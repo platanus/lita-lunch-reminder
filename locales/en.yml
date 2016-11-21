@@ -16,3 +16,4 @@ en:
         dinner_for_two: "Hasta el momento esto es una cita romántica entre %{subject1} y %{subject2} :)"
         current_lunchers_list: "Veamos, los que me avisaron que sí almuerzan hoy son %{subject1}: %{subject2}"
         todays_lunch: "Qué voy a saber yo, pregúntale a la Vicky!"
+        todays_dessert: ":philosoraptor: ¿Fruta?"

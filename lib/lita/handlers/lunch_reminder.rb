@@ -13,6 +13,9 @@ module Lita
       route(/comienza un nuevo día/) do |response|
         refresh
       end
+      route(/qué hay de postre/) do |response|
+        response.reply(t(:todays_dessert))
+      end
       route(/qué hay de almuerzo/) do |response|
         response.reply(t(:todays_lunch))
       end
