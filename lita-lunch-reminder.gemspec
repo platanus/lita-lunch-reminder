@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "lita-lunch-reminder"
-  spec.version       = "0.1.0"
+  spec.version       = "0.2.0"
   spec.authors       = ["Agustin Feuerhake"]
   spec.email         = ["agustin@platan.us"]
   spec.description   = "Lunch reminder"

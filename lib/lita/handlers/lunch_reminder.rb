@@ -7,13 +7,11 @@ module Lita
       def load_on_start(_payload)
         scheduler = Rufus::Scheduler.new
         scheduler.cron('00 10 * * *') do
-          reset_current_lunchers
-          lunchers_list.each do |luncher|
-            user = Lita::User.find_by_mention_name(luncher)
-            message = t(:question, subject: luncher)
-            robot.send_message(Source.new(user: user), message)
-          end
+          refresh
         end
+      end
+      route(/comienza un nuevo día/) do |response|
+        refresh
       end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/) do |response|
         mention_name = response.matches[0][0]
@@ -51,7 +49,7 @@ module Lita
         response.reply(t(:thanks_for_answering))
       end
 
-      route(/quiene?é?s almuerzan hoy/i) do |response|
+      route(/quié?e?nes almuerzan hoy/i) do |response|
         case current_lunchers_list.length
         when 0
           response.reply(t(:no_one_lunches))
@@ -64,8 +62,17 @@ module Lita
         end
       end
 
-      route(/quiene?é?s está?a?n considerados para el almuerzo\??/i) do |response|
+      route(/quié?e?nes está?a?n considerados para el almuerzo\??/i) do |response|
         response.reply(lunchers_list.join(', '))
+      end
+
+      def refresh
+        reset_current_lunchers
+        lunchers_list.each do |luncher|
+          user = Lita::User.find_by_mention_name(luncher)
+          message = t(:question, subject: luncher)
+          robot.send_message(Source.new(user: user), message)
+        end
       end
 
       def add_to_lunchers(mention_name)
