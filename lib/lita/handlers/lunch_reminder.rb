@@ -56,7 +56,7 @@ module Lita
         when 1
           response.reply(t(:only_one_lunches, subject: current_lunchers_list[0]))
         when 2
-          response.reply(t(:dinner_for_two), subject1: current_lunchers_list[0], subject2: current_lunchers_list[1])
+          response.reply(t(:dinner_for_two, subject1: current_lunchers_list[0], subject2: current_lunchers_list[1]))
         else
           response.reply(t(:current_lunchers_list, subject1: current_lunchers_list.length, subject2:current_lunchers_list.join(', ')))
         end
