@@ -30,7 +30,7 @@ module Lita
           response.reply(t(:already_considered_you,subject:response.user.mention_name))
         end
       end
-      route(/^sí$/, command: true) do |response|
+      route(/^sí$|^hoy almuerzo aquí$|^si$/, command: true) do |response|
         success = add_to_current_lunchers(response.user.mention_name)
         lunchers = current_lunchers_list.length
         if success
