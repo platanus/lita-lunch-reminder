@@ -17,3 +17,4 @@ es:
         current_lunchers_list: "Veamos, los que me avisaron que sí almuerzan hoy son %{subject1}: %{subject2}"
         todays_lunch: "Qué voy a saber yo, pregúntale a la Vicky!"
         todays_dessert: ":philosoraptor: ¿Fruta?"
+        yourwelcome: "De nada %{subject} :D"

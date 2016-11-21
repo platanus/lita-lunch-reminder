@@ -10,13 +10,16 @@ module Lita
           refresh
         end
       end
+      route(/gracias/, command: true) do |response|
+        response.reply(t(:yourwelcome, response.user.mention_name))
+      end
       route(/comienza un nuevo día/) do |response|
         refresh
       end
       route(/qué hay de postre/) do |response|
         response.reply(t(:todays_dessert))
       end
-      route(/qué hay de almuerzo/) do |response|
+      route(/qué hay de almuerzo/, command: true) do |response|
         response.reply(t(:todays_lunch))
       end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/) do |response|
@@ -28,15 +31,15 @@ module Lita
           response.reply(t(:already_considered, subject: mention_name))
         end
       end
-      route(/por\sfavor\sconsidé?e?rame\s(para|en) los almuerzos/) do |response|
+      route(/por\sfavor\sconsidé?e?rame\s(para|en) los almuerzos/, command: true) do |response|
         success = add_to_lunchers(response.user.mention_name)
         if success
           response.reply(t(:will_ask_you_daily))
         else
-          response.reply(t(:already_considered_you,subject:response.user.mention_name))
+          response.reply(t(:already_considered_you, subject: response.user.mention_name))
         end
       end
-      route(/^sí$|^hoy almuerzo aquí$|^si$/, command: true) do |response|
+      route(/^sí$|^hoy almuerzo aquí?i?$|^si$/i, command: true) do |response|
         success = add_to_current_lunchers(response.user.mention_name)
         lunchers = current_lunchers_list.length
         if success
@@ -44,7 +47,7 @@ module Lita
           when 1
             response.reply(t(:current_lunchers_one))
           when 2..9
-            response.reply(t(:current_lunchers_some, subject:lunchers))
+            response.reply(t(:current_lunchers_some, subject: lunchers))
           end
         else
           response.reply(t(:current_lunchers_too_many))
@@ -62,9 +65,13 @@ module Lita
         when 1
           response.reply(t(:only_one_lunches, subject: current_lunchers_list[0]))
         when 2
-          response.reply(t(:dinner_for_two, subject1: current_lunchers_list[0], subject2: current_lunchers_list[1]))
+          response.reply(t(:dinner_for_two,
+            subject1: current_lunchers_list[0],
+            subject2: current_lunchers_list[1]))
         else
-          response.reply(t(:current_lunchers_list, subject1: current_lunchers_list.length, subject2:current_lunchers_list.join(', ')))
+          response.reply(t(:current_lunchers_list,
+            subject1: current_lunchers_list.length,
+            subject2: current_lunchers_list.join(', ')))
         end
       end
 
