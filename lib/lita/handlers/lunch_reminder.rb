@@ -13,6 +13,9 @@ module Lita
       route(/comienza un nuevo día/) do |response|
         refresh
       end
+      route(/qué hay de almuerzo/) do |response|
+        response.reply(t(:todays_lunch))
+      end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/) do |response|
         mention_name = response.matches[0][0]
         success = add_to_lunchers(mention_name)
