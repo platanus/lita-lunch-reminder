@@ -5,21 +5,18 @@ module Lita
     class LunchReminder < Handler
       on :loaded, :load_on_start
       def load_on_start(_payload)
-        scheduler = Rufus::Scheduler.new
-        scheduler.cron('00 10 * * *') do
-          refresh
-        end
+        create_schedule
       end
       route(/gracias/, command: true) do |response|
         response.reply(t(:yourwelcome, response.user.mention_name))
       end
-      route(/comienza un nuevo día/) do |response|
+      route(/comienza un nuevo dí?i?a/, command: true) do |response|
         refresh
       end
-      route(/qué hay de postre/) do |response|
-        response.reply(t(:todays_dessert))
+      route(/qué?e? hay de postre/) do |response|
+        response.reply(t(:"todays_dessert#{1 + rand(4)}"))
       end
-      route(/qué hay de almuerzo/, command: true) do |response|
+      route(/qué?e? hay de almuerzo/, command: true) do |response|
         response.reply(t(:todays_lunch))
       end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/) do |response|
@@ -124,6 +121,14 @@ module Lita
       def reset_current_lunchers
         redis.del("current_lunchers")
       end
+
+      def create_schedule
+        scheduler = Rufus::Scheduler.new
+        scheduler.cron('00 13 * * *') do
+          refresh
+        end
+      end
+
       Lita.register_handler(self)
     end
   end
