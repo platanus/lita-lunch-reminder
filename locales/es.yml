@@ -20,4 +20,5 @@ es:
         todays_dessert2: "Lo mismo de todos los días, Pinky"
         todays_dessert3: ":unamused: Me preguntan todos los días lo mismo y todos los días hay lo mismo."
         todays_dessert4: "No tengo idea!"
-        yourwelcome: "De nada %{subject} :D"
+        yourwelcome: "De nada %{subject} :smile:"
+        wont_lunch: "Aun no se distinguir entre los que no han contestado y los que contestaron que no, pero aquí van: %{subject}"

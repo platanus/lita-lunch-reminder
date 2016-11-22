@@ -8,7 +8,7 @@ module Lita
         create_schedule
       end
       route(/gracias/, command: true) do |response|
-        response.reply(t(:yourwelcome, response.user.mention_name))
+        response.reply(t(:yourwelcome, subject: response.user.mention_name))
       end
       route(/comienza un nuevo dí?i?a/, command: true) do |response|
         refresh
@@ -72,6 +72,10 @@ module Lita
         end
       end
 
+      route(/quié?e?nes no almuerzan hoy/i) do |response|
+        response.reply(t(:wont_lunch, subject: wont_lunch.join(', ')))
+      end
+
       route(/quié?e?nes está?a?n considerados para el almuerzo\??/i) do |response|
         response.reply(lunchers_list.join(', '))
       end
@@ -114,7 +118,7 @@ module Lita
         redis.smembers("current_lunchers") || []
       end
 
-      def havent_answered
+      def wont_lunch
         redis.sdiff("lunchers", "current_lunchers")
       end
 
