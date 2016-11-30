@@ -12,7 +12,7 @@ module Lita
           type: ENV['GOOGLE_SP_CRED_TYPE'],
           project_id: ENV['GOOGLE_SP_CRED_PROJECT_ID'],
           private_key_id: ENV['GOOGLE_SP_CRED_PRIVATE_KEY_ID'],
-          private_key: ENV['GOOGLE_SP_CRED_PRIVATE_KEY'],
+          private_key: "-----BEGIN PRIVATE KEY-----\n#{ENV['GOOGLE_SP_CRED_PRIVATE_KEY']}\n-----END PRIVATE KEY-----\n",
           client_email: ENV['GOOGLE_SP_CRED_CLIENT_EMAIL'],
           client_id: ENV['GOOGLE_SP_CRED_CLIENT_ID'],
           auth_uri: ENV['GOOGLE_SP_CRED_AUTH_URI'],
