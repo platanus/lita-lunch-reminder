@@ -10,9 +10,13 @@ module Lita
       route(/gracias/i, command: true) do |response|
         response.reply(t(:yourwelcome, subject: response.user.mention_name))
       end
-      route(/^está?a? (listo|servido) el almuerzo/i) do |response|
+      route(/^está?a? (listo|servido) el almuerzo/i) do
         message = t(:dinner_is_served)
         notify current_lunchers_list, message
+      end
+      route(/write/i) do |response|
+        response.reply "ok amigo"
+        persist_current_lunchers
       end
       route(/qué?e? hay de postre/i) do |response|
         response.reply(t(:"todays_dessert#{1 + rand(4)}"))
@@ -119,6 +123,11 @@ module Lita
         redis.srem("current_lunchers", mention_name)
       end
 
+      def persist_current_lunchers
+        sw = Lita::Services::SpreadsheetWriter.new
+        sw.write_new_row([Time.now.strftime("%Y-%m-%d")].concat(current_lunchers_list))
+      end
+
       def current_lunchers_list
         redis.smembers("current_lunchers") || []
       end
@@ -133,7 +142,7 @@ module Lita
 
       def create_schedule
         scheduler = Rufus::Scheduler.new
-        scheduler.cron('00 15 * * 1,2,3,4,5') do
+        scheduler.cron('00 13 * * 1-5') do
           refresh
         end
       end

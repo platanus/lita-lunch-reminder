@@ -6,6 +6,7 @@ Lita.load_locales Dir[File.expand_path(
 )]
 
 require "lita/handlers/lunch_reminder"
+require "lita/services/spreadsheet_writer"
 
 Lita::Handlers::LunchReminder.template_root File.expand_path(
   File.join("..", "..", "templates"),
