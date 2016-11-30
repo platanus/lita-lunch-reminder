@@ -10,11 +10,12 @@ module Lita
       route(/gracias/i, command: true) do |response|
         response.reply(t(:yourwelcome, subject: response.user.mention_name))
       end
-      route(/^está?a? (listo|servido) el almuerzo/i) do |response|
+      route(/^está?a? (listo|servido) el almuerzo/i) do
         message = t(:dinner_is_served)
         notify current_lunchers_list, message
       end
       route(/write/i) do |response|
+        response.reply "ok amigo"
         persist_current_lunchers
       end
       route(/qué?e? hay de postre/i) do |response|
@@ -141,7 +142,7 @@ module Lita
 
       def create_schedule
         scheduler = Rufus::Scheduler.new
-        scheduler.cron('00 15 * * 1-5') do
+        scheduler.cron('00 13 * * 1-5') do
           refresh
         end
       end
