@@ -133,7 +133,7 @@ module Lita
 
       def create_schedule
         scheduler = Rufus::Scheduler.new
-        scheduler.cron('00 13 * * 1,2,3,4,5') do
+        scheduler.cron('00 15 * * 1,2,3,4,5') do
           refresh
         end
       end
