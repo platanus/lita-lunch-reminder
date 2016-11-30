@@ -22,3 +22,4 @@ en:
         todays_dessert4: "No tengo idea!"
         yourwelcome: "De nada %{subject} :smile:"
         wont_lunch: "Aun no se distinguir entre los que no han contestado y los que contestaron que no, pero aquí van los que no contestaron que sí: %{subject}"
+        dinner_is_served: "Está listo amiguito, baje a almorzar."

@@ -7,13 +7,14 @@ module Lita
       def load_on_start(_payload)
         create_schedule
       end
-      route(/gracias/, command: true) do |response|
+      route(/gracias/i, command: true) do |response|
         response.reply(t(:yourwelcome, subject: response.user.mention_name))
       end
-      route(/comienza un nuevo dí?i?a/, command: true) do |response|
-        refresh
+      route(/^está?a? (listo|servido) el almuerzo/i) do |response|
+        message = t(:dinner_is_served)
+        notify current_lunchers_list, message
       end
-      route(/qué?e? hay de postre/) do |response|
+      route(/qué?e? hay de postre/i) do |response|
         response.reply(t(:"todays_dessert#{1 + rand(4)}"))
       end
       route(/qué?e? hay de almuerzo/, command: true) do |response|
@@ -76,15 +77,19 @@ module Lita
         response.reply(t(:wont_lunch, subject: wont_lunch.join(', ')))
       end
 
-      route(/quié?e?nes está?a?n considerados para el almuerzo\??/i) do |response|
+      route(/quié?e?nes está?a?n considerados para (el|los) almuerzos?/i) do |response|
         response.reply(lunchers_list.join(', '))
       end
 
       def refresh
         reset_current_lunchers
-        lunchers_list.each do |luncher|
+        message = t(:question, subject: luncher)
+        notify(lunchers, message)
+      end
+
+      def notify(list, message)
+        list.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
-          message = t(:question, subject: luncher)
           robot.send_message(Source.new(user: user), message)
         end
       end
@@ -128,7 +133,7 @@ module Lita
 
       def create_schedule
         scheduler = Rufus::Scheduler.new
-        scheduler.cron('00 13 * * *') do
+        scheduler.cron('00 13 * * 1,2,3,4,5') do
           refresh
         end
       end
