@@ -87,8 +87,11 @@ module Lita
 
       def refresh
         reset_current_lunchers
-        message = t(:question, subject: luncher)
-        notify(lunchers, message)
+        lunchers_list.each do |luncher|
+          user = Lita::User.find_by_mention_name(luncher)
+          message = t(:question, subject: luncher)
+          robot.send_message(Source.new(user: user), message)
+        end
       end
 
       def notify(list, message)
@@ -111,7 +114,7 @@ module Lita
       end
 
       def add_to_current_lunchers(mention_name)
-        if current_lunchers_list.length < 10
+        if current_lunchers_list.length < ENV['MAX_LUNCHERS'].to_i
           redis.sadd("current_lunchers", mention_name)
           true
         else
@@ -142,8 +145,11 @@ module Lita
 
       def create_schedule
         scheduler = Rufus::Scheduler.new
-        scheduler.cron('00 13 * * 1-5') do
+        scheduler.cron(ENV['ASK_CRON']) do
           refresh
+        end
+        scheduler.cron(ENV['PERSIST_CRON']) do
+          persist_current_lunchers
         end
       end
 
