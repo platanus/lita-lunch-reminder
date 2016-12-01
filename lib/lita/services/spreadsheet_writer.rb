@@ -1,4 +1,5 @@
 require "google_drive"
+require "Base64"
 module Lita
   module Services
     class SpreadsheetWriter
@@ -12,7 +13,7 @@ module Lita
           type: ENV['GOOGLE_SP_CRED_TYPE'],
           project_id: ENV['GOOGLE_SP_CRED_PROJECT_ID'],
           private_key_id: ENV['GOOGLE_SP_CRED_PRIVATE_KEY_ID'],
-          private_key: ENV['GOOGLE_SP_CRED_PRIVATE_KEY'],
+          private_key: Base64.strict_decode64(ENV['GOOGLE_SP_CRED_PRIVATE_KEY']),
           client_email: ENV['GOOGLE_SP_CRED_CLIENT_EMAIL'],
           client_id: ENV['GOOGLE_SP_CRED_CLIENT_ID'],
           auth_uri: ENV['GOOGLE_SP_CRED_AUTH_URI'],
