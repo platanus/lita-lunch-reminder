@@ -1,5 +1,5 @@
 require "google_drive"
-require "Base64"
+require "base64"
 module Lita
   module Services
     class SpreadsheetWriter
