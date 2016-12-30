@@ -14,17 +14,13 @@ module Lita
         message = t(:dinner_is_served)
         notify current_lunchers_list, message
       end
-      route(/write/i) do |response|
-        response.reply "ok amigo"
-        persist_current_lunchers
-      end
       route(/qué?e? hay de postre/i) do |response|
         response.reply(t(:"todays_dessert#{1 + rand(4)}"))
       end
-      route(/qué?e? hay de almuerzo/, command: true) do |response|
+      route(/qué?e? hay de almuerzo/i) do |response|
         response.reply(t(:todays_lunch))
       end
-      route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/) do |response|
+      route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/, command: true) do |response|
         mention_name = response.matches[0][0]
         success = add_to_lunchers(mention_name)
         if success
@@ -33,13 +29,18 @@ module Lita
           response.reply(t(:already_considered, subject: mention_name))
         end
       end
-      route(/por\sfavor\sconsidé?e?rame\s(para|en) los almuerzos/, command: true) do |response|
+      route(/por\sfavor\sconsidé?e?rame\s(para|en) los almuerzos/i, command: true) do |response|
         success = add_to_lunchers(response.user.mention_name)
         if success
           response.reply(t(:will_ask_you_daily))
         else
           response.reply(t(:already_considered_you, subject: response.user.mention_name))
         end
+      end
+      route(/por\sfavor\sya\sno\sconsideres\sa\s([^\s]+)(para|en) (el|los) almuerzos?/i, command: true) do |response|
+        mention_name = response.matches[0][0]
+        remove_from_lunchers(mention_name)
+        response.reply(t(:thanks_for_answering))
       end
       route(/^sí$|^hoy almuerzo aquí?i?$|^si$/i, command: true) do |response|
         success = add_to_current_lunchers(response.user.mention_name)
@@ -55,7 +56,7 @@ module Lita
           response.reply(t(:current_lunchers_too_many))
         end
       end
-      route(/^no$|no almuerzo|^nop$/, command: true) do |response|
+      route(/no almuerzo/i, command: true) do |response|
         remove_from_current_lunchers response.user.mention_name
         response.reply(t(:thanks_for_answering))
       end
@@ -95,7 +96,7 @@ module Lita
       end
 
       def notify(list, message)
-        list.each do |luncher|
+        list.shuffle.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
           robot.send_message(Source.new(user: user), message)
         end
