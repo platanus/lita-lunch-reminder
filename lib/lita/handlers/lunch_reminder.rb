@@ -37,7 +37,7 @@ module Lita
           response.reply(t(:already_considered_you, subject: response.user.mention_name))
         end
       end
-      route(/por\sfavor\sya\sno\sconsideres\sa\s([^\s]+)(para|en) (el|los) almuerzos?/i, command: true) do |response|
+      route(/por\sfavor\sya\sno\sconsideres\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/i, command: true) do |response|
         mention_name = response.matches[0][0]
         remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
