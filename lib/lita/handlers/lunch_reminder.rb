@@ -4,23 +4,29 @@ module Lita
   module Handlers
     class LunchReminder < Handler
       on :loaded, :load_on_start
+
+      def self.help_msg(route)
+        { "lunch-reminder: #{t("help.#{route}.usage")}" => t("help.#{route}.description") }
+      end
+
       def load_on_start(_payload)
         create_schedule
       end
-      route(/gracias/i, command: true) do |response|
+      route(/gracias/i, command: true, help: help_msg(:thanks)) do |response|
         response.reply(t(:yourwelcome, subject: response.user.mention_name))
       end
-      route(/^está?a? (listo|servido) el almuerzo/i) do
+      route(/^está?a? (listo|servido) el almuerzo/i, help: help_msg(:lunch_served)) do
         message = t(:dinner_is_served)
         notify current_lunchers_list, message
       end
-      route(/qué?e? hay de postre/i) do |response|
+      route(/qué?e? hay de postre/i, help: help_msg(:dessert)) do |response|
         response.reply(t(:"todays_dessert#{1 + rand(4)}"))
       end
-      route(/qué?e? hay de almuerzo/i) do |response|
+      route(/qué?e? hay de almuerzo/i, help: help_msg(:menu)) do |response|
         response.reply(t(:todays_lunch))
       end
-      route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/, command: true) do |response|
+      route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/,
+        command: true, help: help_msg(:consider_user)) do |response|
         mention_name = response.matches[0][0]
         success = add_to_lunchers(mention_name)
         if success
@@ -29,7 +35,8 @@ module Lita
           response.reply(t(:already_considered, subject: mention_name))
         end
       end
-      route(/por\sfavor\sconsidé?e?rame\s(para|en) los almuerzos/i, command: true) do |response|
+      route(/por\sfavor\sconsidé?e?rame\s(para|en) los almuerzos/i,
+        command: true, help: help_msg(:consider_me)) do |response|
         success = add_to_lunchers(response.user.mention_name)
         if success
           response.reply(t(:will_ask_you_daily))
@@ -37,12 +44,14 @@ module Lita
           response.reply(t(:already_considered_you, subject: response.user.mention_name))
         end
       end
-      route(/por\sfavor\sya\sno\sconsideres\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/i, command: true) do |response|
+      route(/por\sfavor\sya\sno\sconsideres\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/i,
+        command: true, help: help_msg(:not_consider_user)) do |response|
         mention_name = response.matches[0][0]
         remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
       end
-      route(/^sí$|^hoy almuerzo aquí?i?$|^si$/i, command: true) do |response|
+      route(/^sí$|^hoy almuerzo aquí?i?$|^si$/i,
+        command: true, help: help_msg(:confirm_yes)) do |response|
         success = add_to_current_lunchers(response.user.mention_name)
         lunchers = current_lunchers_list.length
         if success
@@ -56,12 +65,12 @@ module Lita
           response.reply(t(:current_lunchers_too_many))
         end
       end
-      route(/no almuerzo/i, command: true) do |response|
+      route(/no almuerzo/i, command: true, help: help_msg(:confirm_no)) do |response|
         remove_from_current_lunchers response.user.mention_name
         response.reply(t(:thanks_for_answering))
       end
 
-      route(/quié?e?nes almuerzan hoy/i) do |response|
+      route(/quié?e?nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
         case current_lunchers_list.length
         when 0
           response.reply(t(:no_one_lunches))
@@ -78,11 +87,12 @@ module Lita
         end
       end
 
-      route(/quié?e?nes no almuerzan hoy/i) do |response|
+      route(/quié?e?nes no almuerzan hoy/i, help: help_msg(:show_today_not_lunchers)) do |response|
         response.reply(t(:wont_lunch, subject: wont_lunch.join(', ')))
       end
 
-      route(/quié?e?nes está?a?n considerados para (el|los) almuerzos?/i) do |response|
+      route(/quié?e?nes está?a?n considerados para (el|los) almuerzos?/i,
+        help: help_msg(:show_considered)) do |response|
         response.reply(lunchers_list.join(', '))
       end
 

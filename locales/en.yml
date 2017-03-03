@@ -23,3 +23,41 @@ en:
         yourwelcome: "De nada %{subject} :smile:"
         wont_lunch: "Aun no se distinguir entre los que no han contestado y los que contestaron que no, pero aquí van los que no contestaron que sí: %{subject}"
         dinner_is_served: "Está listo amiguito, baje a almorzar."
+        help:
+          thanks:
+            usage: gracias
+            description: Agradecer al mono
+          lunch_served:
+            usage: está listo el almuerzo
+            description: Avisar a las marabuntas que bajen
+          consider_user:
+            usage: por favor considera a [user] para los almuerzos
+            description: Incluir a [user] entre los que el mono pregunta por el almuerzo
+          consider_me:
+            usage: por favor considerame para los almuerzos
+            description: Incluirme a mi entre los que el mono pregunta por el almuerzo
+          not_consider_user:
+            usage: por favor ya no consideres a [user] para los almuerzos
+            description: Excluir a [user] de la lista de los que el mono pregunta cada día si almuerzan
+          show_today_lunchers:
+            usage: quiénes almuerzan hoy?
+            description: Pedir lista de quienes sí almuerzan hoy
+          show_today_not_lunchers:
+            usage: quiénes no almuerzan hoy?
+            description: Pedir lista de quienes no almuerzan hoy
+          dessert:
+            usage: qué hay de postre?
+            description: Preguntarle al mono qué hay de postre (a tu propia suerte!)
+          menu:
+            usage: qué hay de almuerzo?
+            description: Preguntarle al mono qué hay de almuerzo (a tu propia suerte!)
+          confirm_yes:
+            usage: hoy almuerzo aquí
+            description: Decirle al mono que sí almuerzo hoy
+          confirm_no:
+            usage: no almuerzo
+            description: Decirle al mono que no almuerzo hoy
+          show_considered:
+            usage: quiénes están considerados para los almuerzos?
+            description: Pedir listado de los que el mono pregunta cada día si almuerzan
+
