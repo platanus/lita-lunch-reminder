@@ -58,7 +58,7 @@ module Lita
           case lunchers
           when 1
             response.reply(t(:current_lunchers_one))
-          when 2..9
+          when 2..10
             response.reply(t(:current_lunchers_some, subject: lunchers))
           end
         else
