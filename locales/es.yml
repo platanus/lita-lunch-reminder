@@ -23,6 +23,7 @@ es:
         yourwelcome: "De nada %{subject} :smile:"
         wont_lunch: "Aun no se distinguir entre los que no han contestado y los que contestaron que no, pero aquí van: %{subject}"
         dinner_is_served: "Está listo amiguito, baje a almorzar."
+        friend_added: "Perfecto @%{subject}, anoté a tu invitado como invitado_de_%{subject}."
         help:
           thanks:
             usage: gracias
@@ -60,4 +61,3 @@ es:
           show_considered:
             usage: quiénes están considerados para los almuerzos?
             description: Pedir listado de los que el mono pregunta cada día si almuerzan
-

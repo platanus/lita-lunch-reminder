@@ -70,6 +70,18 @@ module Lita
         response.reply(t(:thanks_for_answering))
       end
 
+      route(/tengo un invitado/i, command: true) do |response|
+        if add_to_current_lunchers("invitado_de_#{response.user.mention_name}")
+          response.reply(t(:friend_added, subject: response.user.mention_name))
+        else
+          response.reply("tu amigo no cabe wn")
+        end
+      end
+
+      route(/tengo una invitada/i, command: true) do |response|
+        response.reply("es rica?")
+      end
+
       route(/quié?e?nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
         case current_lunchers_list.length
         when 0
@@ -94,6 +106,13 @@ module Lita
       route(/quié?e?nes está?a?n considerados para (el|los) almuerzos?/i,
         help: help_msg(:show_considered)) do |response|
         response.reply(lunchers_list.join(', '))
+      end
+
+      route(/cédele mi puesto a ([^\s]+)/i, command: true) do |response|
+        remove_from_current_lunchers(response.user.mention_name)
+        enters = response.matches[0][0]
+        add_to_current_lunchers(enters)
+        response.reply("tú te lo pierdes, comerá #{enters} por ti")
       end
 
       def refresh
