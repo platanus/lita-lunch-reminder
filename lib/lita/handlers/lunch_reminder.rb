@@ -120,14 +120,14 @@ module Lita
         lunchers_list.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
           message = t(:question, subject: luncher)
-          robot.send_message(Source.new(user: user), message)
+          robot.send_message(Source.new(user: user), message) if user
         end
       end
 
       def notify(list, message)
         list.shuffle.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
-          robot.send_message(Source.new(user: user), message)
+          robot.send_message(Source.new(user: user), message) if user
         end
       end
 
