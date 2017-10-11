@@ -27,7 +27,7 @@ module Lita
       end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/,
         command: true, help: help_msg(:consider_user)) do |response|
-        mention_name = response.matches[0][0]
+        mention_name = mention_name_from_response(response)
         success = add_to_lunchers(mention_name)
         if success
           response.reply(t(:will_ask_daily, subject: mention_name))
@@ -46,7 +46,7 @@ module Lita
       end
       route(/por\sfavor\sya\sno\sconsideres\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/i,
         command: true, help: help_msg(:not_consider_user)) do |response|
-        mention_name = response.matches[0][0]
+        mention_name = mention_name_from_response(response)
         remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
       end
@@ -113,6 +113,11 @@ module Lita
         enters = response.matches[0][0]
         add_to_current_lunchers(enters)
         response.reply("tú te lo pierdes, comerá #{enters} por ti")
+      end
+
+      def mention_name_from_response(response)
+        mention_name = response.matches[0][0]
+        mention_name.delete('@') if mention_name
       end
 
       def refresh
