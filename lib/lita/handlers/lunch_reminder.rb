@@ -50,7 +50,7 @@ module Lita
         remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
       end
-      route(/^sí$|^hoy almuerzo aquí?i?$|^si$/i,
+      route(/^sí$|^hoy almuerzo aqu(í|i)$|^si$/i,
         command: true, help: help_msg(:confirm_yes)) do |response|
         add_to_current_lunchers(response.user.mention_name)
         add_to_winning_lunchers(response.user.mention_name) if already_assigned?
@@ -69,7 +69,8 @@ module Lita
       end
 
       route(/tengo un invitado/i, command: true) do |response|
-        if add_to_winning_lunchers("invitado_de_#{response.user.mention_name}")
+        if add_to_winning_lunchers(response.user.mention_name) &&
+            add_to_winning_lunchers("invitado_de_#{response.user.mention_name}")
           response.reply(t(:friend_added, subject: response.user.mention_name))
         else
           response.reply("tu amigo no cabe wn")
@@ -80,7 +81,7 @@ module Lita
         response.reply("es rica?")
       end
 
-      route(/quié?e?nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
+      route(/qui(é|e)nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
         unless already_assigned?
           response.reply("Aun no lo se pero van #{current_lunchers_list.count} interesados.")
           return
@@ -101,17 +102,7 @@ module Lita
         end
       end
 
-      route(/quié?e?nes no almuerzan hoy/i, help: help_msg(:show_today_not_lunchers)) do |response|
-        response.reply(t(:wont_lunch, subject: wont_lunch.join(', ')))
-      end
-
-      route(/resetredis/i) do |response|
-        redis.del('current_lunchers')
-        redis.del('lunchers')
-        response.reply("ok")
-      end
-
-      route(/quié?e?nes está?a?n considerados para (el|los) almuerzos?/i,
+      route(/qui(é|e)nes est(á|a)n considerados para (el|los) almuerzos?/i,
         help: help_msg(:show_considered)) do |response|
         response.reply(lunchers_list.join(', '))
       end
