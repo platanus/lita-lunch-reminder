@@ -119,7 +119,7 @@ module Lita
 
       def mention_name_from_response(response)
         mention_name = response.matches[0][0]
-        mention_name&.delete('@')
+        mention_name.delete('@') if mention_name
       end
 
       def refresh
