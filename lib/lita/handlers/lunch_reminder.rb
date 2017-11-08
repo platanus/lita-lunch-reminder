@@ -143,7 +143,7 @@ module Lita
       end
 
       def add_to_winning_lunchers(mention_name)
-        if winning_lunchers_list.count <= ENV['MAX_LUNCHERS'].to_i
+        if winning_lunchers_list.count < ENV['MAX_LUNCHERS'].to_i
           redis.sadd("winning_lunchers", mention_name)
           true
         else
