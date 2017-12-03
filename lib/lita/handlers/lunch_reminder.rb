@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'rufus-scheduler'
 
 module Lita
@@ -17,7 +19,7 @@ module Lita
       end
       route(/^está?a? (listo|servido) el almuerzo/i, help: help_msg(:lunch_served)) do
         message = t(:dinner_is_served)
-        notify current_lunchers_list, message
+        notify winning_lunchers_list, message
       end
       route(/qué?e? hay de postre/i, help: help_msg(:dessert)) do |response|
         response.reply(t(:"todays_dessert#{1 + rand(4)}"))
