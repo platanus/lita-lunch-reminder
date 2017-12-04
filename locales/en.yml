@@ -61,3 +61,6 @@ en:
           show_considered:
             usage: quiénes están considerados para los almuerzos?
             description: Pedir listado de los que el mono pregunta cada día si almuerzan
+          show_loosing_lunchers:
+            usage: quiénes quedaron afuera del almuerzo hoy?
+            description: Pedir listado de los que el mono dejó afuera del almuerzo

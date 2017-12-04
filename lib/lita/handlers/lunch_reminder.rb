@@ -102,6 +102,21 @@ module Lita
         end
       end
 
+      route(/qui(é|e)n(es)? ((cooper(o|ó|aron))|(cag(o|ó|aron))|(qued(o|ó|aron)) afuera) ((del|con el) almuerzo)? (hoy)?\??/i,
+        help: help_msg(:show_loosing_lunchers)) do |response|
+        unless already_assigned?
+          response.reply("Aun no lo se pero van #{current_lunchers_list.count} interesados.")
+          return
+        end
+        case loosing_lunchers_list.length
+        when 0
+          response.reply('Nadie, estoy de buena hoy dia :)')
+        else
+          verb = ['perjudiqué a', 'me maletié a', 'cooperó', 'deje afuera a'].sample
+          response.reply("Hoy #{verb} #{loosing_lunchers_list.join(', ')}")
+        end
+      end
+
       route(/qui(é|e)nes est(á|a)n considerados para (el|los) almuerzos?/i,
         help: help_msg(:show_considered)) do |response|
         response.reply(lunchers_list.join(', '))
@@ -184,6 +199,11 @@ module Lita
         redis.smembers("winning_lunchers") || []
       end
 
+      def loosing_lunchers_list
+        return [] unless already_assigned?
+        current_lunchers_list - winning_lunchers_list
+      end
+
       def wont_lunch
         redis.sdiff("lunchers", "current_lunchers")
       end
@@ -206,7 +226,7 @@ module Lita
 
       def announce_winners
         notify(winning_lunchers_list, "Yeah baby, almuerzas con nosotros!")
-        notify(current_lunchers_list - winning_lunchers_list, t(:current_lunchers_too_many))
+        notify(loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
       def create_schedule
