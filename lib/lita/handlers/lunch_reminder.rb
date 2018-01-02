@@ -124,6 +124,11 @@ module Lita
         response.reply(lunchers_list.join(', '))
       end
 
+      route(/assignnow/i, command: true) do |response|
+        do_the_assignment
+        response.reply("did it boss")
+      end
+
       route(/cédele mi puesto a ([^\s]+)/i, command: true) do |response|
         unless remove_from_winning_lunchers(response.user.mention_name)
           response.reply("no puedes ceder algo que no tienes, amiguito")
@@ -231,14 +236,18 @@ module Lita
         notify(loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
+      def do_the_assignment
+        pick_winners
+        redis.set("already_assigned", true)
+        announce_winners
+      end
+
       def create_schedule
         scheduler = Rufus::Scheduler.new
         scheduler.cron(ENV['ASK_CRON']) do
           refresh
           scheduler.in(ENV['WAIT_RESPONSES_SECONDS'].to_i) do
-            pick_winners
-            redis.set("already_assigned", true)
-            announce_winners
+            do_the_assignment
           end
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
