@@ -2,17 +2,17 @@ en:
   lita:
     handlers:
       lunch_reminder:
-        question: "Hola! @%{subject}\n oye, ¿Hoy día almuerzas en la oficina?"
+        question: "Hola! @%{subject}\n oye, ¿Hoy día te gustaría almorzar en la oficina?"
         will_ask_daily: "Perfecto, todos los días le preguntaré a %{subject} si almuerza con nosotros."
-        already_considered: "No te preocupes, %{mention_name} ya está considerado para el almuerzo."
+        already_considered: "No te preocupes, %{mention_name} ya está considerado para los almuerzos."
         will_ask_you_daily: "Perfecto, de ahora en adelante, todos los días te preguntaré si almuerzas con nosotros."
         already_considered_you: "No te preocupes @%{subject}, ya te tenía considerado para los almuerzos."
-        current_lunchers_one: "Perfecto! Eres el primero en avisar que almuerza hoy."
-        current_lunchers_some: "Perfecto! Ya van %{subject} que almuerzan hoy."
-        current_lunchers_too_many: "Ups, ya somos 10 en el almuerzo, no cabes :("
+        current_lunchers_one: "Eres el primero en avisar que almuerza hoy, pero no te aseguro nada..."
+        current_lunchers_some: "Hmm.. Ya van %{subject} que les gustaría almorzar aquí hoy."
+        current_lunchers_too_many: "Ups, saliste escogido, no cabes :("
         thanks_for_answering: "Ok! Gracias por avisar. Suerte!"
         no_one_lunches: "Hasta el momento.. no hay nadie que almuerce aquí hoy!"
-        only_one_lunches: "Solo %{subject} me ha confirmado que almuerza..."
+        only_one_lunches: "Aparte de %{subject}, nadie más ha dicho que almuerza en la oficina..."
         dinner_for_two: "Hasta el momento esto es una cita romántica entre %{subject1} y %{subject2} :)"
         current_lunchers_list: "Veamos, los que me avisaron que sí almuerzan hoy son %{subject1}: %{subject2}"
         todays_lunch: "La Vicky no me ha dicho, pero seguro que es algo bueno..."
@@ -61,3 +61,6 @@ en:
           show_considered:
             usage: quiénes están considerados para los almuerzos?
             description: Pedir listado de los que el mono pregunta cada día si almuerzan
+          show_loosing_lunchers:
+            usage: quiénes quedaron afuera del almuerzo hoy?
+            description: Pedir listado de los que el mono dejó afuera del almuerzo
