@@ -1,5 +1,6 @@
 require "spec_helper"
 require 'pry'
+require 'dotenv/load'
 
 describe Lita::Services::LunchAssigner, lita: true do
   let(:robot) { Lita::Robot.new(registry) }
@@ -37,7 +38,15 @@ describe Lita::Services::LunchAssigner, lita: true do
     subject.set_karma("peter", -10)
     lkh = subject.karma_hash(subject.lunchers_list)
     expect(lkh["alfred"]).to eq(20)
-    expect(lkh["peter"]).to eq(0)
+    expect(lkh["peter"]).to eq(1) # 0 karma is 1
+  end
+
+  it "allows for a single no karma man to win" do
+    subject.set_karma("alfred", 0)
+    subject.add_to_lunchers("alfred")
+    subject.add_to_current_lunchers("alfred")
+    subject.pick_winners(1)
+    expect(subject.winning_lunchers_list).to eq(['alfred'])
   end
 
   it "considerates karma for shuffle and decreases to winners" do
@@ -51,5 +60,4 @@ describe Lita::Services::LunchAssigner, lita: true do
     expect(subject.winning_lunchers_list).to eq(['alfred'])
     expect(subject.get_karma("alfred")).to eq(-1)
   end
-
 end

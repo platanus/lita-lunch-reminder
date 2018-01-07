@@ -175,7 +175,7 @@ module Lita
         scheduler.cron(ENV['ASK_CRON']) do
           refresh
           scheduler.in(ENV['WAIT_RESPONSES_SECONDS'].to_i) do
-            do_the_assignment
+            @assigner.do_the_assignment
             announce_winners
           end
         end

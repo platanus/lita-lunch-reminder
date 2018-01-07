@@ -89,7 +89,7 @@ module Lita
 
       def karma_hash(list)
         kh = list.map { |m| [m, get_karma(m)] }.to_h
-        kh.map { |k, v| [k, v - kh.values.min] }.to_h
+        kh.map { |k, v| [k, (v - kh.values.min).to_i.zero? ? 1 : v - kh.values.min] }.to_h
       end
 
       def pick_winners(amount)
