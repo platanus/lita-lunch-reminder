@@ -16,7 +16,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     usr = Lita::User.create(124, name: "armando")
     send_message("@lita tengo un invitado", as: usr)
     send_message("quienes almuerzan hoy?", as: usr)
-    expect(replies.last).to match("invitado_de_armando")
+    expect(replies.last).to match("no lo se")
   end
   it "responds that invitee does not fit" do
     ['armando', 'luis', 'peter'].each do |name|
@@ -25,12 +25,10 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     end
     expect(replies.last).to match("no cabe")
   end
-  it "allows a user to give his place" do
+  it "does not allow a user to give his place before he has it" do
     usr = Lita::User.create(124, name: "armando")
     send_message("@lita hoy almuerzo aquí", as: usr)
     send_message("@lita cédele mi puesto a patricio", as: usr)
-    send_message("quienes almuerzan hoy?", as: usr)
-    expect(replies.last).to match("patricio")
-    expect(replies.last).not_to match("armando")
+    expect(replies.last).to match("algo que no tienes")
   end
 end
