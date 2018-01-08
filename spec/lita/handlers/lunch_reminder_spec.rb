@@ -1,5 +1,4 @@
 require "spec_helper"
-require 'pry'
 
 describe Lita::Handlers::LunchReminder, lita_handler: true do
   it "responds to invite announcement" do

@@ -1,5 +1,4 @@
 require "spec_helper"
-require 'pry'
 require 'dotenv/load'
 
 describe Lita::Services::LunchAssigner, lita: true do

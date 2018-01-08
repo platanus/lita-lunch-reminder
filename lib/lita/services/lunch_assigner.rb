@@ -1,6 +1,5 @@
 require 'redis'
 require 'weighted_randomizer'
-require 'pry'
 module Lita
   module Services
     class LunchAssigner
