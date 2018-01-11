@@ -94,10 +94,15 @@ module Lita
 
       def pick_winners(amount)
         contestants = WeightedRandomizer.new(karma_hash(current_lunchers_list))
-        contestants.sample(amount).each do |winner|
-          add_to_winning_lunchers winner
-          decrease_karma winner
+        winners = []
+        while winners.count < amount && winners.count < current_lunchers_list.count
+          winner = contestants.sample
+          unless winners.include? winner
+            winners.push winner
+            decrease_karma winner
+          end
         end
+        winners.each { |w| add_to_winning_lunchers w }
       end
 
       def already_assigned?
