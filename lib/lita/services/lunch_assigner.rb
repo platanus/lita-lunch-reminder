@@ -1,5 +1,4 @@
 require 'redis'
-require 'weighted_randomizer'
 module Lita
   module Services
     class LunchAssigner
@@ -93,11 +92,11 @@ module Lita
       end
 
       def pick_winners(amount)
-        contestants = WeightedRandomizer.new(karma_hash(current_lunchers_list))
+        contestants = Lita::Services::WeightedPicker.new(karma_hash(current_lunchers_list))
         winners = []
         while winners.count < amount && winners.count < current_lunchers_list.count
           winner = contestants.sample
-          unless winners.include? winner
+          unless winner.nil? || winners.include?(winner)
             winners.push winner
             decrease_karma winner
           end
