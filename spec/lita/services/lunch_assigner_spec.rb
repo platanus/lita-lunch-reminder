@@ -60,4 +60,20 @@ describe Lita::Services::LunchAssigner, lita: true do
     expect(subject.winning_lunchers_list).to eq(['alfred'])
     expect(subject.get_karma("alfred")).to eq(-1)
   end
+
+  it "interates until every spot has been asigned" do
+    subject.add_to_current_lunchers("alfred")
+    subject.set_karma("alfred", 0.1)
+    subject.add_to_current_lunchers("peter")
+    subject.set_karma("peter", 100)
+    subject.add_to_current_lunchers("john")
+    subject.set_karma("john", 1)
+    subject.add_to_current_lunchers("john")
+    subject.set_karma("john", 2)
+    subject.add_to_current_lunchers("john")
+    subject.set_karma("john", 6)
+    subject.pick_winners(3)
+    expect(subject.winning_lunchers_list).to include('peter')
+    expect(subject.winning_lunchers_list.count).to eq(3)
+  end
 end
