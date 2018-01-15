@@ -14,7 +14,7 @@ es:
         no_one_lunches: "Hasta el momento.. no hay nadie que almuerce aquí hoy!"
         only_one_lunches: "Aparte de %{subject}, nadie más ha dicho que almuerza en la oficina..."
         dinner_for_two: "Hasta el momento esto es una cita romántica entre %{subject1} y %{subject2} :)"
-        current_lunchers_list: "Veamos, los que me avisaron que sí almuerzan hoy son %{subject1}: %{subject2}"
+        current_lunchers_list: "Veamos, a los que toqué hoy con mi varita mágica son %{subject1}: %{subject2}"
         todays_lunch: "La Vicky no me ha dicho, pero seguro que es algo bueno..."
         todays_dessert1: ":philosoraptor: ¿Será fruta?"
         todays_dessert2: "Lo mismo de todos los días, Pinky"
