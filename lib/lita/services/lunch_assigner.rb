@@ -92,16 +92,14 @@ module Lita
       end
 
       def pick_winners(amount)
-        contestants = Lita::Services::WeightedPicker.new(karma_hash(current_lunchers_list))
-        winners = []
-        while winners.count < amount && winners.count < current_lunchers_list.count
-          winner = contestants.sample
-          unless winner.nil? || winners.include?(winner)
-            winners.push winner
-            decrease_karma winner
-          end
+        winners = Lita::Services::WeightedPicker.new(
+          karma_hash(current_lunchers_list)
+        ).sample(amount)
+
+        winners.each do |w|
+          decrease_karma w
+          add_to_winning_lunchers w
         end
-        winners.each { |w| add_to_winning_lunchers w }
       end
 
       def already_assigned?

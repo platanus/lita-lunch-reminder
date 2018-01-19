@@ -4,14 +4,32 @@ module Lita
       def initialize(karma_hash)
         raise NonPositiveKarmaError unless karma_hash.values.all?(&:positive?)
         @karma_hash = karma_hash
+        @current_lunchers_count = karma_hash.count
       end
 
-      def sample
+      def sample_one
         return if @karma_hash.empty?
 
         u = rand
         winner = cumulative_karma_hash.find { |k, _| k > u }.last
         remove(winner)
+      end
+
+      def sample(n)
+        winners = []
+
+        sample_size = [n, @current_lunchers_count].min
+
+        return winners if sample_size.zero?
+
+        sample_size.times do
+          winner = sample_one
+          unless winner.nil? || winners.include?(winner)
+            winners.push winner
+          end
+        end
+
+        winners
       end
 
       private
