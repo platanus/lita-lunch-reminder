@@ -34,7 +34,7 @@ module Lita
       end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/,
         command: true, help: help_msg(:consider_user)) do |response|
-        mention_name = mention_name_from_response(response)
+        mention_name = clean_mention_name(response.matches[0][0])
         success = @assigner.add_to_lunchers(mention_name)
         if success
           response.reply(t(:will_ask_daily, subject: mention_name))
@@ -53,7 +53,7 @@ module Lita
       end
       route(/por\sfavor\sya\sno\sconsideres\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/i,
         command: true, help: help_msg(:not_consider_user)) do |response|
-        mention_name = mention_name_from_response(response)
+        mention_name = clean_mention_name(response.matches[0][0])
         @assigner.remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
       end
@@ -134,18 +134,28 @@ module Lita
         response.reply("did it boss")
       end
 
+      route(/cu(á|a)nto karma tengo\?/i, command: true) do |response|
+        user_karma = @assigner.get_karma(response.user.mention_name)
+        response.reply("Tienes #{user_karma} puntos de karma, mi padawan.")
+      end
+
+      route(/cu(á|a)nto karma tiene ([^\s]+)\?/i, command: true) do |response|
+        user = clean_mention_name(response.matches[0][1])
+        user_karma = @assigner.get_karma(user)
+        response.reply("@#{user} tiene #{user_karma} puntos de karma.")
+      end
+
       route(/cédele mi puesto a ([^\s]+)/i, command: true) do |response|
         unless @assigner.remove_from_winning_lunchers(response.user.mention_name)
           response.reply("no puedes ceder algo que no tienes, amiguito")
           next
         end
-        enters = response.matches[0][0]
+        enters = clean_mention_name(response.matches[0][0])
         @assigner.add_to_winning_lunchers(enters)
         response.reply("tú te lo pierdes, comerá #{enters} por ti")
       end
 
-      def mention_name_from_response(response)
-        mention_name = response.matches[0][0]
+      def clean_mention_name(mention_name)
         mention_name.delete('@') if mention_name
       end
 

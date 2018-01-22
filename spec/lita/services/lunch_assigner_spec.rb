@@ -74,6 +74,6 @@ describe Lita::Services::LunchAssigner, lita: true do
     subject.set_karma("john", 6)
     subject.pick_winners(3)
     expect(subject.winning_lunchers_list).to include('peter')
-    expect(subject.winning_lunchers_list.count).to eq(3)
+    expect(subject.winning_lunchers_list.count).to eq(2)
   end
 end

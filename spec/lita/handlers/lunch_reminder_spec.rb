@@ -30,4 +30,15 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     send_message("@lita cédele mi puesto a patricio", as: usr)
     expect(replies.last).to match("algo que no tienes")
   end
+  it "answers with the user karma" do
+    usr = Lita::User.create(124, name: "armando")
+    send_message("@lita cuánto karma tengo?", as: usr)
+    expect(replies.last).to match("Tienes 0 puntos de karma, mi padawan")
+  end
+  it "answers with the user karma" do
+    usr1 = Lita::User.create(124, name: "armando")
+    Lita::User.create(124, name: "fernando")
+    send_message("@lita cuánto karma tiene fernando?", as: usr1)
+    expect(replies.last).to match("@fernando tiene 0 puntos de karma.")
+  end
 end
