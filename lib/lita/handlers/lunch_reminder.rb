@@ -22,14 +22,14 @@ module Lita
       route(/gracias/i, command: true, help: help_msg(:thanks)) do |response|
         response.reply(t(:yourwelcome, subject: response.user.mention_name))
       end
-      route(/^está?a? (listo|servido) el almuerzo/i, help: help_msg(:lunch_served)) do
+      route(/^est[áa] (listo|servido) el almuerzo/i, help: help_msg(:lunch_served)) do
         message = t(:dinner_is_served)
         notify @assigner.winning_lunchers_list, message
       end
-      route(/qué?e? hay de postre/i, help: help_msg(:dessert)) do |response|
+      route(/qu[ée] hay de postre/i, help: help_msg(:dessert)) do |response|
         response.reply(t(:"todays_dessert#{1 + rand(4)}"))
       end
-      route(/qué?e? hay de almuerzo/i, help: help_msg(:menu)) do |response|
+      route(/qu[ée] hay de almuerzo/i, help: help_msg(:menu)) do |response|
         response.reply(t(:todays_lunch))
       end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/,
@@ -42,7 +42,7 @@ module Lita
           response.reply(t(:already_considered, subject: mention_name))
         end
       end
-      route(/por\sfavor\sconsidé?e?rame\s(para|en) los almuerzos/i,
+      route(/por\sfavor\sconsid[ée]rame\s(para|en) los almuerzos/i,
         command: true, help: help_msg(:consider_me)) do |response|
         success = @assigner.add_to_lunchers(response.user.mention_name)
         if success
@@ -57,7 +57,7 @@ module Lita
         @assigner.remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
       end
-      route(/^sí$|^hoy almuerzo aqu(í|i)$|^si$/i,
+      route(/^s[íi]$|^hoy almuerzo aqu[íi]$/i,
         command: true, help: help_msg(:confirm_yes)) do |response|
         @assigner.add_to_current_lunchers(response.user.mention_name)
         @assigner.add_to_winning_lunchers(response.user.mention_name) if @assigner.already_assigned?
@@ -88,7 +88,7 @@ module Lita
         response.reply("es rica?")
       end
 
-      route(/qui(é|e)nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
+      route(/qui[ée]nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
         unless @assigner.already_assigned?
           response.reply("Aun no lo se pero van #{@assigner.current_lunchers_list.count} interesados.")
           next
@@ -109,7 +109,7 @@ module Lita
         end
       end
 
-      route(/qui(é|e)n(es)? ((cooper(o|ó|aron))|(cag(o|ó|aron))|(qued(o|ó|aron)) afuera) ((del|con el) almuerzo)? (hoy)?\??/i,
+      route(/qui[ée]n(es)? ((cooper(o|ó|aron))|(cag(o|ó|aron))|(qued(o|ó|aron)) afuera) ((del|con el) almuerzo)? (hoy)?\??/i,
         help: help_msg(:show_loosing_lunchers)) do |response|
         unless @assigner.already_assigned?
           response.reply("No lo se, pero van #{@assigner.current_lunchers_list.count} interesados.")
@@ -124,7 +124,7 @@ module Lita
         end
       end
 
-      route(/qui(é|e)nes est(á|a)n considerados para (el|los) almuerzos?/i,
+      route(/qui[ée]nes est[áa]n considerados para (el|los) almuerzos?\??/i,
         help: help_msg(:show_considered)) do |response|
         response.reply(@assigner.lunchers_list.join(', '))
       end
@@ -134,18 +134,18 @@ module Lita
         response.reply("did it boss")
       end
 
-      route(/cu(á|a)nto karma tengo\?/i, command: true) do |response|
+      route(/cu[áa]nto karma tengo\??/i, command: true) do |response|
         user_karma = @assigner.get_karma(response.user.mention_name)
         response.reply("Tienes #{user_karma} puntos de karma, mi padawan.")
       end
 
-      route(/cu(á|a)nto karma tiene ([^\s]+)\?/i, command: true) do |response|
+      route(/cu[áa]nto karma tiene ([^\s]+)\??/i, command: true) do |response|
         user = clean_mention_name(response.matches[0][1])
         user_karma = @assigner.get_karma(user)
         response.reply("@#{user} tiene #{user_karma} puntos de karma.")
       end
 
-      route(/cédele mi puesto a ([^\s]+)/i, command: true) do |response|
+      route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
         unless @assigner.remove_from_winning_lunchers(response.user.mention_name)
           response.reply("no puedes ceder algo que no tienes, amiguito")
           next
