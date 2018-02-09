@@ -3,14 +3,14 @@ require 'pry'
 require 'dotenv/load'
 
 describe Lita::Services::WeightedPicker do
-  def init_subject(karma_hash)
-    described_class.new(karma_hash)
+  def init_subject(weighted_hash)
+    described_class.new(weighted_hash)
   end
 
   describe '#sample_one' do
     context 'with no participants' do
-      let(:karma_hash) { {} }
-      let(:subject) { init_subject(karma_hash) }
+      let(:weighted_hash) { {} }
+      let(:subject) { init_subject(weighted_hash) }
 
       it 'returns nil' do
         expect(subject.sample_one).to be_nil
@@ -18,8 +18,8 @@ describe Lita::Services::WeightedPicker do
     end
 
     context 'with one participant' do
-      let(:karma_hash) { { 'ham' => 10 } }
-      let(:subject) { init_subject(karma_hash) }
+      let(:weighted_hash) { { 'ham' => 10 } }
+      let(:subject) { init_subject(weighted_hash) }
 
       it 'picks the participant, and then returns nil' do
         expect(subject.sample_one).to eq('ham')
@@ -29,38 +29,38 @@ describe Lita::Services::WeightedPicker do
     end
 
     context 'with multiple participants' do
-      let(:karma_hash) { { 'ham' => 10, 'agustin' => 1 } }
-      let(:subject) { init_subject(karma_hash) }
-      let(:current_lunchers) { ['ham', 'agustin'] }
+      let(:weighted_hash) { { 'ham' => 10, 'agustin' => 1 } }
+      let(:subject) { init_subject(weighted_hash) }
+      let(:winners) { ['ham', 'agustin'] }
 
       it 'picks both lunchers then nil' do
-        expect(current_lunchers).to include(subject.sample_one)
-        expect(current_lunchers).to include(subject.sample_one)
+        expect(winners).to include(subject.sample_one)
+        expect(winners).to include(subject.sample_one)
         expect(subject.sample_one).to eq(nil)
         expect(subject.sample_one).to eq(nil)
       end
     end
 
     context 'with non positive karma' do
-      let(:karma_hash) { { 'agustin' => 1 } }
-      let(:subject) { init_subject(karma_hash) }
+      let(:weighted_hash) { { 'agustin' => 1 } }
+      let(:subject) { init_subject(weighted_hash) }
 
       it 'raises NonPositiveKarmaError with 0 karma' do
-        karma_hash['jaime'] = 0
-        expect { init_subject(karma_hash) }.to raise_error(Lita::Services::NonPositiveKarmaError)
+        weighted_hash['jaime'] = 0
+        expect { init_subject(weighted_hash) }.to raise_error(Lita::Services::NonPositiveKarmaError)
       end
 
       it 'raises NonPositiveKarmaError with negative karma' do
-        karma_hash['giovanni'] = -10
-        expect { init_subject(karma_hash) }.to raise_error(Lita::Services::NonPositiveKarmaError)
+        weighted_hash['giovanni'] = -10
+        expect { init_subject(weighted_hash) }.to raise_error(Lita::Services::NonPositiveKarmaError)
       end
     end
   end
 
   describe '#sample' do
     context 'with no participants' do
-      let(:karma_hash) { {} }
-      let(:subject) { init_subject(karma_hash) }
+      let(:weighted_hash) { {} }
+      let(:subject) { init_subject(weighted_hash) }
 
       it 'returns empty array' do
         expect(subject.sample(3)).to eq([])
@@ -68,8 +68,8 @@ describe Lita::Services::WeightedPicker do
     end
 
     context 'with participants' do
-      let(:karma_hash) { { 'ham' => 10, 'agustin' => 1, 'giovanni' => 1 } }
-      let(:subject) { init_subject(karma_hash) }
+      let(:weighted_hash) { { 'ham' => 10, 'agustin' => 1, 'giovanni' => 1 } }
+      let(:subject) { init_subject(weighted_hash) }
 
       context 'with sample of size 0' do
         it 'returns empty array' do
@@ -89,7 +89,7 @@ describe Lita::Services::WeightedPicker do
         end
 
         it 'returns array of size equal to lunchers size' do
-          expect(subject.sample(3).count).to eq(karma_hash.count)
+          expect(subject.sample(3).count).to eq(weighted_hash.count)
         end
 
         it 'returns array with every participant' do
@@ -105,7 +105,7 @@ describe Lita::Services::WeightedPicker do
 
       context 'with sample size bigger than lunchers size' do
         it 'returns array of size equal to lunchers size' do
-          expect(subject.sample(5).count).to eq(karma_hash.count)
+          expect(subject.sample(5).count).to eq(weighted_hash.count)
         end
 
         it 'returns array with every participant' do

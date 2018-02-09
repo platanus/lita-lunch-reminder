@@ -1,24 +1,24 @@
 module Lita
   module Services
     class WeightedPicker
-      def initialize(karma_hash)
-        raise NonPositiveKarmaError unless karma_hash.values.all?(&:positive?)
-        @karma_hash = karma_hash
-        @current_lunchers_count = karma_hash.count
+      def initialize(weighted_hash)
+        raise NonPositiveKarmaError unless weighted_hash.values.all?(&:positive?)
+        @weighted_hash = weighted_hash
+        @total_elements = weighted_hash.count
       end
 
       def sample_one
-        return if @karma_hash.empty?
+        return if @weighted_hash.empty?
 
         u = rand
-        winner = cumulative_karma_hash.find { |k, _| k > u }.last
+        winner = cumulative_weighted_hash.find { |k, _| k > u }.last
         remove(winner)
       end
 
       def sample(n)
         winners = []
 
-        sample_size = [n, @current_lunchers_count].min
+        sample_size = [n, @total_elements].min
 
         return winners if sample_size.zero?
 
@@ -34,22 +34,22 @@ module Lita
 
       private
 
-      def cumulative_karma_hash
-        total_karma = @karma_hash.values.reduce(0, :+).to_f
+      def cumulative_weighted_hash
+        total_points = @weighted_hash.values.reduce(0, :+).to_f
         u = 0.0
-        @karma_hash.map { |k, v| [u += v / total_karma, k] }.to_h
+        @weighted_hash.map { |k, v| [u += v / total_points, k] }.to_h
       end
 
       def min
-        @karma_hash.values.min
+        @weighted_hash.values.min
       end
 
       def max
-        @karma_hash.values.max
+        @weighted_hash.values.max
       end
 
       def remove(winner)
-        @karma_hash = @karma_hash.reject { |k, _| k == winner }
+        @weighted_hash = @weighted_hash.reject { |k, _| k == winner }
         winner
       end
     end
