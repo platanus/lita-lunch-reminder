@@ -9,7 +9,8 @@ module Lita
 
       def initialize(robot)
         super
-        @assigner = Lita::Services::LunchAssigner.new(redis)
+        @karmanager = Lita::Services::Karmanager.new(redis)
+        @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
       end
 
       def self.help_msg(route)
@@ -135,14 +136,21 @@ module Lita
       end
 
       route(/cu[áa]nto karma tengo\??/i, command: true) do |response|
-        user_karma = @assigner.get_karma(response.user.mention_name)
+        user_karma = @karmanager.get_karma(response.user.mention_name)
         response.reply("Tienes #{user_karma} puntos de karma, mi padawan.")
       end
 
       route(/cu[áa]nto karma tiene ([^\s]+)\??/i, command: true) do |response|
         user = clean_mention_name(response.matches[0][1])
-        user_karma = @assigner.get_karma(user)
+        user_karma = @karmanager.get_karma(user)
         response.reply("@#{user} tiene #{user_karma} puntos de karma.")
+      end
+
+      route(/transfi(é|e)rele karma a ([^\s]+)/i, command: true) do |response|
+        giver = response.user.mention_name
+        destinatary = clean_mention_name(response.matches[0][1])
+        @karmanager.transfer_karma(giver, destinatary)
+        response.reply("@#{giver}, le has dado uno de tus puntos de karma a @#{destinatary}.")
       end
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|

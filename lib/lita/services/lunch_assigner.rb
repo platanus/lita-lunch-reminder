@@ -4,24 +4,9 @@ module Lita
     class LunchAssigner
       attr_accessor :redis
 
-      def initialize(redis_instance)
+      def initialize(redis_instance, karmanager_instance)
         @redis = redis_instance
-      end
-
-      def set_karma(mention_name, karma)
-        @redis.set("#{mention_name}:karma", karma.to_i)
-      end
-
-      def get_karma(mention_name)
-        @redis.get("#{mention_name}:karma").to_i || 0
-      end
-
-      def increase_karma(mention_name)
-        @redis.incr("#{mention_name}:karma")
-      end
-
-      def decrease_karma(mention_name)
-        @redis.decr("#{mention_name}:karma")
+        @karmanager = karmanager_instance
       end
 
       def current_lunchers_list
@@ -85,19 +70,13 @@ module Lita
         @redis.del("already_assigned")
       end
 
-      def karma_hash(list)
-        kh = list.map { |m| [m, get_karma(m)] }.to_h
-        kl = kh.map { |k, v| [k, v - kh.values.min] }.to_h
-        kl.map { |k, v| [k, v.to_i.zero? ? 1 : v] }.to_h
-      end
-
       def pick_winners(amount)
         winners = Lita::Services::WeightedPicker.new(
           karma_hash(current_lunchers_list)
         ).sample(amount)
 
         winners.each do |w|
-          decrease_karma w
+          @karmanager.decrease_karma w
           add_to_winning_lunchers w
         end
       end
