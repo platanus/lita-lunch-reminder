@@ -136,20 +136,22 @@ module Lita
       end
 
       route(/cu[áa]nto karma tengo\??/i, command: true) do |response|
-        user_karma = @karmanager.get_karma(response.user.mention_name)
+        user_karma = @karmanager.get_karma(response.user.id)
         response.reply("Tienes #{user_karma} puntos de karma, mi padawan.")
       end
 
       route(/cu[áa]nto karma tiene ([^\s^?]+)\??/i, command: true) do |response|
-        user = clean_mention_name(response.matches[0][0])
-        user_karma = @karmanager.get_karma(user)
-        response.reply("@#{user} tiene #{user_karma} puntos de karma.")
+        mention_name = clean_mention_name(response.matches[0][0])
+        user = Lita::User.find_by_mention_name(mention_name)
+        user_karma = @karmanager.get_karma(user.id)
+        response.reply("@#{user.mention_name} tiene #{user_karma} puntos de karma.")
       end
 
       route(/transfi[ée]rele karma a ([^\s]+)/i, command: true) do |response|
-        giver = response.user.mention_name
-        destinatary = clean_mention_name(response.matches[0][0])
-        @karmanager.transfer_karma(giver, destinatary)
+        giver = response.user
+        mention_name = clean_mention_name(response.matches[0][0])
+        destinatary = Lita::User.find_by_mention_name(mention_name)
+        @karmanager.transfer_karma(giver.id, destinatary.id)
         response.reply("@#{giver}, le has dado uno de tus puntos de karma a @#{destinatary}.")
       end
 

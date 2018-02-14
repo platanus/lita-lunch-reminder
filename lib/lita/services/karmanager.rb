@@ -38,13 +38,14 @@ module Lita
       end
 
       def add_base_karma(list, base)
-        list.each do |user_id|
-          set_karma(user_id, base + get_karma(user_id))
+        list.each do |mention_name|
+          user = Lita::User.find_by_mention_name(mention_name)
+          set_karma(user.id, base + get_karma(mention_name))
         end
       end
 
       def karma_hash(list)
-        kh = list.map { |m| [m, get_karma(m)] }.to_h
+        kh = list.map { |m| [m, get_karma(Lita::User.find_by_mention_name(m).id)] }.to_h
         kl = kh.map { |k, v| [k, v - kh.values.min] }.to_h
         kl.map { |k, v| [k, v.to_i.zero? ? 1 : v] }.to_h
       end

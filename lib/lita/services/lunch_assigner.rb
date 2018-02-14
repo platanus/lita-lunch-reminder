@@ -72,11 +72,11 @@ module Lita
 
       def pick_winners(amount)
         winners = Lita::Services::WeightedPicker.new(
-          karma_hash(current_lunchers_list)
+          @karmanager.karma_hash(current_lunchers_list)
         ).sample(amount)
 
         winners.each do |w|
-          @karmanager.decrease_karma w
+          @karmanager.decrease_karma Lita::User.find_by_mention_name(w).id
           add_to_winning_lunchers w
         end
       end

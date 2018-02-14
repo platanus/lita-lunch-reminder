@@ -23,8 +23,11 @@ describe Lita::Services::Karmanager, lita: true do
   end
 
   it "adds base karma to everyone on a list" do
-    subject.set_karma("agustin", 1)
+    Lita::User.create(126, mention_name: "john")
+    Lita::User.create(127, mention_name: "peter")
+    agustin = Lita::User.create(129, mention_name: "agustin")
+    subject.set_karma("agustin", 1) # this line sets old-mention_name-based-karma
     subject.add_base_karma(["agustin", "peter", "john"], 100)
-    expect(subject.get_karma("agustin")).to eq(101)
+    expect(subject.get_karma(agustin.id)).to eq(101)
   end
 end
