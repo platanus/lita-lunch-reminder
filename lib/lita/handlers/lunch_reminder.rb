@@ -192,6 +192,9 @@ module Lita
         scheduler.cron(ENV['PERSIST_CRON']) do
           persist_winning_lunchers
         end
+        scheduler.cron(ENV['RESET_KARMA_CRON']) do
+          @assigner.reset_karma
+        end
       end
 
       Lita.register_handler(self)

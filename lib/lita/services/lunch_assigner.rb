@@ -110,6 +110,17 @@ module Lita
         pick_winners(ENV['MAX_LUNCHERS'].to_i)
         redis.set("already_assigned", true)
       end
+
+      def reset_karma
+        min_luncher_karma = lunchers_list.map { |luncher| get_karma(luncher) }.min
+        max_karma_after_reset = -10
+        return if min_luncher_karma >= max_karma_after_reset
+        lunchers_list.each do |luncher|
+          karma = get_karma(luncher)
+          new_karma = max_karma_after_reset * karma / min_luncher_karma
+          set_karma(luncher, new_karma)
+        end
+      end
     end
   end
 end

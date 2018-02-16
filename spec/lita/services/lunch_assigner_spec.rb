@@ -72,8 +72,58 @@ describe Lita::Services::LunchAssigner, lita: true do
     subject.set_karma("john", 2)
     subject.add_to_current_lunchers("john")
     subject.set_karma("john", 6)
-    subject.pick_winners(3)
+    subject.pick_winners(2)
     expect(subject.winning_lunchers_list).to include('peter')
     expect(subject.winning_lunchers_list.count).to eq(2)
+  end
+
+  describe '#reset_karma' do
+    context 'with min_karma less than -10' do
+      before do
+        subject.add_to_lunchers('jaime')
+        subject.set_karma('jaime', -5)
+        subject.add_to_lunchers('saratscheff')
+        subject.set_karma('saratscheff', -20)
+        subject.add_to_lunchers('oscar')
+        subject.set_karma('oscar', -10)
+        subject.add_to_lunchers('giovanni')
+        subject.set_karma('giovanni', -100)
+        subject.add_to_lunchers('agustin')
+        subject.set_karma('agustin', -40)
+      end
+
+      it 'resets karma correctly' do
+        subject.reset_karma
+        expect(subject.get_karma('jaime')).to eq(-1)
+        expect(subject.get_karma('saratscheff')).to eq(-2)
+        expect(subject.get_karma('oscar')).to eq(-1)
+        expect(subject.get_karma('giovanni')).to eq(-10)
+        expect(subject.get_karma('agustin')).to eq(-4)
+      end
+    end
+
+    context 'with min_karma greater than -10' do
+      before do
+        subject.add_to_lunchers('jaime')
+        subject.set_karma('jaime', -1)
+        subject.add_to_lunchers('saratscheff')
+        subject.set_karma('saratscheff', -2)
+        subject.add_to_lunchers('oscar')
+        subject.set_karma('oscar', -2)
+        subject.add_to_lunchers('giovanni')
+        subject.set_karma('giovanni', -4)
+        subject.add_to_lunchers('agustin')
+        subject.set_karma('agustin', -6)
+      end
+
+      it 'resets karma correctly' do
+        subject.reset_karma
+        expect(subject.get_karma('jaime')).to eq(-1)
+        expect(subject.get_karma('saratscheff')).to eq(-2)
+        expect(subject.get_karma('oscar')).to eq(-2)
+        expect(subject.get_karma('giovanni')).to eq(-4)
+        expect(subject.get_karma('agustin')).to eq(-6)
+      end
+    end
   end
 end
