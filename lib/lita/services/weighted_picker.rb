@@ -16,6 +16,8 @@ module Lita
       end
 
       def sample(n)
+        raise NegativeSampleSize if n.negative?
+
         winners = []
 
         sample_size = [n, @total_elements].min
@@ -55,5 +57,6 @@ module Lita
     end
 
     class NonPositiveKarmaError < StandardError; end
+    class NegativeSampleSize < StandardError; end
   end
 end

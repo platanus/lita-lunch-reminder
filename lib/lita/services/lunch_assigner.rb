@@ -92,7 +92,7 @@ module Lita
       end
 
       def pick_winners(amount)
-        winners = Lita::Services::WeightedPicker.new(
+        winners = Lita::Services::SortedPicker.new(
           karma_hash(current_lunchers_list)
         ).sample(amount)
 
