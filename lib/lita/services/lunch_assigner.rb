@@ -9,6 +9,36 @@ module Lita
         @karmanager = karmanager_instance
       end
 
+      def set_karma(mention_name, karma)
+        user = Lita::User.find_by_mention_name(mention_name)
+        @redis.set("#{user.id}:karma", karma.to_i) if user
+      end
+
+      def get_karma(mention_name)
+        user = Lita::User.find_by_mention_name(mention_name)
+        return 0 unless user
+        @redis.get("#{user.id}:karma").to_i || 0
+      end
+
+      def set_wager(mention_name, wager)
+        can_wager = wager <= get_karma(mention_name).abs / 2
+        @redis.set("#{mention_name}:wager", wager.to_i) if can_wager
+        can_wager
+      end
+
+      def get_wager(mention_name)
+        (@redis.get("#{mention_name}:wager") || 1).to_i
+      end
+
+      def increase_karma(mention_name)
+        @redis.incr("#{mention_name}:karma")
+      end
+
+      def decrease_karma(mention_name, wager)
+        user = Lita::User.find_by_mention_name(mention_name)
+        @redis.decrby("#{user.id}:karma", wager) if user
+      end
+
       def current_lunchers_list
         @redis.smembers('current_lunchers') || []
       end
@@ -80,18 +110,35 @@ module Lita
       end
 
       def reset_lunchers
-        @redis.del('current_lunchers')
-        @redis.del('winning_lunchers')
-        @redis.del('already_assigned')
+        lunchers_list.each do |luncher|
+          @redis.del("#{luncher}:wager")
+        end
+        @redis.del("current_lunchers")
+        @redis.del("winning_lunchers")
+        @redis.del("already_assigned")
+      end
+
+      def karma_hash(list)
+        kh = list.map { |m| [m, get_karma(m)] }.to_h
+        kh.map { |k, v| [k, v - kh.values.min + 1] }.to_h
+      end
+
+      def wager_hash(list)
+        list.map { |m| [m, get_wager(m)] }.to_h
+      end
+
+      def karma_hash_with_wager(list)
+        list.map { |m| [m, get_wager(m)] }.to_h
       end
 
       def pick_winners(amount)
+        wh = wager_hash(current_lunchers_list)
         winners = Lita::Services::WeightedPicker.new(
-          @karmanager.karma_hash(current_lunchers_list)
-        ).sample(amount)
+          karma_hash_with_wager(current_lunchers_list)
+        ).truncate(amount)
 
         winners.each do |w|
-          @karmanager.decrease_karma Lita::User.find_by_mention_name(w).id
+          decrease_karma w, wh[w]
           add_to_winning_lunchers w
         end
       end

@@ -32,6 +32,11 @@ module Lita
         winners
       end
 
+      def truncate(n)
+        sample_size = [n, @total_elements].min
+        @weighted_hash.sort_by { |user, points| -points }.to_a.first(sample_size).to_h.keys
+      end
+
       private
 
       def cumulative_weighted_hash

@@ -172,4 +172,11 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
     end
   end
+
+  it "assigns user wager" do
+    armando = Lita::User.create(124, name: 'armando')
+    expect_any_instance_of(Lita::Services::LunchAssigner).to receive(:set_wager)
+      .with('armando', 5)
+    send_message("@lita apuesto 5 puntos de karma", as: armando)
+  end
 end

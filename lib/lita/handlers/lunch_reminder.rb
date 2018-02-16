@@ -231,6 +231,16 @@ module Lita
         end
       end
 
+      route(/apuesto ([^\D]+) puntos( de karma)?/i, command: true) do |response|
+        wager = response.matches[0][0].to_i
+        unless @assigner.set_wager(response.user.mention_name, wager)
+          response.reply("no puedes apostar tanto karma, amiguito")
+          next
+        end
+        response.reply("apostaste #{wager} puntos de karma")
+      end
+
+
       def broadcast_to_channel(message, channel)
         target = Source.new(room: channel)
         robot.send_message(target, message)
