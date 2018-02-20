@@ -9,7 +9,8 @@ module Lita
 
       def initialize(robot)
         super
-        @assigner = Lita::Services::LunchAssigner.new(redis)
+        @karmanager = Lita::Services::Karmanager.new(redis)
+        @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
       end
 
       def self.help_msg(route)
@@ -134,15 +135,29 @@ module Lita
         response.reply("did it boss")
       end
 
+      route(/convert_to_new_karma/i, command: true) do |response|
+        @karmanager.convert_to_new_karma(lunchers_list, 1000)
+        response.reply("did it boss")
+      end
+
       route(/cu[áa]nto karma tengo\??/i, command: true) do |response|
-        user_karma = @assigner.get_karma(response.user.mention_name)
+        user_karma = @karmanager.get_karma(response.user.id)
         response.reply("Tienes #{user_karma} puntos de karma, mi padawan.")
       end
 
-      route(/cu[áa]nto karma tiene ([^\s]+)\??/i, command: true) do |response|
-        user = clean_mention_name(response.matches[0][1])
-        user_karma = @assigner.get_karma(user)
-        response.reply("@#{user} tiene #{user_karma} puntos de karma.")
+      route(/cu[áa]nto karma tiene ([^\s^?]+)\??/i, command: true) do |response|
+        mention_name = clean_mention_name(response.matches[0][0])
+        user = Lita::User.find_by_mention_name(mention_name)
+        user_karma = @karmanager.get_karma(user.id)
+        response.reply("@#{user.mention_name} tiene #{user_karma} puntos de karma.")
+      end
+
+      route(/transfi[ée]rele karma a ([^\s]+)/i, command: true) do |response|
+        giver = response.user
+        mention_name = clean_mention_name(response.matches[0][0])
+        destinatary = Lita::User.find_by_mention_name(mention_name)
+        @karmanager.transfer_karma(giver.id, destinatary.id)
+        response.reply("@#{giver}, le has dado uno de tus puntos de karma a @#{destinatary}.")
       end
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
