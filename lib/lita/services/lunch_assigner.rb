@@ -48,7 +48,12 @@ module Lita
 
       def persist_winning_lunchers
         sw = Lita::Services::SpreadsheetWriter.new
-        sw.write_new_row([Time.now.strftime("%Y-%m-%d")].concat(winning_lunchers_list))
+        time = Time.now.strftime("%Y-%m-%d")
+        winning_lunchers_list.each do |winner|
+          user = User.find_by_mention_name(winner) || User.find_by_name(winner)
+          winner_id = user ? user.id : nil
+          sw.write_new_row([time, winner, winner_id])
+        end
       end
 
       def winning_lunchers_list
