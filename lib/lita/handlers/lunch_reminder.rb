@@ -135,6 +135,11 @@ module Lita
         response.reply("did it boss")
       end
 
+      route(/convert_to_new_karma/i, command: true) do |response|
+        @karmanager.convert_to_new_karma(lunchers_list, 1000)
+        response.reply("did it boss")
+      end
+
       route(/cu[áa]nto karma tengo\??/i, command: true) do |response|
         user_karma = @karmanager.get_karma(response.user.id)
         response.reply("Tienes #{user_karma} puntos de karma, mi padawan.")
