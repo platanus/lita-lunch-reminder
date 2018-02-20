@@ -4,7 +4,9 @@ require 'dotenv/load'
 
 describe Lita::Services::LunchAssigner, lita: true do
   let(:robot) { Lita::Robot.new(registry) }
-  let(:karmanager) { Lita::Services::Karmanager.new(Lita::Handlers::LunchReminder.new(robot).redis) }
+  let(:karmanager) do
+    Lita::Services::Karmanager.new(Lita::Handlers::LunchReminder.new(robot).redis)
+  end
   let(:subject) { described_class.new(Lita::Handlers::LunchReminder.new(robot).redis, karmanager) }
 
   it "returns a list of current lunchers" do
