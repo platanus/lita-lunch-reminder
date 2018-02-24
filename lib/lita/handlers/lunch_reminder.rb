@@ -136,7 +136,7 @@ module Lita
       end
 
       route(/convert_to_new_karma/i, command: true) do |response|
-        @karmanager.convert_to_new_karma(lunchers_list, 1000)
+        @karmanager.convert_to_new_karma(@assigner.lunchers_list, 1000)
         response.reply("did it boss")
       end
 

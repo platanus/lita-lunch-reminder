@@ -40,7 +40,7 @@ module Lita
       def convert_to_new_karma(list, base)
         list.each do |mention_name|
           user = Lita::User.find_by_mention_name(mention_name)
-          set_karma(user.id, base + get_karma(mention_name))
+          set_karma(user.id, base + get_karma(mention_name)) if user
         end
       end
 
