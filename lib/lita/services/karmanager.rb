@@ -49,6 +49,14 @@ module Lita
         kl = kh.map { |k, v| [k, v - kh.values.min] }.to_h
         kl.map { |k, v| [k, v.to_i.zero? ? 1 : v] }.to_h
       end
+
+      def average_karma(list)
+        total_karma = 0
+        list.each do |m|
+          total_karma += get_karma(Lita::User.find_by_mention_name(m).id)
+        end
+        total_karma / list.length
+      end
     end
   end
 end

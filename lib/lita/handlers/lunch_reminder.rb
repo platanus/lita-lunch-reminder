@@ -39,6 +39,8 @@ module Lita
         success = @assigner.add_to_lunchers(mention_name)
         if success
           response.reply(t(:will_ask_daily, subject: mention_name))
+          user = Lita::User.find_by_mention_name(mention_name)
+          @karmanager.set_karma(user.id, @karmanager.average_karma)
         else
           response.reply(t(:already_considered, subject: mention_name))
         end
@@ -132,11 +134,6 @@ module Lita
 
       route(/assignnow/i, command: true) do |response|
         @assigner.do_the_assignment
-        response.reply("did it boss")
-      end
-
-      route(/convert_to_new_karma/i, command: true) do |response|
-        @karmanager.convert_to_new_karma(@assigner.lunchers_list, 1000)
         response.reply("did it boss")
       end
 

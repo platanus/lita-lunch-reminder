@@ -30,4 +30,14 @@ describe Lita::Services::Karmanager, lita: true do
     subject.convert_to_new_karma(["agustin", "peter", "john"], 100)
     expect(subject.get_karma(agustin.id)).to eq(101)
   end
+
+  it "calculates average karma" do
+    john = Lita::User.create(126, mention_name: "john")
+    peter = Lita::User.create(127, mention_name: "peter")
+    agustin = Lita::User.create(129, mention_name: "agustin")
+    subject.set_karma(john.id, 300)
+    subject.set_karma(peter.id, 0)
+    subject.set_karma(agustin.id, 0)
+    expect(subject.average_karma(["john", "peter", "agustin"])).to eq(100)
+  end
 end
