@@ -40,7 +40,9 @@ module Lita
         if success
           response.reply(t(:will_ask_daily, subject: mention_name))
           user = Lita::User.find_by_mention_name(mention_name)
-          @karmanager.set_karma(user.id, @karmanager.average_karma)
+          karma_for_new_user = @karmanager.average_karma(@assigner.lunchers_list)
+          @karmanager.set_karma(user.id, karma_for_new_user)
+          response.reply("Le asigne #{karma_for_new_user} a #{user.mention_name} con id #{user.id}")
         else
           response.reply(t(:already_considered, subject: mention_name))
         end
