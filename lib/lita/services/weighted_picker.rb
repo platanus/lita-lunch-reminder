@@ -2,7 +2,7 @@ module Lita
   module Services
     class WeightedPicker
       def initialize(weighted_hash)
-        raise NonPositiveKarmaError unless weighted_hash.values.all?(&:positive?)
+        raise NonPositiveKarmaError unless weighted_hash.values.all? { |v| v > 0 }
         @weighted_hash = weighted_hash
         @total_elements = weighted_hash.count
       end
