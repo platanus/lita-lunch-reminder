@@ -53,7 +53,8 @@ module Lita
       def average_karma(list)
         total_karma = 0
         list.each do |m|
-          total_karma += get_karma(Lita::User.find_by_mention_name(m).id)
+          usr = Lita::User.find_by_mention_name(m)
+          total_karma += get_karma(usr.id) if usr
         end
         total_karma / list.length
       end
