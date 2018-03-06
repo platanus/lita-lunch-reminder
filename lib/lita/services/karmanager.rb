@@ -46,8 +46,8 @@ module Lita
 
       def karma_hash(list)
         kh = list.map { |m| [m, get_karma(Lita::User.find_by_mention_name(m).id)] }.to_h
-        kl = kh.map { |k, v| [k, v - kh.values.min] }.to_h
-        kl.map { |k, v| [k, v.to_i.zero? ? 1 : v] }.to_h
+        kl = kh.map { |k, v| [k, v.to_i - kh.values.min] }.to_h
+        kl.map { |k, v| [k, v.to_i.zero? ? 1 : v.to_i] }.to_h
       end
 
       def average_karma(list)
