@@ -40,4 +40,12 @@ describe Lita::Services::Karmanager, lita: true do
     subject.set_karma(agustin.id, 0)
     expect(subject.average_karma(["john", "peter", "agustin"])).to eq(100)
   end
+
+  it "raises exception" do
+    john = Lita::User.create(126, mention_name: "john")
+    subject.set_karma(john.id, 300)
+    expect do
+      subject.average_karma(["john", "peter", "agustin"])
+    end.to raise_exception("Can't find mention name 'peter'")
+  end
 end

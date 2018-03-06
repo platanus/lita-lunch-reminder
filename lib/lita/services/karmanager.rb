@@ -54,7 +54,8 @@ module Lita
         total_karma = 0
         list.each do |m|
           usr = Lita::User.find_by_mention_name(m)
-          total_karma += get_karma(usr.id) if usr
+          raise Exception.new("Can't find mention name '#{m}'") if !usr
+          total_karma += get_karma(usr.id)
         end
         total_karma / list.length
       end
