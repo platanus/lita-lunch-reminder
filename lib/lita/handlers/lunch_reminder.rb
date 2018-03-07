@@ -136,6 +136,7 @@ module Lita
 
       route(/assignnow/i, command: true) do |response|
         @assigner.do_the_assignment
+        announce_winners
         response.reply("did it boss")
       end
 
