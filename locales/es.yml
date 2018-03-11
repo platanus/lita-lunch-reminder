@@ -2,7 +2,7 @@ es:
   lita:
     handlers:
       lunch_reminder:
-        question: "Hola! @%{subject}\n oye, ¿Hoy día te gustaría almorzar en la oficina?"
+        question: "Hola! @%{subject}\n oye, ¿Mañana te gustaría almorzar en la oficina?"
         will_ask_daily: "Perfecto, todos los días le preguntaré a %{subject} si almuerza con nosotros."
         already_considered: "No te preocupes, %{mention_name} ya está considerado para los almuerzos."
         will_ask_you_daily: "Perfecto, de ahora en adelante, todos los días te preguntaré si almuerzas con nosotros."
