@@ -157,7 +157,7 @@ module Lita
         destinatary = Lita::User.find_by_mention_name(mention_name)
         @karmanager.transfer_karma(giver.id, destinatary.id)
         response.reply(
-          "@#{giver.mention_name}, le has dado uno de tus puntos de " + 
+          "@#{giver.mention_name}, le has dado uno de tus puntos de " +
           "karma a @#{destinatary.mention_name}."
         )
       end
