@@ -165,10 +165,16 @@ module Lita
       
       route(/abs[óo]rvele karma a ([^\s]+)/i, command: true) do |response|
         taker = response.user
+        
+        if taker.mention_name != 'ignacio'
+          response.reply("Eso es muy feo")
+          next
+        end
+          
         mention_name = clean_mention_name(response.matches[0][0])
         destinatary = Lita::User.find_by_mention_name(mention_name)
         @karmanager.transfer_karma(destinatary.id, taker.id)
-        response.reply("@#{taker}, le has robado uno de sus puntos de karma a @#{destinatary}.")
+        response.reply("@#{taker.mention_name}, le has robado uno de sus puntos de karma a @#{destinatary.mention_name}.")
       end
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
