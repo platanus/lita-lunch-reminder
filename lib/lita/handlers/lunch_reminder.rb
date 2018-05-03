@@ -152,7 +152,7 @@ module Lita
         response.reply("@#{user.mention_name} tiene #{user_karma} puntos de karma.")
       end
 
-      route(/(transfi[ée]rele|dale|c[eé]dele) karma a ([^\s]+)/i, command: true) do |response|
+      route(/transfi[ée]rele karma a ([^\s]+)/i, command: true) do |response|
         giver = response.user
         mention_name = clean_mention_name(response.matches[0][0])
         destinatary = Lita::User.find_by_mention_name(mention_name)
@@ -162,6 +162,7 @@ module Lita
           "karma a @#{destinatary.mention_name}."
         )
       end
+<<<<<<< HEAD
       
       route(/abs[óo]rvele karma a ([^\s]+)/i, command: true) do |response|
         taker = response.user
@@ -176,6 +177,8 @@ module Lita
         @karmanager.transfer_karma(destinatary.id, taker.id)
         response.reply("@#{taker.mention_name}, le has robado uno de sus puntos de karma a @#{destinatary.mention_name}.")
       end
+=======
+>>>>>>> parent of 2259aab... Merge pull request #24 from platanus/language-fix
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
         unless @assigner.remove_from_winning_lunchers(response.user.mention_name)
