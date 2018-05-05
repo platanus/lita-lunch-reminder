@@ -94,6 +94,11 @@ module Lita
         pick_winners(ENV['MAX_LUNCHERS'].to_i)
         redis.set("already_assigned", true)
       end
+
+      def weekday_name_plus(i)
+        week = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
+        week[(Date.today.cwday + i) % 7]
+      end
     end
   end
 end

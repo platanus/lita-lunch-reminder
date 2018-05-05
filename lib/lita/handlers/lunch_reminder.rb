@@ -183,7 +183,7 @@ module Lita
         @assigner.reset_lunchers
         @assigner.lunchers_list.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
-          message = t(:question, subject: luncher)
+          message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
           robot.send_message(Source.new(user: user), message) if user
         end
       end
