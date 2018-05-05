@@ -95,7 +95,8 @@ module Lita
 
       route(/qui[ée]nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
         unless @assigner.already_assigned?
-          response.reply("Aun no lo se pero van #{@assigner.current_lunchers_list.count} interesados.")
+          response.reply("Aun no lo se pero van #{@assigner.current_lunchers_list.count} \
+            interesados: #{@assigner.current_lunchers_list.join(', ')}")
           next
         end
         case @assigner.winning_lunchers_list.length
@@ -117,7 +118,8 @@ module Lita
       route(/qui[ée]n(es)? ((cooper(o|ó|aron))|(cag(o|ó|aron))|(qued(o|ó|aron)) afuera) ((del|con el) almuerzo)? (hoy)?\??/i,
         help: help_msg(:show_loosing_lunchers)) do |response|
         unless @assigner.already_assigned?
-          response.reply("No lo se, pero van #{@assigner.current_lunchers_list.count} interesados.")
+          response.reply("No lo se, pero van #{@assigner.current_lunchers_list.count} \
+            interesados: #{@assigner.current_lunchers_list.join(', ')}")
           next
         end
         case @assigner.loosing_lunchers_list.length
