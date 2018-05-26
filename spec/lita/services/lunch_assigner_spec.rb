@@ -78,4 +78,10 @@ describe Lita::Services::LunchAssigner, lita: true do
     expect(subject.winning_lunchers_list).to include('pedro')
     expect(subject.winning_lunchers_list.count).to eq(2)
   end
+  
+  it "knows the day of the week" do
+    fake_today = Date.parse('2018-01-01')
+    allow(Date).to receive(:today).and_return(fake_today)
+    expect(subject.weekday_name_plus(0)).to eq('lunes')
+  end
 end

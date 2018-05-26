@@ -1,7 +1,5 @@
 # coding: utf-8
 
-require 'rufus-scheduler'
-
 module Lita
   module Handlers
     class LunchReminder < Handler
@@ -95,7 +93,8 @@ module Lita
 
       route(/qui[ée]nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
         unless @assigner.already_assigned?
-          response.reply("Aun no lo se pero van #{@assigner.current_lunchers_list.count} interesados.")
+          response.reply("Aun no lo se pero van #{@assigner.current_lunchers_list.count} \
+            interesados: #{@assigner.current_lunchers_list.join(', ')}")
           next
         end
         case @assigner.winning_lunchers_list.length
@@ -117,7 +116,8 @@ module Lita
       route(/qui[ée]n(es)? ((cooper(o|ó|aron))|(cag(o|ó|aron))|(qued(o|ó|aron)) afuera) ((del|con el) almuerzo)? (hoy)?\??/i,
         help: help_msg(:show_loosing_lunchers)) do |response|
         unless @assigner.already_assigned?
-          response.reply("No lo se, pero van #{@assigner.current_lunchers_list.count} interesados.")
+          response.reply("No lo se, pero van #{@assigner.current_lunchers_list.count} \
+            interesados: #{@assigner.current_lunchers_list.join(', ')}")
           next
         end
         case @assigner.loosing_lunchers_list.length
@@ -173,6 +173,22 @@ module Lita
         response.reply("tú te lo pierdes, comerá #{enters} por ti")
       end
 
+      route(/.*/i, command: false) do |response|
+        if quiet_time? && Lita::Room.find_by_name("coffeebar").id == response.room.id
+          user = Lita::User.find_by_mention_name(response.user.mention_name)
+          message = "Sugiero que evitemos hablar en #coffeebar entre las 10 y las " \
+          "12 del día para poder concentrarnos. Esto es porque las interrupciones" \
+          " hacen muy dificil trabajar: http://www.paulgraham.com/makersschedule.html"
+          robot.send_message(Source.new(user: user), message) if user
+        end
+      end
+
+      def quiet_time?
+        (1..5).cover? DateTime.current.wday &&
+          DateTime.current.hour >= ENV['QUIET_START_HOUR'].to_i &&
+          DateTime.current.hour <= ENV['QUIET_END_HOUR'].to_i
+      end
+
       def clean_mention_name(mention_name)
         mention_name.delete('@') if mention_name
       end
@@ -181,7 +197,7 @@ module Lita
         @assigner.reset_lunchers
         @assigner.lunchers_list.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
-          message = t(:question, subject: luncher)
+          message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
           robot.send_message(Source.new(user: user), message) if user
         end
       end
@@ -208,7 +224,7 @@ module Lita
           end
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
-          persist_winning_lunchers
+          @assigner.persist_winning_lunchers
         end
       end
 

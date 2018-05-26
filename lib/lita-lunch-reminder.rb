@@ -1,5 +1,6 @@
 require "lita"
 require "redis"
+require "rufus-scheduler"
 
 Lita.load_locales Dir[File.expand_path(
   File.join("..", "..", "locales", "*.yml"), __FILE__
@@ -14,3 +15,7 @@ require "lita/services/karmanager"
 Lita::Handlers::LunchReminder.template_root File.expand_path(
   File.join("..", "..", "templates"), __FILE__
 )
+
+unless ENV['RACK_ENV'] == 'production'
+  require 'pry'
+end
