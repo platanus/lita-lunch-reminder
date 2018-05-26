@@ -1,7 +1,5 @@
 # coding: utf-8
 
-require 'rufus-scheduler'
-
 module Lita
   module Handlers
     class LunchReminder < Handler
@@ -175,6 +173,22 @@ module Lita
         response.reply("tú te lo pierdes, comerá #{enters} por ti")
       end
 
+      route(/.*/i, command: false) do |response|
+        if quiet_time? && Lita::Room.find_by_name("lita-test").id == response.room.id
+          user = Lita::User.find_by_mention_name(response.user.mention_name)
+          message = "Sugiero que evitemos hablar en #coffeebar entre las 10 y las " \
+          "12 del día para poder concentrarnos. Esto es porque las interrupciones" \
+          " hacen muy dificil trabajar: http://www.paulgraham.com/makersschedule.html"
+          robot.send_message(Source.new(user: user), message) if user
+        end
+      end
+
+      def quiet_time?
+        (1..5).cover? DateTime.current.wday &&
+          DateTime.current.hour >= ENV['QUIET_START_HOUR'].to_i &&
+          DateTime.current.hour <= ENV['QUIET_END_HOUR'].to_i
+      end
+
       def clean_mention_name(mention_name)
         mention_name.delete('@') if mention_name
       end
@@ -210,7 +224,7 @@ module Lita
           end
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
-          persist_winning_lunchers
+          @assigner.persist_winning_lunchers
         end
       end
 
