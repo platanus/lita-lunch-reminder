@@ -174,19 +174,19 @@ module Lita
       end
 
       route(/.*/i, command: false) do |response|
-        if quiet_time? && Lita::Room.find_by_name("coffeebar").id == response.room.id
-          user = Lita::User.find_by_mention_name(response.user.mention_name)
-          message = "Sugiero que evitemos hablar en #coffeebar entre las 10 y las " \
-          "12 del día para poder concentrarnos. Esto es porque las interrupciones" \
-          " hacen muy dificil trabajar: http://www.paulgraham.com/makersschedule.html"
+        if quiet_time? && Lita::Room.find_by_name("lita-test").id == response.room.id
+          user = Lita::User.find_by_mention_name("agustin")
+          message = "Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y las " \
+          "12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones" \
+          " hacen muy dificil trabajar! mira: http://www.paulgraham.com/makersschedule.html"
           robot.send_message(Source.new(user: user), message) if user
         end
       end
 
       def quiet_time?
-        (1..5).cover? DateTime.current.wday &&
-          DateTime.current.hour >= ENV['QUIET_START_HOUR'].to_i &&
-          DateTime.current.hour <= ENV['QUIET_END_HOUR'].to_i
+        ((1..5).cover? DateTime.current.wday) &&
+          (DateTime.now.hour >= ENV['QUIET_START_HOUR'].to_i) &&
+          (DateTime.now.hour <= ENV['QUIET_END_HOUR'].to_i)
       end
 
       def clean_mention_name(mention_name)
