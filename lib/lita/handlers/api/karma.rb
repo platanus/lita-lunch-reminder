@@ -12,16 +12,14 @@ module Lita
           @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
         end
 
-        http.get '/karma/:user_id', :karma
+        http.get '/karma', :karma
 
         def karma(request, response)
-          user_id = request.env['router.params'][:user_id]
-          user = Lita::User.find_by_id(user_id)
+          return respond_not_authorized(response) unless authorized?(request)
+          user = Lita::User.find_by_id(request.params[:user_id])
           if user
-            user_karma = @karmanager.get_karma(user_id)
+            user_karma = @karmanager.get_karma(user.id)
             respond(response, karma: user_karma)
-          else
-            respond(response, status: 404, message: 'Usuario no encontrado')
           end
         end
 

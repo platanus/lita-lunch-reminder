@@ -16,25 +16,23 @@ module Lita
         http.get '/current_lunchers', :current_lunchers
         http.post '/current_lunchers', :opt_in
 
-        def winning_lunchers(_request, response)
+        def winning_lunchers(request, response)
+          return respond_not_authorized(response) unless authorized?(request)
           list = @assigner.winning_lunchers_list
           respond(response, winning_lunchers: list)
         end
 
-        def current_lunchers(_request, response)
+        def current_lunchers(request, response)
+          return respond_not_authorized(response) unless authorized?(request)
           list = @assigner.current_lunchers_list
           respond(response, current_lunchers: list)
         end
 
         def opt_in(request, response)
-          user_id = JSON.parse(request.body.read)['user_id']
-          user = Lita::User.find_by_id(user_id) if user_id
-          if user
-            @assigner.add_to_current_lunchers(user.mention_name)
-            respond(response, success: true)
-          else
-            respond(response, status: 404, message: 'Usuario no encontrado')
-          end
+          return respond_not_authorized(response) unless authorized?(request)
+          user = Lita::User.find_by_id(request.params[:user_id])
+          @assigner.add_to_current_lunchers(user.mention_name) if user
+          respond(response, success: true) if user
         end
 
         Lita.register_handler(self)
