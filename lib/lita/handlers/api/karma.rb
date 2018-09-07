@@ -6,6 +6,8 @@ module Lita
   module Handlers
     module Api
       class Karma < Lita::Handlers::Api::ApiController
+        namespace 'lunch_reminder'
+
         def initialize(robot)
           super
           @karmanager = Lita::Services::Karmanager.new(redis)
