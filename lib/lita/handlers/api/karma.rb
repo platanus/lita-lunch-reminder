@@ -30,8 +30,8 @@ module Lita
           return respond_not_authorized(response) unless authorized?(request)
           body = JSON.parse(request.body.read)
           user = Lita::User.find_by_id(request.params[:user_id])
-          receiver = Lita::User.find_by_id(body['receiver_id'])
-          karma_amount = body['karma_amount']
+          receiver = Lita::User.find_by_mention_name(body['receiver'])
+          karma_amount = body['amount']
           if user && receiver && karma_amount
             @karmanager.transfer_karma(user.id, receiver.id, karma_amount)
             respond(response, success: true)
