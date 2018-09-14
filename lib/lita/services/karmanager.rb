@@ -32,9 +32,9 @@ module Lita
         @redis.decrby("#{user_id}:karma", amount)
       end
 
-      def transfer_karma(giver_id, receiver_id)
-        decrease_karma(giver_id)
-        increase_karma(receiver_id)
+      def transfer_karma(giver_id, receiver_id, amount)
+        decrease_karma_by(giver_id, amount)
+        increase_karma_by(receiver_id, amount)
       end
 
       def convert_to_new_karma(list, base)
