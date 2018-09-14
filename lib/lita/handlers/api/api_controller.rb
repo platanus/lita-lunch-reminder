@@ -17,7 +17,7 @@ module Lita
         def authorized?(request)
           user_id = request.params[:user_id]
           user = Lita::User.find_by_id(user_id)
-          user.present?
+          !user.nil?
         end
 
         Lita.register_handler(self)

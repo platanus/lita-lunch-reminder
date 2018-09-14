@@ -76,9 +76,9 @@ describe Lita::Services::LunchAssigner, lita: true do
     karmanager.set_karma(juan.id, 2)
     subject.pick_winners(3)
     expect(subject.winning_lunchers_list).to include('pedro')
-    expect(subject.winning_lunchers_list.count).to eq(2)
+    expect(subject.winning_lunchers_list.count).to eq(3)
   end
-  
+
   it "knows the day of the week" do
     fake_today = Date.parse('2018-01-01')
     allow(Date).to receive(:today).and_return(fake_today)

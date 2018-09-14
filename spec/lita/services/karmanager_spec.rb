@@ -18,7 +18,7 @@ describe Lita::Services::Karmanager, lita: true do
   it "transfers karma" do
     subject.set_karma("agustin", 1000)
     subject.set_karma("peter", 1000)
-    subject.transfer_karma("agustin", "peter")
+    subject.transfer_karma("agustin", "peter", 1)
     expect(subject.get_karma("agustin")).to eq(999)
   end
 
