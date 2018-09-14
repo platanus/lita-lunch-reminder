@@ -55,7 +55,7 @@ describe Lita::Handlers::Api::Karma, lita_handler: true do
         @pedro_karma = karmanager.get_karma(pedro.id)
         @response = JSON.parse(http.post do |req|
           req.url 'karma/transfer'
-          req.body = "{\"receiver_id\": \"#{pedro.id}\", \"karma_amount\": 5 }"
+          req.body = "{\"receiver\": \"#{pedro.mention_name}\", \"amount\": 5 }"
         end.body)
       end
 
