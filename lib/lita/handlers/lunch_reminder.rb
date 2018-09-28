@@ -184,9 +184,9 @@ module Lita
       end
 
       def quiet_time?
-        ((1..5).cover? DateTime.current.wday) &&
-          (DateTime.now.hour >= ENV['QUIET_START_HOUR'].to_i) &&
-          (DateTime.now.hour <= ENV['QUIET_END_HOUR'].to_i)
+        ((1..5).cover? Time.now.wday) &&
+          (Time.now.hour >= ENV['QUIET_START_HOUR'].to_i) &&
+          (Time.now.hour <= ENV['QUIET_END_HOUR'].to_i)
       end
 
       def clean_mention_name(mention_name)
