@@ -25,6 +25,15 @@ describe Lita::Services::LunchAssigner, lita: true do
     expect(subject.lunchers_list).to eq([])
   end
 
+  it 'transfer lunch' do
+    subject.add_to_lunchers("alfred")
+    subject.add_to_current_lunchers("alfred")
+    subject.add_to_winning_lunchers("alfred")
+    subject.add_to_lunchers("andres")
+    expect(subject.transfer_lunch('alfred', 'andres')).to be true
+    expect(subject.winning_lunchers_list).to contain_exactly('andres')
+  end
+
   it "create a hash that handles negative karma" do
     pedro = Lita::User.create(126, mention_name: "pedro")
     juan = Lita::User.create(127, mention_name: "juan")

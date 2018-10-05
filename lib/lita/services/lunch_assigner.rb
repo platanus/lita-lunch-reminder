@@ -46,6 +46,14 @@ module Lita
         @redis.srem("winning_lunchers", mention_name)
       end
 
+      def transfer_lunch(sender_mention_name, receiver_mention_name)
+        if remove_from_winning_lunchers(sender_mention_name)
+          add_to_winning_lunchers(receiver_mention_name)
+        else
+          false
+        end
+      end
+
       def persist_winning_lunchers
         sw = Lita::Services::SpreadsheetWriter.new
         time = Time.now.strftime("%Y-%m-%d")
