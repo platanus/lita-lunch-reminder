@@ -20,7 +20,6 @@ module Lita
 
       def add_limit_order(new_order)
         return if placed_limit_order?(JSON.parse(new_order)['user_id'])
-
         @redis.sadd('orders', new_order)
       end
 
