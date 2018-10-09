@@ -21,6 +21,8 @@ describe Lita::Services::MarketManager, lita: true do
   let(:andres) { Lita::User.create(137, mention_name: 'andres') }
   let(:oscar) { Lita::User.create(147, mention_name: 'oscar') }
   let(:fernanda) { Lita::User.create(157, mention_name: 'fernanda') }
+  let(:order_id) { SecureRandom.uuid }
+  let(:order_time) { Time.now }
 
   def add_limit_order(order_id, user, type, created_at)
     order = {
@@ -43,57 +45,67 @@ describe Lita::Services::MarketManager, lita: true do
     lunch_assigner.add_to_lunchers(fernanda.mention_name)
   end
 
+  before do
+    ENV['MAX_LUNCHERS'] = '20'
+  end
+
   describe '#add_limit_order' do
     context 'first order added' do
       before do
-        @order_id = SecureRandom.uuid
-        @order_time = Time.now
-        add_limit_order(@order_id, fdom, 'sell', @order_time)
+        add_limit_order(order_id, fdom, 'sell', order_time)
       end
 
-      it { expect(subject.orders.last).not_to be_nil }
-      it { expect(subject.orders.last['user_id']).to eq(fdom.id) }
-      it { expect(subject.orders.last['id']).to eq(@order_id) }
-      it { expect(subject.orders.last['type']).to eq('sell') }
-      it { expect(subject.orders.last['created_at']).to eq(@order_time.strftime('%F %T %z')) }
+      it 'add order to limit orders' do
+        add_limit_order(order_id, fdom, 'sell', order_time)
+        expect(subject.orders.last).not_to be_nil
+      end
+
+      it 'add the correct limit order' do
+        add_limit_order(order_id, fdom, 'sell', order_time)
+        expect(subject.orders.last['id']).to eq(order_id)
+      end
     end
 
     context 'with non empty orders' do
       before do
         add_limit_order(SecureRandom.uuid, andres, 'sell', Time.new(2018, 10, 2))
-        @order_id = SecureRandom.uuid
-        @order_time = Time.now
-        add_limit_order(@order_id, fdom, 'sell', @order_time)
       end
 
-      it { expect(subject.orders.last).not_to be_nil }
-      it { expect(subject.orders.last['user_id']).to eq(fdom.id) }
-      it { expect(subject.orders.last['id']).to eq(@order_id) }
-      it { expect(subject.orders.last['type']).to eq('sell') }
-      it { expect(subject.orders.last['created_at']).to eq(@order_time.strftime('%F %T %z')) }
+      it 'add limit order' do
+        add_limit_order(order_id, fdom, 'sell', order_time)
+        expect(subject.orders.last).not_to be_nil
+      end
+
+      it 'sort orders by date' do
+        add_limit_order(order_id, fdom, 'sell', order_time)
+        expect(subject.orders.last['user_id']).to eq(fdom.id)
+        expect(subject.orders.last['id']).to eq(order_id)
+        expect(subject.orders.last['type']).to eq('sell')
+        expect(subject.orders.last['created_at']).to eq(order_time.strftime('%F %T %z'))
+      end
     end
 
     context 'user already has an order' do
       before do
         @old_order_id = SecureRandom.uuid
-        @order_time = Time.now
-        add_limit_order(@old_order_id, fdom, 'sell', @order_time)
+        add_limit_order(@old_order_id, fdom, 'sell', order_time)
         @new_order = add_limit_order(SecureRandom.uuid, fdom, 'sell', Time.now)
+        allow(subject).to receive(:placed_limit_order?).with(fdom.id).and_return true
       end
 
-      it 'doesn\'t add order to list' do
+      it "doesn't add order to list" do
         subject.add_limit_order(@new_order)
         expect(subject.orders.size).to eq(1)
       end
 
-      it 'doesn\'t edit list' do
-        add_limit_order(SecureRandom.uuid, fdom, 'sell', @order_time)
+      it "doesn't edit list" do
+        add_limit_order(SecureRandom.uuid, fdom, 'sell', order_time)
         expect(subject.orders.first['id']).to eq(@old_order_id)
       end
 
-      it 'call placed_limit_order? and return true' do
-        expect(subject).to receive(:placed_limit_order?).with(fdom.id).and_return true
-        add_limit_order(SecureRandom.uuid, fdom, 'sell', @order_time)
+      it 'calls placed_limit_order?' do
+        add_limit_order(SecureRandom.uuid, fdom, 'sell', order_time)
+        expect(subject).to have_received(:placed_limit_order?).with(fdom.id)
       end
     end
   end
@@ -107,7 +119,7 @@ describe Lita::Services::MarketManager, lita: true do
       it { expect(subject.placed_limit_order?(fdom.id)).to be true }
     end
 
-    context 'user doesn\'t have an order' do
+    context "user doesn't have an order" do
       before do
         add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
       end
@@ -137,14 +149,20 @@ describe Lita::Services::MarketManager, lita: true do
       end
 
       it { expect(subject.orders.size).to eq(3) }
-      it { expect(subject.orders[0]['user_id']).to eq(fdom.id) }
-      it { expect(subject.orders[1]['user_id']).to eq(oscar.id) }
-      it { expect(subject.orders[2]['user_id']).to eq(andres.id) }
+      it 'sort orders by date' do
+        expect(subject.orders[0]['user_id']).to eq(fdom.id)
+        expect(subject.orders[1]['user_id']).to eq(oscar.id)
+        expect(subject.orders[2]['user_id']).to eq(andres.id)
+      end
     end
   end
 
   describe '#add_market_order' do
     context 'user with karma' do
+      before do
+        karmanager.set_karma(fdom.id, 100)
+      end
+
       context 'no limit orders' do
         it { expect(subject.add_market_order(fdom.id)).to be_nil }
       end
@@ -152,7 +170,7 @@ describe Lita::Services::MarketManager, lita: true do
       context 'exist one order' do
         before do
           add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
-          subject.add_market_order(fernanda.id)
+          subject.add_market_order(fdom.id)
         end
 
         it { expect(subject.orders.size).to eq(0) }
@@ -164,17 +182,54 @@ describe Lita::Services::MarketManager, lita: true do
           add_limit_order(SecureRandom.uuid, andres, 'sell', Time.new(2018, 10, 5))
           add_limit_order(SecureRandom.uuid, fdom, 'sell', Time.new(2018, 10, 3))
           add_limit_order(SecureRandom.uuid, oscar, 'sell', Time.new(2018, 10, 4))
+          karmanager.set_karma(fdom.id, 100)
+          karmanager.set_karma(fernanda.id, 100)
           @karma_fdom = karmanager.get_karma(fdom.id)
           @karma_fernanda = karmanager.get_karma(fernanda.id)
-          subject.add_market_order(fernanda.id)
         end
 
-        it { expect(subject.orders.size).to eq(2) }
-        it { expect(subject.orders[0]['user_id']).to eq(oscar.id) }
-        it { expect(subject.orders[1]['user_id']).to eq(andres.id) }
-        it { expect(lunch_assigner.winning_lunchers_list).to include(fernanda.mention_name) }
-        it { expect(karmanager.get_karma(fdom.id)).to eq(@karma_fdom + 1) }
-        it { expect(karmanager.get_karma(fernanda.id)).to eq(@karma_fernanda - 1) }
+        it 'place market order' do
+          subject.add_market_order(fernanda.id)
+          expect(subject.orders.size).to eq(2)
+        end
+
+        it 'math the correct limit order' do
+          subject.add_market_order(fernanda.id)
+          expect(subject.orders[0]['user_id']).to eq(oscar.id)
+          expect(subject.orders[1]['user_id']).to eq(andres.id)
+        end
+
+        it 'add buyer to winning lunchers' do
+          subject.add_market_order(fernanda.id)
+          expect(lunch_assigner.winning_lunchers_list).to include(fernanda.mention_name)
+        end
+
+        it 'transfer karma from buyer to seller' do
+          subject.add_market_order(fernanda.id)
+          expect(karmanager.get_karma(fdom.id)).to eq(@karma_fdom + 1)
+          expect(karmanager.get_karma(fernanda.id)).to eq(@karma_fernanda - 1)
+        end
+      end
+    end
+
+    context 'user without karma' do
+      before do
+        karmanager.set_karma(fdom.id, 0)
+      end
+
+      context 'no limit orders' do
+        it { expect(subject.add_market_order(fdom.id)).to be_nil }
+      end
+
+      context 'exist one order' do
+        before do
+          add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
+        end
+
+        it 'not place market order' do
+          subject.add_market_order(fdom.id)
+          expect(subject.orders.size).to eq(1)
+        end
       end
     end
   end

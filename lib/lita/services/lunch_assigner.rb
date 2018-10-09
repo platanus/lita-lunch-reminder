@@ -10,32 +10,32 @@ module Lita
       end
 
       def current_lunchers_list
-        @redis.smembers("current_lunchers") || []
+        @redis.smembers('current_lunchers') || []
       end
 
       def add_to_current_lunchers(mention_name)
-        @redis.sadd("current_lunchers", mention_name)
+        @redis.sadd('current_lunchers', mention_name)
       end
 
       def remove_from_current_lunchers(mention_name)
-        @redis.srem("current_lunchers", mention_name)
+        @redis.srem('current_lunchers', mention_name)
       end
 
       def add_to_lunchers(mention_name)
-        @redis.sadd("lunchers", mention_name)
+        @redis.sadd('lunchers', mention_name)
       end
 
       def remove_from_lunchers(mention_name)
-        @redis.srem("lunchers", mention_name)
+        @redis.srem('lunchers', mention_name)
       end
 
       def lunchers_list
-        @redis.smembers("lunchers") || []
+        @redis.smembers('lunchers') || []
       end
 
       def add_to_winning_lunchers(mention_name)
         if winning_lunchers_list.count < ENV['MAX_LUNCHERS'].to_i
-          @redis.sadd("winning_lunchers", mention_name)
+          @redis.sadd('winning_lunchers', mention_name)
           true
         else
           false
@@ -43,11 +43,13 @@ module Lita
       end
 
       def remove_from_winning_lunchers(mention_name)
-        @redis.srem("winning_lunchers", mention_name)
+        @redis.srem('winning_lunchers', mention_name)
       end
 
       def transfer_lunch(sender_mention_name, receiver_mention_name)
-        if remove_from_winning_lunchers(sender_mention_name)
+        if lunchers_list.include?(receiver_mention_name) && \
+            !winning_lunchers_list.include?(receiver_mention_name) \
+            && remove_from_winning_lunchers(sender_mention_name)
           add_to_winning_lunchers(receiver_mention_name)
         else
           false
@@ -56,7 +58,7 @@ module Lita
 
       def persist_winning_lunchers
         sw = Lita::Services::SpreadsheetWriter.new
-        time = Time.now.strftime("%Y-%m-%d")
+        time = Time.now.strftime('%Y-%m-%d')
         winning_lunchers_list.each do |winner|
           user = User.find_by_mention_name(winner) || User.find_by_name(winner)
           winner_id = user ? user.id : nil
@@ -65,7 +67,7 @@ module Lita
       end
 
       def winning_lunchers_list
-        @redis.smembers("winning_lunchers") || []
+        @redis.smembers('winning_lunchers') || []
       end
 
       def loosing_lunchers_list
@@ -74,13 +76,13 @@ module Lita
       end
 
       def wont_lunch
-        @redis.sdiff("lunchers", "current_lunchers")
+        @redis.sdiff('lunchers', 'current_lunchers')
       end
 
       def reset_lunchers
-        @redis.del("current_lunchers")
-        @redis.del("winning_lunchers")
-        @redis.del("already_assigned")
+        @redis.del('current_lunchers')
+        @redis.del('winning_lunchers')
+        @redis.del('already_assigned')
       end
 
       def pick_winners(amount)
@@ -95,12 +97,12 @@ module Lita
       end
 
       def already_assigned?
-        redis.get("already_assigned") ? true : false
+        redis.get('already_assigned') ? true : false
       end
 
       def do_the_assignment
         pick_winners(ENV['MAX_LUNCHERS'].to_i)
-        redis.set("already_assigned", true)
+        redis.set('already_assigned', true)
       end
 
       def weekday_name_plus(i)

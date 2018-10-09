@@ -16,8 +16,8 @@ module Lita
         end
 
         http.get 'market/limit_orders', :limit_orders
-        http.post 'market/place_limit_order', :place_limit_order
-        http.post 'market/place_market_order', :place_market_order
+        http.post 'market/limit_orders', :place_limit_order
+        http.post 'market/market_orders', :place_market_order
 
         def limit_orders(request, response)
           return respond_not_authorized(response) unless authorized?(request)
@@ -31,10 +31,10 @@ module Lita
           body = request.body.read
           list = @assigner.winning_lunchers_list
           if user
-            if (list.include? user.mention_name) && @market_manager.add_limit_order(body)
+            if list.include?(user.mention_name) && @market_manager.add_limit_order(body)
               respond(response, success: true)
             else
-              respond(response, status: 404, message: 'User can\'t place limit order')
+              respond(response, status: 403, message: 'User can\'t place limit order')
             end
           else
             response.status = 404
@@ -48,10 +48,10 @@ module Lita
           list = @assigner.winning_lunchers_list
 
           if user
-            if (!list.include? user.mention_name) && @market_manager.add_market_order(user.id)
+            if !list.include?(user.mention_name) && @market_manager.add_market_order(user.id)
               respond(response, success: true)
             else
-              respond(response, status: 404, message: 'User can\'t place limit order')
+              respond(response, status: 403, message: 'User can\'t place market order')
             end
           else
             response.status = 404
