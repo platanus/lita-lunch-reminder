@@ -2,11 +2,9 @@ require 'spec_helper'
 
 describe Lita::Handlers::Api::Market, lita_handler: true do
   let(:redis) { Lita::Handlers::LunchReminder.new(robot).redis }
-  let(:karmanager) do
-    Lita::Services::Karmanager.new(redis)
-  end
+  let(:karmanager) { Lita::Services::Karmanager.new(redis) }
   let(:assigner) { Lita::Services::LunchAssigner.new(redis, karmanager) }
-  let(:market) { Lita::Services::LunchAssigner.new(redis, assigner, karmanager) }
+  let(:market) { Lita::Services::MarketManager.new(redis, assigner, karmanager) }
   let(:juan) { Lita::User.create(127, mention_name: 'juan') }
   let(:pedro) { Lita::User.create(137, mention_name: 'pedro') }
   let(:oscar) { Lita::User.create(157, mention_name: 'oscar') }
@@ -73,8 +71,6 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     context 'authorized' do
       context 'user didn\'t won lunch' do
         before do
-          id = SecureRandom.uuid
-          time = Time.now
           allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: juan.id)
           @response = JSON.parse(http.post do |req|
             req.url 'market/limit_orders'
@@ -82,7 +78,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
               \"id\": \"#{SecureRandom.uuid}\",
               \"user_id\": #{juan.id},
               \"type\": \"sell\",
-              \"created_at\": #{time}
+              \"created_at\": #{Time.now}
             }"
           end.body)
         end
@@ -104,7 +100,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
           @response = JSON.parse(http.post do |req|
             req.url 'market/place_limit_order'
             req.body = "{
-              id: #{SecureRandom.uuid},
+              id: #{id},
               user_id: #{pedro.id},
               type: sell,
               created_at: #{time}
@@ -119,7 +115,15 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
           expect(limit_orders.size).to eq(1)
         end
 
-        # Verificar datos de la limit order
+        context 'limit order data should match' do
+          before do
+            limit_orders = market_orders
+          end
+
+          it { expect(limit_orders.first.id == id) }
+          it { expect(limit_orders.first.user_id == pedro) }
+          it { expect(limit_orders.first.created_at == time) }
+        end
       end
     end
   end
@@ -133,6 +137,10 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
           req.body = "{\"sender_id\": \"#{juan.id}\"}"
         end.body)
       end
+
+      it 'should not add buyer to lunchers' do
+        expect(assigner.winning_lunchers_list).not_to include(juan.mention_name)
+      end
     end
 
     context 'one or more limit orders' do
@@ -145,7 +153,46 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
         end.body)
       end
 
-      # Terminar test: Verificar transaccion. Que no pueda comprar almuerzo si ya tiene.
+      it 'should add buyer to lunchers' do
+        expect(assigner.winning_lunchers_list).to include(juan.mention_name)
+      end
+
+      it 'should remove seller from lunchers' do
+        expect(assigner.winning_lunchers_list).not_to include(pedro.mention_name)
+      end
+    end
+
+    context 'user already has lunch' do
+      before do
+        allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: pedro.id)
+        @response = JSON.parse(http.post do |req|
+          req.url 'market/place_market_order'
+          req.body = "{\"sender_id\": \"#{pedro.id}\"}"
+        end.body)
+      end
+
+      it 'should not remove user from lunchers' do
+        expect(assigner.winning_lunchers_list).to include(pedro.mention_name)
+      end
+    end
+
+    context 'user has a limit order' do
+      before do
+        limit_order = add_limit_order(SecureRandom.uuid, pedro, 'sell', Time.now)
+        allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: pedro.id)
+        @response = JSON.parse(http.post do |req|
+          req.url 'market/place_market_order'
+          req.body = "{\"sender_id\": \"#{pedro.id}\"}"
+        end.body)
+      end
+
+      it 'should not remove user from lunchers' do
+        expect(assigner.winning_lunchers_list).to include(pedro.mention_name)
+      end
+
+      it 'should not remove limit order' do
+        expect(market.orders).to include(limit_order)
+      end
     end
   end
 end
