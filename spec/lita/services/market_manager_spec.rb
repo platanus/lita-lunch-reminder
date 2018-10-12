@@ -231,7 +231,7 @@ describe Lita::Services::MarketManager, lita: true do
           add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
         end
 
-        it "doesn't places market order" do
+        it "doesn't place market order" do
           subject.add_market_order(fdom.id)
           expect(subject.orders.size).to eq(1)
         end

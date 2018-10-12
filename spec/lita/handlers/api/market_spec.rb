@@ -8,6 +8,8 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   let(:juan) { Lita::User.create(127, mention_name: 'juan') }
   let(:pedro) { Lita::User.create(137, mention_name: 'pedro') }
   let(:oscar) { Lita::User.create(157, mention_name: 'oscar') }
+  let(:id) { SecureRandom.uuid }
+  let(:time) { Time.now }
 
   def add_limit_order(order_id, user, type, created_at)
     order = {
@@ -86,16 +88,13 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
       context 'user won lunch' do
         before do
           allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: pedro.id)
-          @id = SecureRandom.uuid
-          @time = Time.now
           @response = JSON.parse(http.post do |req|
             req.url 'market/limit_orders'
-            req.body = "{ \"id\": \"#{@id}\",
+            req.body = "{ \"id\": \"#{id}\",
               \"user_id\": \"#{pedro.id}\",
               \"type\": \"sell\",
-              \"created_at\": \"#{@time}\" }"
+              \"created_at\": \"#{time}\" }"
           end.body)
-          @limit_orders = market.orders
         end
 
         it { expect(@response['success']).to be(true) }
@@ -104,10 +103,11 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
           expect(market.orders.size).to eq(1)
         end
 
-        context 'limit order data should match' do
-          it { expect(@limit_orders.first['id'] == @id) }
-          it { expect(@limit_orders.first['user_id'] == pedro.id) }
-          it { expect(@limit_orders.first['created_at'] == @time) }
+        it 'limit order data should match' do
+          limit_orders = market.orders
+          expect(limit_orders.first['id'] == @id)
+          expect(limit_orders.first['user_id'] == pedro.id)
+          expect(limit_orders.first['created_at'] == @time)
         end
       end
     end
@@ -158,7 +158,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
 
       context 'user already has lunch' do
         before do
-          @limit_order = add_limit_order(SecureRandom.uuid, pedro, 'sell', Time.now)
+          add_limit_order(id, pedro, 'sell', Time.now)
           allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: pedro.id)
           @response = JSON.parse(http.post do |req|
             req.url 'market/market_orders'
@@ -174,7 +174,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
         end
 
         it 'should not remove limit order' do
-          expect(market.orders).to include(JSON.parse(@limit_order))
+          expect(market.orders.first['id']).to eq(id)
         end
       end
     end
