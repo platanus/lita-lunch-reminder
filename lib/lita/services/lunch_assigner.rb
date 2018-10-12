@@ -47,7 +47,7 @@ module Lita
       end
 
       def transfer_lunch(sender_mention_name, receiver_mention_name)
-        if lunchers_list.include?(receiver_mention_name) && \
+        if lunchers_list.include?(receiver_mention_name) &&
             !winning_lunchers_list.include?(receiver_mention_name) \
             && remove_from_winning_lunchers(sender_mention_name)
           add_to_winning_lunchers(receiver_mention_name)
