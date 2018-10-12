@@ -69,7 +69,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     end
 
     context 'authorized' do
-      context 'user didn\'t won lunch' do
+      context "user didn't won lunch" do
         before do
           allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: juan.id)
           @response = JSON.parse(http.post do |req|
