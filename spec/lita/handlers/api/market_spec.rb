@@ -34,10 +34,10 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     allow(assigner).to receive(:winning_lunchers_list).and_return(true)
     allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:assigner).and_return(assigner)
     allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:current_user).and_return(user)
-    allow_any_instance_of(Lita::Handlers::Api::Market).to \
-     receive(:market_manager).and_return(market)
-    allow_any_instance_of(Lita::Handlers::Api::Market).to \
-     receive(:winning_list).and_return(winning_list)
+    allow_any_instance_of(Lita::Handlers::Api::Market)
+      .to receive(:market_manager).and_return(market)
+    allow_any_instance_of(Lita::Handlers::Api::Market)
+      .to receive(:winning_list).and_return(winning_list)
     allow(market).to receive(:add_limit_order).and_return(true)
   end
 
@@ -54,8 +54,8 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
       let(:limit_order) { { id: order_id, user_id: 127, type: 'sell', created_at: time } }
       before do
         allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:authorized?).and_return(true)
-        allow_any_instance_of(Lita::Handlers::Api::Market).to \
-         receive(:market_manager).and_return(market)
+        allow_any_instance_of(Lita::Handlers::Api::Market)
+          .to receive(:market_manager).and_return(market)
         allow(market).to receive(:orders).and_return([limit_order])
       end
 
