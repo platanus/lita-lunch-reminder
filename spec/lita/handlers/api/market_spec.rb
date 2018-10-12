@@ -71,7 +71,6 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     context 'authorized' do
       context "user didn't won lunch" do
         before do
-          allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: juan.id)
           @response = JSON.parse(http.post do |req|
             req.url 'market/limit_orders'
             req.body = "{\"id\": \"#{SecureRandom.uuid}\",
@@ -81,12 +80,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
           end.body)
         end
 
-        it { expect(@response['status']).to eq(403) }
-        it { expect(@response['message']).to eq('User can\'t place limit order') }
-
-        it 'should not add order to limits orders' do
-          expect(market.orders.size).to eq(0)
-        end
+        it { expect(market.orders.size).to eq(0) }
       end
 
       context 'user won lunch' do

@@ -33,6 +33,7 @@ module Lita
           if user
             if list.include?(user.mention_name) && @market_manager.add_limit_order(body)
               respond(response, success: true)
+            end
           else
             response.status = 404
             respond(response, status: 404, message: 'Error in parameters')
