@@ -10,9 +10,6 @@ module Lita
 
         def initialize(robot)
           super
-          @karmanager = Lita::Services::Karmanager.new(redis)
-          @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
-          @market_manager = Lita::Services::MarketManager.new(redis, @assigner, @karmanager)
         end
 
         http.get 'market/limit_orders', :limit_orders
@@ -21,16 +18,16 @@ module Lita
 
         def limit_orders(request, response)
           return respond_not_authorized(response) unless authorized?(request)
-          orders = @market_manager.orders
+          orders = market_manager.orders
           respond(response, limit_orders: orders)
         end
 
         def place_limit_order(request, response)
           return respond_not_authorized(response) unless authorized?(request)
-          user = Lita::User.find_by_id(request.params[:user_id])
+          user = current_user(request)
           body = request.body.read
           if user
-            if winning_list.include?(user.mention_name) && @market_manager.add_limit_order(body)
+            if winning_list.include?(user.mention_name) && market_manager.add_limit_order(body)
               respond(response, success: true)
             end
           else
@@ -41,10 +38,9 @@ module Lita
 
         def place_market_order(request, response)
           return respond_not_authorized(response) unless authorized?(request)
-          user = Lita::User.find_by_id(request.params[:user_id])
-
+          user = current_user(request)
           if user
-            if !winning_list.include?(user.mention_name) && @market_manager.add_market_order(user.id)
+            if !winning_list.include?(user.mention_name) && market_manager.add_market_order(user.id)
               respond(response, success: true)
             end
           else
@@ -59,6 +55,18 @@ module Lita
 
         def winning_list
           @winning_list ||= @assigner.winning_lunchers_list
+        end
+
+        def market_manager
+          @market_manager ||= Lita::Services::MarketManager.new(redis, @assigner, @karmanager)
+        end
+
+        def karmanager
+          @karmanager ||= Lita::Services::Karmanager.new(redis)
+        end
+
+        def assigner
+          @assigner ||= Lita::Services::LunchAssigner.new(redis, @karmanager)
         end
       end
     end

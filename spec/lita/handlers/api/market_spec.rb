@@ -1,15 +1,15 @@
 require 'spec_helper'
 
 describe Lita::Handlers::Api::Market, lita_handler: true do
-  let(:redis) { Lita::Handlers::LunchReminder.new(robot).redis }
-  let(:karmanager) { Lita::Services::Karmanager.new(redis) }
-  let(:assigner) { Lita::Services::LunchAssigner.new(redis, karmanager) }
-  let(:market) { Lita::Services::MarketManager.new(redis, assigner, karmanager) }
-  let(:juan) { Lita::User.create(127, mention_name: 'juan') }
-  let(:pedro) { Lita::User.create(137, mention_name: 'pedro') }
-  let(:oscar) { Lita::User.create(157, mention_name: 'oscar') }
+  let(:karmanager) { double }
+  let(:assigner) { double }
+  let(:market) { double }
+  let(:user) { double }
   let(:order_id) { SecureRandom.uuid }
   let(:time) { Time.now }
+  let(:limit_order) { { id: order_id, user_id: 127, type: 'sell', created_at: time } }
+  let(:market_order) { { user_id: '127' } }
+  let(:winning_list) { [user] }
 
   def add_limit_order(order_id, user, type, created_at)
     order = {
@@ -28,15 +28,15 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
 
   before do
     ENV['MAX_LUNCHERS'] = '20'
-    assigner.add_to_lunchers('juan')
-    assigner.add_to_lunchers('pedro')
-    assigner.add_to_lunchers('oscar')
-    karmanager.set_karma(juan.id, 10)
-    karmanager.set_karma(pedro.id, 20)
-    karmanager.set_karma(oscar.id, 20)
-    assigner.add_to_current_lunchers(juan.mention_name)
-    assigner.add_to_current_lunchers(pedro.mention_name)
-    assigner.add_to_winning_lunchers(pedro.mention_name)
+    allow(assigner).to receive(:winning_lunchers_list).and_return('pedro')
+    allow(user).to receive(:mention_name).and_return('pedro')
+    allow(user).to receive(:id).and_return('127')
+    allow(assigner).to receive(:winning_lunchers_list).and_return(true)
+    allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:market_manager).and_return(market)
+    allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:assigner).and_return(assigner)
+    allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:current_user).and_return(user)
+    allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:winning_list).and_return(winning_list)
+    allow(market).to receive(:add_limit_order).and_return(true)
   end
 
   describe '#limit_orders' do
@@ -49,14 +49,16 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     end
 
     context 'authorized' do
+      let(:limit_order) { { id: order_id, user_id: 127, type: 'sell', created_at: time } }
       before do
-        allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: pedro.id)
-        @limit_order = add_limit_order(SecureRandom.uuid, pedro, 'sell', Time.now)
-        @response = JSON.parse(http.get('market/limit_orders').body)
+        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:authorized?).and_return(true)
+        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:market_manager).and_return(market)
+        allow(market).to receive(:orders).and_return([limit_order])
       end
 
       it 'includes the limit orders' do
-        expect(@response['limit_orders'].first.to_json).to eq(@limit_order)
+        response = JSON.parse(http.get('market/limit_orders').body)
+        expect(response['limit_orders'].first.to_json).to eq(limit_order.to_json)
       end
     end
   end
@@ -71,44 +73,17 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     end
 
     context 'authorized' do
-      context "user didn't won lunch" do
-        before do
-          @response = JSON.parse(http.post do |req|
-            req.url 'market/limit_orders'
-            req.body = "{\"id\": \"#{SecureRandom.uuid}\",
-              \"user_id\": \"#{juan.id}\",
-              \"type\": \"sell\",
-              \"created_at\": \"#{Time.now}\"}"
-          end.body)
-        end
-
-        it { expect(market.orders.size).to eq(0) }
+      before do
+        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:authorized?).and_return(true)
+        allow(winning_list).to receive(:include?).and_return(true)
       end
 
-      context 'user won lunch' do
-        before do
-          allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: pedro.id)
-          @response = JSON.parse(http.post do |req|
-            req.url 'market/limit_orders'
-            req.body = "{ \"id\": \"#{order_id}\",
-              \"user_id\": \"#{pedro.id}\",
-              \"type\": \"sell\",
-              \"created_at\": \"#{time}\" }"
-          end.body)
-        end
-
-        it { expect(@response['success']).to be(true) }
-
-        it 'should place limit order' do
-          expect(market.orders.size).to eq(1)
-        end
-
-        it 'limit order data should match' do
-          limit_orders = market.orders
-          expect(limit_orders.first['id'] == order_id)
-          expect(limit_orders.first['user_id'] == pedro.id)
-          expect(limit_orders.first['created_at'] == time)
-        end
+      it 'responds with success' do
+        response = JSON.parse(http.post do |req|
+          req.url 'market/limit_orders'
+          req.body = limit_order.to_s
+        end.body)
+        expect(response['success']).to be(true)
       end
     end
   end
@@ -116,61 +91,25 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   describe 'POST market order' do
     context 'not authorized' do
       it 'responds with not autorized' do
-        response = JSON.parse(http.post('market/limit_orders').body)
+        response = JSON.parse(http.post('market/market_orders').body)
         expect(response['status']).to eq(401)
         expect(response['message']).to eq('Not authorized')
       end
     end
 
     context 'authorized' do
-      context 'no limit orders' do
-        before do
-          response = JSON.parse(http.post do |req|
-            req.url 'market/market_orders'
-            req.body = "{\"sender_id\": \"#{juan.id}\"}"
-          end.body)
-        end
-
-        it 'should not add buyer to lunchers' do
-          expect(assigner.winning_lunchers_list).not_to include(juan.mention_name)
-        end
+      before do
+        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:authorized?).and_return(true)
+        allow(market).to receive(:add_market_order).and_return(true)
+        allow(winning_list).to receive(:include?).and_return(false)
       end
 
-      context 'one or more limit orders' do
-        before do
-          add_limit_order(SecureRandom.uuid, pedro, 'sell', Time.now)
-          allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: juan.id)
-          @response = JSON.parse(http.post do |req|
-            req.url 'market/market_orders'
-            req.body = "{\"sender_id\": \"#{juan.id}\"}"
-          end.body)
-        end
-
-        it 'should add buyer to lunchers' do
-          expect(assigner.winning_lunchers_list).to include(juan.mention_name)
-        end
-
-        it 'should remove seller from lunchers' do
-          expect(assigner.winning_lunchers_list).not_to include(pedro.mention_name)
-        end
-      end
-
-      context 'user already has lunch' do
-        before do
-          add_limit_order(id, pedro, 'sell', Time.now)
-          @response = JSON.parse(http.post do |req|
-            req.url 'market/market_orders'
-            req.body = "{\"sender_id\": \"#{pedro.id}\"}"
-          end.body)
-        end
-
-        it 'should not remove user from lunchers' do
-          expect(assigner.winning_lunchers_list).to include(pedro.mention_name)
-        end
-
-        it 'should not remove limit order' do
-          expect(market.orders.first['id']).to eq(order_id)
-        end
+      it 'responds with success' do
+        response = JSON.parse(http.post do |req|
+          req.url 'market/market_orders'
+          req.body = market_order.to_s
+        end.body)
+        expect(response['success']).to eq(true)
       end
     end
   end
