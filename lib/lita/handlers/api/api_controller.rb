@@ -20,6 +20,10 @@ module Lita
           !user.nil?
         end
 
+        def current_user(request)
+          Lita::User.find_by_id(request.params[:user_id])
+        end
+
         Lita.register_handler(self)
       end
     end
