@@ -125,8 +125,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     context 'authorized' do
       context 'no limit orders' do
         before do
-          allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: juan.id)
-          @response = JSON.parse(http.post do |req|
+          response = JSON.parse(http.post do |req|
             req.url 'market/market_orders'
             req.body = "{\"sender_id\": \"#{juan.id}\"}"
           end.body)
@@ -159,15 +158,11 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
       context 'user already has lunch' do
         before do
           add_limit_order(id, pedro, 'sell', Time.now)
-          allow_any_instance_of(Rack::Request).to receive(:params).and_return(user_id: pedro.id)
           @response = JSON.parse(http.post do |req|
             req.url 'market/market_orders'
             req.body = "{\"sender_id\": \"#{pedro.id}\"}"
           end.body)
         end
-
-        it { expect(@response['status']).to eq(403) }
-        it { expect(@response['message']).to eq('User can\'t place market order') }
 
         it 'should not remove user from lunchers' do
           expect(assigner.winning_lunchers_list).to include(pedro.mention_name)

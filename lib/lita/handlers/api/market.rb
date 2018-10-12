@@ -46,8 +46,6 @@ module Lita
           if user
             if !winning_list.include?(user.mention_name) && @market_manager.add_market_order(user.id)
               respond(response, success: true)
-            else
-              respond(response, status: 403, message: 'User can\'t place market order')
             end
           else
             response.status = 404
