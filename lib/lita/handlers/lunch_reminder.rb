@@ -9,6 +9,7 @@ module Lita
         super
         @karmanager = Lita::Services::Karmanager.new(redis)
         @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
+        @market = Lita::Services::MarketManager.new(redis, @assigner, @karmanager)
       end
 
       def self.help_msg(route)
@@ -205,6 +206,7 @@ module Lita
 
       def refresh
         @assigner.reset_lunchers
+        @market.reset_limit_orders
         @assigner.lunchers_list.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
           message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
