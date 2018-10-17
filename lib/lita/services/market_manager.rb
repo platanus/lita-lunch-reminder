@@ -14,7 +14,7 @@ module Lita
       end
 
       def orders
-        orders = @redis.smembers('orders')&.map { |order| JSON.parse(order) } || []
+        orders = @redis.smembers('orders').map { |order| JSON.parse(order) } || [] 
         orders.sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
       end
 
