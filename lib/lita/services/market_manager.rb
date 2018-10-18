@@ -29,7 +29,7 @@ module Lita
       end
 
       def add_market_order(lunch_sender_id)
-        return unless @karmanager.get_karma(lunch_sender_id).positive?
+        return unless @karmanager.get_karma(lunch_sender_id) > 0
         order = remove_order
         return if order.nil?
         lunch_sender = Lita::User.find_by_id(order['user_id'].to_i)
