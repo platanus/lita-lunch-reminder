@@ -25,10 +25,10 @@ module Lita
         def place_limit_order(request, response)
           return respond_not_authorized(response) unless authorized?(request)
           user = current_user(request)
-          body = request.body.read
+          order = limit_order_for_user(user)
           if user
-            if winning_list.include?(user.mention_name) && market_manager.add_limit_order(body)
-              respond(response, success: true)
+            if winning_list.include?(user.mention_name) && market_manager.add_limit_order(order)
+              respond(response, success: true, order: order)
             end
           else
             response.status = 404
@@ -52,6 +52,15 @@ module Lita
         Lita.register_handler(self)
 
         private
+
+        def limit_order_for_user(user)
+          {
+            id: SecureRandom.uuid,
+            user_id: user.id,
+            type: 'limit',
+            created_at: Time.now
+          }.to_json
+        end
 
         def winning_list
           @winning_list ||= @assigner.winning_lunchers_list
