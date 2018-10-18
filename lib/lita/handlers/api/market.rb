@@ -31,7 +31,7 @@ module Lita
               respond(response, success: true, order: order)
             else
               response.status = 403
-              respond(response, status: 403, message: 'Not in lunchers')
+              respond(response, status: 403, message: 'Can not place order')
             end
           else
             response.status = 404
@@ -47,7 +47,7 @@ module Lita
               respond(response, success: true)
             else
               response.status = 403
-              respond(response, status: 403, message: 'Already in lunchers')
+              respond(response, status: 403, message: 'Can not buy lunch')
             end
           else
             response.status = 404
