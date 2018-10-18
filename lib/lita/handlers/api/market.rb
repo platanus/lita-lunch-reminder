@@ -29,6 +29,8 @@ module Lita
           if user
             if winning_list.include?(user.mention_name) && market_manager.add_limit_order(order)
               respond(response, success: true, order: order)
+            else
+              respond(response, status: 403, message: 'Not in lunchers')
             end
           else
             response.status = 404
@@ -42,6 +44,8 @@ module Lita
           if user
             if !winning_list.include?(user.mention_name) && market_manager.add_market_order(user.id)
               respond(response, success: true)
+            else
+              respond(response, status: 403, message: 'Already in lunchers')
             end
           else
             response.status = 404
