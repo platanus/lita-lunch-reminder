@@ -88,6 +88,18 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
         end.body)
         expect(response['success']).to be(true)
       end
+
+      it 'responds with an order' do
+        response = JSON.parse(http.post do |req|
+          req.url 'market/limit_orders'
+          req.body = limit_order.to_s
+        end.body)
+        order = JSON.parse(response['order'])
+        expect(order).not_to be_nil
+        expect(order['id']).not_to be_nil
+        expect(order['type']).to eq('limit')
+        expect(order['created_at']).not_to be_nil
+      end
     end
   end
 
