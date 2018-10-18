@@ -63,11 +63,11 @@ module Lita
         end
 
         def winning_list
-          @winning_list ||= @assigner.winning_lunchers_list
+          @winning_list ||= assigner.winning_lunchers_list
         end
 
         def market_manager
-          @market_manager ||= Lita::Services::MarketManager.new(redis, @assigner, @karmanager)
+          @market_manager ||= Lita::Services::MarketManager.new(redis, assigner, karmanager)
         end
 
         def karmanager
@@ -75,7 +75,7 @@ module Lita
         end
 
         def assigner
-          @assigner ||= Lita::Services::LunchAssigner.new(redis, @karmanager)
+          @assigner ||= Lita::Services::LunchAssigner.new(redis, karmanager)
         end
       end
     end
