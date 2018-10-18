@@ -9,7 +9,7 @@ module Lita
         super
         @karmanager = Lita::Services::Karmanager.new(redis)
         @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
-        @market = Lita::Services::MarketManager.new(redis, @assigner, @karmanager)
+        @market = Lita::Services::MarketManager.new(redis)
       end
 
       def self.help_msg(route)
