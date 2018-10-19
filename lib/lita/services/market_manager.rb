@@ -28,14 +28,14 @@ module Lita
         orders.map { |order| order['user_id'] }.include? user_id
       end
 
-      def add_market_order(lunch_sender_id)
-        return unless @karmanager.get_karma(lunch_sender_id) > 0
+      def add_market_order(lunch_buyer_id)
+        return unless @karmanager.get_karma(lunch_buyer_id) > 0
         order = remove_order
         return if order.nil?
-        lunch_sender = Lita::User.find_by_id(order['user_id'].to_i)
-        lunch_receiver = Lita::User.find_by_id(lunch_sender_id)
-        @karmanager.transfer_karma(lunch_sender_id, order['user_id'], 1)
-        @lunch_assigner.transfer_lunch(lunch_sender.mention_name, lunch_receiver.mention_name)
+        lunch_seller = Lita::User.find_by_id(order['user_id'])
+        lunch_buyer = Lita::User.find_by_id(lunch_buyer_id)
+        @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
+        @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
       end
 
       def remove_order
