@@ -7,6 +7,7 @@ module Lita
         def respond(response, body)
           response.headers['Content-Type'] = 'application/json'
           response.body << body.to_json
+          redis.disconnect!
         end
 
         def respond_not_authorized(response)
