@@ -87,12 +87,12 @@ module Lita
             @assigner.add_to_winning_lunchers("invitado_de_#{response.user.mention_name}")
           response.reply(t(:friend_added, subject: response.user.mention_name))
         else
-          response.reply("tu amigo no cabe wn")
+          response.reply('tu amigo no cabe wn')
         end
       end
 
       route(/tengo una invitada/i, command: true) do |response|
-        response.reply("es rica?")
+        response.reply('es rica?')
       end
 
       route(/qui[ée]nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
@@ -141,7 +141,7 @@ module Lita
       route(/assignnow/i, command: true) do |response|
         @assigner.do_the_assignment
         announce_winners
-        response.reply("did it boss")
+        response.reply('did it boss')
       end
 
       route(/cu[áa]nto karma tengo\??/i, command: true) do |response|
@@ -171,7 +171,7 @@ module Lita
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
         unless @assigner.remove_from_winning_lunchers(response.user.mention_name)
-          response.reply("no puedes ceder algo que no tienes, amiguito")
+          response.reply('no puedes ceder algo que no tienes, amiguito')
           next
         end
         enters = clean_mention_name(response.matches[0][0])
@@ -180,11 +180,11 @@ module Lita
       end
 
       route(/.*/i, command: false) do |response|
-        if quiet_time? && Lita::Room.find_by_name("lita-test").id == response.room.id
-          user = Lita::User.find_by_mention_name("agustin")
-          message = "Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y las " \
-          "12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones" \
-          " hacen muy dificil trabajar! mira: http://www.paulgraham.com/makersschedule.html"
+        if quiet_time? && Lita::Room.find_by_name('lita-test').id == response.room.id
+          user = Lita::User.find_by_mention_name('agustin')
+          message = 'Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y las ' \
+          '12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones' \
+          ' hacen muy dificil trabajar! mira: http://www.paulgraham.com/makersschedule.html'
           robot.send_message(Source.new(user: user), message) if user
         end
       end
