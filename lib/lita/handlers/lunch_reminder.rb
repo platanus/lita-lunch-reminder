@@ -204,11 +204,12 @@ module Lita
 
       route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
         user = response.user
-        seller_user = @market.add_market_order(user.id)
-        unless seller_user
+        order = @market.add_market_order(user.id)
+        unless order
           response.reply('no te puedo comprar almuerzo...')
           next
         end
+        seller_user = Lita::User.find_by_id(order['user_id'])
         response.reply_privately("@#{user.mention_name}, ya te consegui almuerzo!")
         broadcast_to_channel(
           "@#{user.mention_name} le compró almuerzo a @#{seller_user.mention_name}",

@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'dotenv/load'
 
 describe Lita::Handlers::LunchReminder, lita_handler: true do
-  let(:user) { double }
 
   before do
     ENV['MAX_LUNCHERS'] = '3'
@@ -86,14 +85,20 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
 
   describe 'place market order' do
     context 'user can place market order' do
+      let(:user) { double }
+      let(:lita_user) { Lita::User }
+      let!(:user2) { Lita::User.create(124, mention_name: 'armando') }
       before do
-        allow_any_instance_of(Lita::Services::MarketManager).to receive(:add_market_order).and_return(user)
+        allow_any_instance_of(Lita::Services::MarketManager).to \
+          receive(:add_market_order).and_return('user_id': 123)
+        allow(lita_user).to receive(:find_by_id).and_return(user)
+        allow(lita_user).to receive(:create).and_return(user2)
         allow(user).to receive(:mention_name).and_return('felipe.dominguez')
       end
       it 'responds that market order was placed' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita compro almuerzo', as: armando)
-        expect(replies.last).to match('ya te consegui almuerzo!')
+        expect(replies.last).to match('@armando le compró almuerzo a @felipe.dominguez')
       end
     end
     context "user cant' place market order" do
