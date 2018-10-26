@@ -1,6 +1,14 @@
 require 'spec_helper'
+require 'dotenv/load'
 
 describe Lita::Handlers::LunchReminder, lita_handler: true do
+  before do
+    ENV['MAX_LUNCHERS'] = '3'
+    ENV['WAIT_RESPONSES_SECONDS'] = '0 0 * * *'
+    ENV['ASK_CRON'] = '0 0 * * *'
+    ENV['PERSIST_CRON'] = '0 0 * * *'
+  end
+
   it 'responds to invite announcement' do
     usr = Lita::User.create(123, name: 'carlos')
     send_message('@lita tengo un invitado', as: usr)
@@ -49,5 +57,28 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     expect(replies.last).to match('Tienes -1 puntos de karma, mi padawan')
     send_message('@lita cuánto karma tengo?', as: armando)
     expect(replies.last).to match('Tienes 1 puntos de karma, mi padawan')
+  end
+
+  describe 'place limit order' do
+    context 'user has lunch' do
+      before do
+        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:place_limit_order).and_return(true)
+      end
+      it 'responds that limit order was placed' do
+        armando = Lita::User.create(124, mention_name: 'armando')
+        send_message('@lita vende mi almuerzo', as: armando)
+        expect(replies.last).to match('Tengo tu almuerzo en venta!')
+      end
+    end
+    context 'user without lunch' do
+      before do
+        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:place_limit_order).and_return(false)
+      end
+      it 'responds with an error' do
+        armando = Lita::User.create(124, mention_name: 'armando')
+        send_message('@lita vende mi almuerzo', as: armando)
+        expect(replies.last).to match('No puedes vender algo que no tienes!')
+      end
+    end
   end
 end
