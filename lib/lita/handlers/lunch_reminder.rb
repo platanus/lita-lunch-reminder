@@ -202,6 +202,18 @@ module Lita
         broadcast_to_audit_channel("@#{user.mention_name}, tengo tu almuerzo en venta!")
       end
 
+      route(/compr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
+        user = response.user
+        unless @market.add_market_order(user.id)
+          response.reply('no te puedo comprar almuerzo...')
+          next
+        end
+        response.reply(
+          "@#{user.mention_name}, tengo tu almuerzo en venta!"
+        )
+        broadcast_to_audit_channel("@#{user.mention_name}, ya te consegui almuerzo!")
+      end
+
       def broadcast_to_audit_channel(message)
         target = Source.new(room: '#karma-audit')
         robot.send_message(target, message)
