@@ -189,6 +189,19 @@ module Lita
         end
       end
 
+      route(/vend[oe] (mi|\s)? ?almuerzo/i, command: true) do |response|
+        user = response.user
+        order = create_order(user, 'limit')
+        unless @market.add_limit_order(order)
+          response.reply('No puedes vender algo que no tienes!')
+          next
+        end
+        response.reply(
+          "@#{user.mention_name}, tengo tu almuerzo en venta!"
+        )
+        broadcast_to_audit_channel("@#{user.mention_name}, tengo tu almuerzo en venta!")
+      end
+
       def broadcast_to_audit_channel(message)
         target = Source.new(room: '#karma-audit')
         robot.send_message(target, message)
@@ -238,6 +251,15 @@ module Lita
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
         end
+      end
+
+      def create_order(user, type)
+        {
+          id: SecureRandom.uuid,
+          user_id: user.id,
+          type: type,
+          created_at: Time.now
+        }.to_json
       end
 
       Lita.register_handler(self)
