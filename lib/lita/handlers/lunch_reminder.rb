@@ -42,8 +42,8 @@ module Lita
           karma_for_new_user = @karmanager.average_karma(@assigner.lunchers_list)
           @karmanager.set_karma(user.id, karma_for_new_user)
           response.reply("Le asigne #{karma_for_new_user} a #{user.mention_name} con id #{user.id}")
-          broadcast_to_audit_channel("Se empezó a considerar a #{user.mention_name}. " +
-            "Nuevo karma:  #{karma_for_new_user}")
+          broadcast_to_channel("Se empezó a considerar a #{user.mention_name}. " +
+            "Nuevo karma:  #{karma_for_new_user}", '#karma-audit')
         else
           response.reply(t(:already_considered, subject: mention_name))
         end
@@ -62,7 +62,7 @@ module Lita
         mention_name = clean_mention_name(response.matches[0][0])
         @assigner.remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
-        broadcast_to_audit_channel("Se dejó de considerar a #{mention_name}")
+        broadcast_to_channel("Se dejó de considerar a #{mention_name}", '#karma-audit')
       end
       route(/^s[íi]$|^hoy almuerzo aqu[íi]$/i,
         command: true, help: help_msg(:confirm_yes)) do |response|
@@ -165,8 +165,8 @@ module Lita
           "@#{giver.mention_name}, le has dado uno de tus puntos de " +
           "karma a @#{destinatary.mention_name}."
         )
-        broadcast_to_audit_channel("@#{giver.mention_name}, le ha dado un punto de " +
-          "karma a @#{destinatary.mention_name}.")
+        broadcast_to_channel("@#{giver.mention_name}, le ha dado un punto de " +
+          "karma a @#{destinatary.mention_name}.", '#karma-audit')
       end
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
@@ -199,7 +199,7 @@ module Lita
         response.reply(
           "@#{user.mention_name}, tengo tu almuerzo en venta!"
         )
-        broadcast_to_audit_channel("@#{user.mention_name}, tengo tu almuerzo en venta!")
+        broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
       end
 
       route(/compr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
@@ -209,13 +209,13 @@ module Lita
           next
         end
         response.reply(
-          "@#{user.mention_name}, tengo tu almuerzo en venta!"
+          "@#{user.mention_name}, ya te consegui almuerzo!"
         )
-        broadcast_to_audit_channel("@#{user.mention_name}, ya te consegui almuerzo!")
+        broadcast_to_channel("@#{user.mention_name}, ya te consegui almuerzo!", '#cooking')
       end
 
-      def broadcast_to_audit_channel(message)
-        target = Source.new(room: '#karma-audit')
+      def broadcast_to_channel(message, channel)
+        target = Source.new(room: channel)
         robot.send_message(target, message)
       end
 
