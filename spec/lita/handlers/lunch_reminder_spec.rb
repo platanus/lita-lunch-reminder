@@ -81,4 +81,27 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
     end
   end
+
+  describe 'place market order' do
+    context 'user can place market order' do
+      before do
+        allow_any_instance_of(Lita::Services::MarketManager).to receive(:add_market_order).and_return(true)
+      end
+      it 'responds that market order was placed' do
+        armando = Lita::User.create(124, mention_name: 'armando')
+        send_message('@lita compro almuerzo', as: armando)
+        expect(replies.last).to match('ya te consegui almuerzo!')
+      end
+    end
+    context "user cant' place market order" do
+      before do
+        allow_any_instance_of(Lita::Services::MarketManager).to receive(:add_market_order).and_return(false)
+      end
+      it 'responds with an error' do
+        armando = Lita::User.create(124, mention_name: 'armando')
+        send_message('@lita compro almuerzo', as: armando)
+        expect(replies.last).to match('no te puedo comprar almuerzo...')
+      end
+    end
+  end
 end
