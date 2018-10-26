@@ -202,7 +202,7 @@ module Lita
         broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
       end
 
-      route(/compr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
+      route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
         user = response.user
         unless @market.add_market_order(user.id)
           response.reply('no te puedo comprar almuerzo...')
