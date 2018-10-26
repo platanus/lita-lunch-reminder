@@ -196,7 +196,7 @@ module Lita
           response.reply('No puedes vender algo que no tienes!')
           next
         end
-        response.reply(
+        response.reply_privately(
           "@#{user.mention_name}, tengo tu almuerzo en venta!"
         )
         broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
@@ -204,14 +204,15 @@ module Lita
 
       route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
         user = response.user
-        unless @market.add_market_order(user.id)
+        seller_user = @market.add_market_order(user.id)
+        unless seller_user
           response.reply('no te puedo comprar almuerzo...')
           next
         end
-        response.reply(
-          "@#{user.mention_name}, ya te consegui almuerzo!"
-        )
-        broadcast_to_channel("@#{user.mention_name}, ya te consegui almuerzo!", '#cooking')
+        response.reply_privately("@#{user.mention_name}, ya te consegui almuerzo!")
+        broadcast_to_channel(
+          "@#{user.mention_name} le compró almuerzo a @#{seller_user.mention_name}",
+          '#cooking')
       end
 
       def broadcast_to_channel(message, channel)
