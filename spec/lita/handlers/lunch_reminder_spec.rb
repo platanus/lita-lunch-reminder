@@ -62,7 +62,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
   describe 'place limit order' do
     context 'user has lunch' do
       before do
-        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:place_limit_order).and_return(true)
+        allow_any_instance_of(Lita::Services::MarketManager).to receive(:add_limit_order).and_return(true)
       end
       it 'responds that limit order was placed' do
         armando = Lita::User.create(124, mention_name: 'armando')
@@ -72,12 +72,12 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     end
     context 'user without lunch' do
       before do
-        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:place_limit_order).and_return(false)
+        allow_any_instance_of(Lita::Services::MarketManager).to receive(:add_limit_order).and_return(false)
       end
       it 'responds with an error' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita vende mi almuerzo', as: armando)
-        expect(replies.last).to match('no puedes vender algo que no tienes!')
+        expect(replies.last).to match('No puedes vender algo que no tienes!')
       end
     end
   end
