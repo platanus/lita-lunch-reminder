@@ -38,7 +38,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     send_message('@lita cédele mi puesto a patricio', as: usr)
     expect(replies.last).to match('algo que no tienes')
   end
-  it 'answerth the user karma' do
+  it 'answers the user karma' do
     usr = Lita::User.create(124, name: 'armando')
     send_message('@lita cuánto karma tengo?', as: usr)
     expect(replies.last).to match('Tienes 0 puntos de karma, mi padawan')
@@ -67,7 +67,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       it 'responds that limit order was placed' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita vende mi almuerzo', as: armando)
-        expect(replies.last).to match('Tengo tu almuerzo en venta!')
+        expect(replies.last).to match('tengo tu almuerzo en venta!')
       end
     end
     context 'user without lunch' do
@@ -77,7 +77,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       it 'responds with an error' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita vende mi almuerzo', as: armando)
-        expect(replies.last).to match('No puedes vender algo que no tienes!')
+        expect(replies.last).to match('no puedes vender algo que no tienes!')
       end
     end
   end
