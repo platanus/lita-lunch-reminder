@@ -64,3 +64,9 @@ es:
           show_loosing_lunchers:
             usage: quiénes quedaron afuera del almuerzo hoy?
             description: Pedir listado de los que el mono dejó afuera del almuerzo
+          sell_lunch:
+            usage: vende mi almuerzo
+            description: Pon una orden de venta de almuerzo
+          buy_lunch:
+            usage: vende mi almuerzo
+            description: Pon una orden de venta de almuerzo
