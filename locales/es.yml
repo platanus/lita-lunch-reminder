@@ -24,6 +24,11 @@ es:
         wont_lunch: "Aun no se distinguir entre los que no han contestado y los que contestaron que no, pero aquí van los que no contestaron que sí: %{subject}"
         dinner_is_served: "Está listo amiguito, *suba* a almorzar ;)"
         friend_added: "Perfecto @%{subject}, anoté a tu invitado como invitado_de_%{subject}."
+        selling_lunch: 'tengo tu almuerzo en venta!'
+        bought_lunch: 'ya te conseguí almuerzo!'
+        transaction: "@%{subject1} le compró almuerzo a @%{subject2}"
+        cant_buy: 'no te puedo comprar almuerzo...'
+        cant_sell: 'no puedes vender algo que no tienes!'
         help:
           thanks:
             usage: gracias
@@ -64,3 +69,9 @@ es:
           show_loosing_lunchers:
             usage: quiénes quedaron afuera del almuerzo hoy?
             description: Pedir listado de los que el mono dejó afuera del almuerzo
+          sell_lunch:
+            usage: vende mi almuerzo
+            description: Pon una orden de venta de almuerzo
+          buy_lunch:
+            usage: vende mi almuerzo
+            description: Pon una orden de compra de almuerzo

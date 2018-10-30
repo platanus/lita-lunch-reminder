@@ -189,30 +189,36 @@ module Lita
         end
       end
 
-      route(/vend[oe] (mi|\s)? ?almuerzo/i, command: true) do |response|
+      route(/vend[oe] (mi|\s)? ?almuerzo/i,
+        command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
         order = create_order(user, 'limit')
-        unless @market.add_limit_order(order)
-          response.reply('No puedes vender algo que no tienes!')
+        unless winning_list.include?(user.mention_name)
+          response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
         end
-        response.reply_privately(
-          "@#{user.mention_name}, tengo tu almuerzo en venta!"
-        )
-        broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
+        if @market.add_limit_order(order)
+          response.reply_privately(
+            "@#{user.mention_name}, #{t(:selling_lunch)}"
+          )
+          broadcast_to_channel("@#{user.mention_name}, #{t(:selling_lunch)}", '#cooking')
+        end
       end
 
-      route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
+      route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
+        command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
         order = @market.add_market_order(user.id)
         unless order
-          response.reply('no te puedo comprar almuerzo...')
+          response.reply(t(:cant_buy))
           next
         end
         seller_user = Lita::User.find_by_id(order['user_id'])
-        response.reply_privately("@#{user.mention_name}, ya te consegui almuerzo!")
+        response.reply_privately("@#{user.mention_name}, #{t(:bought_lunch)}")
         broadcast_to_channel(
-          "@#{user.mention_name} le compró almuerzo a @#{seller_user.mention_name}",
+          t(:transaction,
+            subject1: user.mention_name,
+            subject2: seller_user.mention_name),
           '#cooking'
         )
       end
@@ -275,6 +281,10 @@ module Lita
           type: type,
           created_at: Time.now
         }.to_json
+      end
+
+      def winning_list
+        @winning_list ||= @assigner.winning_lunchers_list
       end
 
       Lita.register_handler(self)
