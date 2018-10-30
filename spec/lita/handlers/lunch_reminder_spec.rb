@@ -83,7 +83,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       it 'responds with an error' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita vende mi almuerzo', as: armando)
-        expect(replies.last).to match('No puedes vender algo que no tienes!')
+        expect(replies.last).to match('@armando no puedes vender algo que no tienes!')
       end
     end
   end

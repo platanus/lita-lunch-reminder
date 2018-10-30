@@ -194,7 +194,7 @@ module Lita
         user = response.user
         order = create_order(user, 'limit')
         unless winning_list.include?(user.mention_name)
-          response.reply('No puedes vender algo que no tienes!')
+          response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
         end
         if @market.add_limit_order(order)
@@ -210,13 +210,15 @@ module Lita
         user = response.user
         order = @market.add_market_order(user.id)
         unless order
-          response.reply('no te puedo comprar almuerzo...')
+          response.reply(t(:cant_buy))
           next
         end
         seller_user = Lita::User.find_by_id(order['user_id'])
-        response.reply_privately("@#{user.mention_name}, ya te consegui almuerzo!")
+        response.reply_privately("@#{user.mention_name}, #{t(:bought_lunch)}")
         broadcast_to_channel(
-          "@#{user.mention_name} #{t(:transaction)} @#{seller_user.mention_name}",
+          t(:transaction,
+            subject1: user.mention_name,
+            subject2: seller_user.mention_name),
           '#cooking'
         )
       end
