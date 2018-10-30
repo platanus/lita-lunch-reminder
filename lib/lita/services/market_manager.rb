@@ -19,6 +19,20 @@ module Lita
               .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
       end
 
+      def ask_orders
+        orders = @redis.smembers('orders') || []
+        orders.map { |order| JSON.parse(order) }
+              .select { |z| z.type == 'ask' }
+              .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
+      end
+
+      def bid_orders
+        orders = @redis.smembers('orders') || []
+        orders.map { |order| JSON.parse(order) }
+              .select { |z| z.type == 'bid' }
+              .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
+      end
+
       def add_limit_order(new_order)
         return if placed_limit_order?(JSON.parse(new_order)['user_id'])
         @redis.sadd('orders', new_order)
