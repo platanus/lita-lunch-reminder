@@ -52,44 +52,44 @@ describe Lita::Services::MarketManager, lita: true do
   describe '#add_limit_order' do
     context 'first order added' do
       before do
-        add_limit_order(order_id, fdom, 'sell', order_time)
+        add_limit_order(order_id, fdom, 'ask', order_time)
       end
 
       it 'adds order to limit orders' do
-        add_limit_order(order_id, fdom, 'sell', order_time)
+        add_limit_order(order_id, fdom, 'ask', order_time)
         expect(subject.orders.last).not_to be_nil
       end
 
       it 'adds the correct limit order' do
-        add_limit_order(order_id, fdom, 'sell', order_time)
+        add_limit_order(order_id, fdom, 'ask', order_time)
         expect(subject.orders.last['id']).to eq(order_id)
       end
     end
 
     context 'with non empty orders' do
       before do
-        add_limit_order(SecureRandom.uuid, andres, 'sell', Time.new(2018, 10, 2))
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 2))
       end
 
       it 'adds limit order' do
-        add_limit_order(order_id, fdom, 'sell', order_time)
+        add_limit_order(order_id, fdom, 'ask', order_time)
         expect(subject.orders.last).not_to be_nil
       end
 
       it 'sorts orders by date' do
-        add_limit_order(order_id, fdom, 'sell', order_time)
+        add_limit_order(order_id, fdom, 'ask', order_time)
         expect(subject.orders.last['user_id']).to eq(fdom.id)
         expect(subject.orders.last['id']).to eq(order_id)
-        expect(subject.orders.last['type']).to eq('sell')
+        expect(subject.orders.last['type']).to eq('ask')
         expect(subject.orders.last['created_at']).to eq(order_time.strftime('%F %T %z'))
       end
     end
 
     context 'user already has an order' do
       let(:old_order_id) { SecureRandom.uuid }
-      let(:new_order) { add_limit_order(SecureRandom.uuid, fdom, 'sell', Time.now) }
+      let(:new_order) { add_limit_order(SecureRandom.uuid, fdom, 'ask', Time.now) }
       before do
-        add_limit_order(old_order_id, fdom, 'sell', order_time)
+        add_limit_order(old_order_id, fdom, 'ask', order_time)
         allow(subject).to receive(:placed_limit_order?).with(fdom.id).and_return true
       end
 
@@ -99,17 +99,17 @@ describe Lita::Services::MarketManager, lita: true do
       end
 
       it "doesn't edit list" do
-        add_limit_order(SecureRandom.uuid, fdom, 'sell', order_time)
+        add_limit_order(SecureRandom.uuid, fdom, 'ask', order_time)
         expect(subject.orders.first['id']).to eq(old_order_id)
       end
 
       it 'calls placed_limit_order?' do
-        add_limit_order(SecureRandom.uuid, fdom, 'sell', order_time)
+        add_limit_order(SecureRandom.uuid, fdom, 'ask', order_time)
         expect(subject).to have_received(:placed_limit_order?).with(fdom.id)
       end
 
       it 'placed_limit_order? returns true' do
-        add_limit_order(SecureRandom.uuid, fdom, 'sell', order_time)
+        add_limit_order(SecureRandom.uuid, fdom, 'ask', order_time)
         expect(subject.placed_limit_order?(fdom.id)).to eq(true)
       end
     end
@@ -118,7 +118,7 @@ describe Lita::Services::MarketManager, lita: true do
   describe '#placed_limit_order?' do
     context 'user already has an order' do
       before do
-        add_limit_order(SecureRandom.uuid, fdom, 'sell', Time.now)
+        add_limit_order(SecureRandom.uuid, fdom, 'ask', Time.now)
       end
 
       it { expect(subject.placed_limit_order?(fdom.id)).to be true }
@@ -126,7 +126,7 @@ describe Lita::Services::MarketManager, lita: true do
 
     context "user doesn't have an order" do
       before do
-        add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.now)
       end
 
       it { expect(subject.placed_limit_order?(fdom.id)).to be false }
@@ -140,7 +140,7 @@ describe Lita::Services::MarketManager, lita: true do
 
     context 'with one order' do
       before do
-        add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.now)
       end
 
       it { expect(subject.orders.size).to eq(1) }
@@ -148,9 +148,9 @@ describe Lita::Services::MarketManager, lita: true do
 
     context 'with more than one order' do
       before do
-        add_limit_order(SecureRandom.uuid, andres, 'sell', Time.new(2018, 10, 5))
-        add_limit_order(SecureRandom.uuid, fdom, 'sell', Time.new(2018, 10, 3))
-        add_limit_order(SecureRandom.uuid, oscar, 'sell', Time.new(2018, 10, 4))
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
+        add_limit_order(SecureRandom.uuid, fdom, 'ask', Time.new(2018, 10, 3))
+        add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 4))
       end
 
       it { expect(subject.orders.size).to eq(3) }
@@ -174,7 +174,7 @@ describe Lita::Services::MarketManager, lita: true do
 
       context 'exists one order' do
         before do
-          add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
+          add_limit_order(SecureRandom.uuid, andres, 'ask', Time.now)
           subject.add_market_order(fdom.id)
         end
 
@@ -184,9 +184,9 @@ describe Lita::Services::MarketManager, lita: true do
       context 'exists more than one order' do
         before do
           setup_lunchers
-          add_limit_order(SecureRandom.uuid, andres, 'sell', Time.new(2018, 10, 5))
-          add_limit_order(SecureRandom.uuid, fdom, 'sell', Time.new(2018, 10, 3))
-          add_limit_order(SecureRandom.uuid, oscar, 'sell', Time.new(2018, 10, 4))
+          add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
+          add_limit_order(SecureRandom.uuid, fdom, 'ask', Time.new(2018, 10, 3))
+          add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 4))
           karmanager.set_karma(fdom.id, 100)
           karmanager.set_karma(fernanda.id, 100)
         end
@@ -207,7 +207,7 @@ describe Lita::Services::MarketManager, lita: true do
           expect(lunch_assigner.winning_lunchers_list).to include(fernanda.mention_name)
         end
 
-        it 'transfers karma from buyer to seller' do
+        it 'transfers karma from buyer to asker' do
           karma_fdom = karmanager.get_karma(fdom.id)
           karma_fernanda = karmanager.get_karma(fernanda.id)
           subject.add_market_order(fernanda.id)
@@ -228,7 +228,7 @@ describe Lita::Services::MarketManager, lita: true do
 
       context 'exists one order' do
         before do
-          add_limit_order(SecureRandom.uuid, andres, 'sell', Time.now)
+          add_limit_order(SecureRandom.uuid, andres, 'ask', Time.now)
         end
 
         it "doesn't place market order" do
@@ -241,9 +241,9 @@ describe Lita::Services::MarketManager, lita: true do
 
   describe '#reset_limit_orders' do
     before do
-      add_limit_order(SecureRandom.uuid, andres, 'sell', Time.new(2018, 10, 5))
-      add_limit_order(SecureRandom.uuid, fdom, 'sell', Time.new(2018, 10, 3))
-      add_limit_order(SecureRandom.uuid, oscar, 'sell', Time.new(2018, 10, 4))
+      add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
+      add_limit_order(SecureRandom.uuid, fdom, 'ask', Time.new(2018, 10, 3))
+      add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 4))
       subject.reset_limit_orders
     end
 
