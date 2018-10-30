@@ -307,4 +307,13 @@ describe Lita::Services::MarketManager, lita: true do
 
     it { expect(subject.orders.size).to eq(0) }
   end
+
+  describe '#execute_transaction' do
+    before do
+      let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5)) }
+      let(:bid_order) { add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3)) }
+    end
+
+    it { expect(subject.execute_transaction).to eq('ask': ask_order, 'bid': bid_order) }
+  end
 end
