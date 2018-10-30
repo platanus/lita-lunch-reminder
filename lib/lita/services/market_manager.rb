@@ -53,14 +53,18 @@ module Lita
         order
       end
 
-      def remove_order
-        return if orders.empty?
-        new_orders = orders
+      def remove_orders
+        new_ask_orders = ask_orders
+        new_bid_orders = ask_orders
+        return if new_ask_orders.empty? || new_bid_orders.empty?
         reset_limit_orders
-        new_orders[1..-1].each do |order|
+        new_ask_orders[1..-1].each do |order|
           @redis.sadd('orders', order.to_json)
         end
-        new_orders.first
+        new_bid_orders[1..-1].each do |order|
+          @redis.sadd('orders', order.to_json)
+        end
+        { 'ask': new_ask_orders.first, 'bid': new_bid_orders }
       end
 
       def reset_limit_orders
