@@ -42,8 +42,8 @@ module Lita
           user = Lita::User.find_by_mention_name(mention_name)
           @karmanager.set_karma(user.id, karma_for_new_user)
           response.reply("Le asigne #{karma_for_new_user} a #{user.mention_name} con id #{user.id}")
-          broadcast_to_audit_channel("Se empezó a considerar a #{user.mention_name}. " +
-            "Nuevo karma:  #{karma_for_new_user}")
+          broadcast_to_channel("Se empezó a considerar a #{user.mention_name}. " +
+            "Nuevo karma:  #{karma_for_new_user}", '#karma-audit')
         else
           response.reply(t(:already_considered, subject: mention_name))
         end
@@ -62,7 +62,7 @@ module Lita
         mention_name = clean_mention_name(response.matches[0][0])
         @assigner.remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
-        broadcast_to_audit_channel("Se dejó de considerar a #{mention_name}")
+        broadcast_to_channel("Se dejó de considerar a #{mention_name}", '#karma-audit')
       end
       route(/^s[íi]$|^hoy almuerzo aqu[íi]$/i,
         command: true, help: help_msg(:confirm_yes)) do |response|
@@ -87,12 +87,12 @@ module Lita
             @assigner.add_to_winning_lunchers("invitado_de_#{response.user.mention_name}")
           response.reply(t(:friend_added, subject: response.user.mention_name))
         else
-          response.reply("tu amigo no cabe wn")
+          response.reply('tu amigo no cabe wn')
         end
       end
 
       route(/tengo una invitada/i, command: true) do |response|
-        response.reply("es rica?")
+        response.reply('es rica?')
       end
 
       route(/qui[ée]nes almuerzan hoy/i, help: help_msg(:show_today_lunchers)) do |response|
@@ -141,7 +141,7 @@ module Lita
       route(/assignnow/i, command: true) do |response|
         @assigner.do_the_assignment
         announce_winners
-        response.reply("did it boss")
+        response.reply('did it boss')
       end
 
       route(/cu[áa]nto karma tengo\??/i, command: true) do |response|
@@ -165,13 +165,13 @@ module Lita
           "@#{giver.mention_name}, le has dado uno de tus puntos de " +
           "karma a @#{destinatary.mention_name}."
         )
-        broadcast_to_audit_channel("@#{giver.mention_name}, le ha dado un punto de " +
-          "karma a @#{destinatary.mention_name}.")
+        broadcast_to_channel("@#{giver.mention_name}, le ha dado un punto de " +
+          "karma a @#{destinatary.mention_name}.", '#karma-audit')
       end
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
         unless @assigner.remove_from_winning_lunchers(response.user.mention_name)
-          response.reply("no puedes ceder algo que no tienes, amiguito")
+          response.reply('no puedes ceder algo que no tienes, amiguito')
           next
         end
         enters = clean_mention_name(response.matches[0][0])
@@ -180,17 +180,45 @@ module Lita
       end
 
       route(/.*/i, command: false) do |response|
-        if quiet_time? && Lita::Room.find_by_name("lita-test").id == response.room.id
-          user = Lita::User.find_by_mention_name("agustin")
-          message = "Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y las " \
-          "12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones" \
-          " hacen muy dificil trabajar! mira: http://www.paulgraham.com/makersschedule.html"
+        if quiet_time? && Lita::Room.find_by_name('lita-test').id == response.room.id
+          user = Lita::User.find_by_mention_name('agustin')
+          message = 'Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y' \
+          'las 12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones' \
+          ' hacen muy dificil trabajar! mira: http://www.paulgraham.com/makersschedule.html'
           robot.send_message(Source.new(user: user), message) if user
         end
       end
 
-      def broadcast_to_audit_channel(message)
-        target = Source.new(room: '#karma-audit')
+      route(/vend[oe] (mi|\s)? ?almuerzo/i, command: true) do |response|
+        user = response.user
+        order = create_order(user, 'limit')
+        unless @market.add_limit_order(order)
+          response.reply('No puedes vender algo que no tienes!')
+          next
+        end
+        response.reply_privately(
+          "@#{user.mention_name}, tengo tu almuerzo en venta!"
+        )
+        broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
+      end
+
+      route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
+        user = response.user
+        order = @market.add_market_order(user.id)
+        unless order
+          response.reply('no te puedo comprar almuerzo...')
+          next
+        end
+        seller_user = Lita::User.find_by_id(order['user_id'])
+        response.reply_privately("@#{user.mention_name}, ya te consegui almuerzo!")
+        broadcast_to_channel(
+          "@#{user.mention_name} le compró almuerzo a @#{seller_user.mention_name}",
+          '#cooking'
+        )
+      end
+
+      def broadcast_to_channel(message, channel)
+        target = Source.new(room: channel)
         robot.send_message(target, message)
       end
 
@@ -238,6 +266,15 @@ module Lita
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
         end
+      end
+
+      def create_order(user, type)
+        {
+          id: SecureRandom.uuid,
+          user_id: user.id,
+          type: type,
+          created_at: Time.now
+        }.to_json
       end
 
       Lita.register_handler(self)

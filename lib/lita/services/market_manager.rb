@@ -36,6 +36,7 @@ module Lita
         lunch_buyer = Lita::User.find_by_id(lunch_buyer_id)
         @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
         @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
+        order
       end
 
       def remove_order
