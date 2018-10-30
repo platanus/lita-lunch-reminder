@@ -182,8 +182,8 @@ module Lita
       route(/.*/i, command: false) do |response|
         if quiet_time? && Lita::Room.find_by_name('lita-test').id == response.room.id
           user = Lita::User.find_by_mention_name('agustin')
-          message = 'Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y las ' \
-          '12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones' \
+          message = 'Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y' \
+          'las 12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones' \
           ' hacen muy dificil trabajar! mira: http://www.paulgraham.com/makersschedule.html'
           robot.send_message(Source.new(user: user), message) if user
         end
@@ -213,7 +213,8 @@ module Lita
         response.reply_privately("@#{user.mention_name}, ya te consegui almuerzo!")
         broadcast_to_channel(
           "@#{user.mention_name} le compró almuerzo a @#{seller_user.mention_name}",
-          '#cooking')
+          '#cooking'
+        )
       end
 
       def broadcast_to_channel(message, channel)
