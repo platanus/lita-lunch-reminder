@@ -70,6 +70,15 @@ module Lita
       def reset_limit_orders
         @redis.del('orders')
       end
+
+      def execute_transaction
+        orders = remove_orders
+        return unless orders
+        lunch_seller = Lita::User.find_by_id(orders['ask']['user_id'])
+        lunch_buyer = Lita::User.find_by_id(orders['bid']['user_id'])
+        @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
+        @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
+      end
     end
   end
 end
