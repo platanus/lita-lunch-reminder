@@ -22,14 +22,14 @@ module Lita
       def ask_orders
         orders = @redis.smembers('orders') || []
         orders.map { |order| JSON.parse(order) }
-              .select { |z| z.type == 'ask' }
+              .select { |z| z['type'] == 'ask' }
               .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
       end
 
       def bid_orders
         orders = @redis.smembers('orders') || []
         orders.map { |order| JSON.parse(order) }
-              .select { |z| z.type == 'bid' }
+              .select { |z| z['type'] == 'bid' }
               .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
       end
 
