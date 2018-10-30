@@ -191,6 +191,35 @@ describe Lita::Services::MarketManager, lita: true do
     end
   end
 
+  describe '#bid_orders' do
+    context 'without orders' do
+      it { expect(subject.bid_orders.size).to eq(0) }
+    end
+
+    context 'with one order' do
+      before do
+        add_limit_order(SecureRandom.uuid, andres, 'bid', Time.now)
+      end
+
+      it { expect(subject.bid_orders.size).to eq(1) }
+    end
+
+    context 'with more than one order' do
+      before do
+        add_limit_order(SecureRandom.uuid, andres, 'bid', Time.new(2018, 10, 5))
+        add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3))
+        add_limit_order(SecureRandom.uuid, oscar, 'bid', Time.new(2018, 10, 4))
+      end
+
+      it { expect(subject.orders.size).to eq(3) }
+      it 'sorts orders by date' do
+        expect(subject.bid_orders[0]['user_id']).to eq(fdom.id)
+        expect(subject.bid_orders[1]['user_id']).to eq(oscar.id)
+        expect(subject.bid_orders[2]['user_id']).to eq(andres.id)
+      end
+    end
+  end
+
   describe '#add_market_order' do
     context 'user with karma' do
       before do
