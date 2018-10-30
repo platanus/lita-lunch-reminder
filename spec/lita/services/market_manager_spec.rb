@@ -253,25 +253,6 @@ describe Lita::Services::MarketManager, lita: true do
           subject.add_market_order(fernanda.id)
           expect(subject.orders.size).to eq(2)
         end
-
-        it 'matchs the correct limit order' do
-          subject.add_market_order(fernanda.id)
-          expect(subject.orders[0]['user_id']).to eq(oscar.id)
-          expect(subject.orders[1]['user_id']).to eq(andres.id)
-        end
-
-        it 'adds buyer to winning lunchers' do
-          subject.add_market_order(fernanda.id)
-          expect(lunch_assigner.winning_lunchers_list).to include(fernanda.mention_name)
-        end
-
-        it 'transfers karma from buyer to asker' do
-          karma_fdom = karmanager.get_karma(fdom.id)
-          karma_fernanda = karmanager.get_karma(fernanda.id)
-          subject.add_market_order(fernanda.id)
-          expect(karmanager.get_karma(fdom.id)).to eq(karma_fdom + 1)
-          expect(karmanager.get_karma(fernanda.id)).to eq(karma_fernanda - 1)
-        end
       end
     end
 
@@ -318,15 +299,46 @@ describe Lita::Services::MarketManager, lita: true do
       it { expect(subject.ask_orders.size).to eq(1) }
     end
 
-    context 'exists two or more orders' do
+    context 'exists two orders' do
       before do
         let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5)) }
         let(:bid_order) { add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3)) }
+        karmanager.set_karma(fdom.id, 100)
+        karmanager.set_karma(andres.id, 100)
         subject.execute_transaction
       end
 
       it { expect(subject.ask_orders.size).to eq(0) }
       it { expect(subject.bid_orders.size).to eq(0) }
+
+      it 'transfers karma from buyer to asker' do
+        karma_fdom = karmanager.get_karma(fdom.id)
+        karma_andres = karmanager.get_karma(andres.id)
+        subject.add_market_order(andres.id)
+        expect(karmanager.get_karma(fdom.id)).to eq(karma_fdom - 1)
+        expect(karmanager.get_karma(andres.id)).to eq(karma_andres + 1)
+      end
+      it 'adds buyer to winning lunchers' do
+        subject.add_market_order(fernanda.id)
+        expect(lunch_assigner.winning_lunchers_list).to include(fernanda.mention_name)
+      end
+    end
+
+    context 'exists more than two orders' do
+      before do
+        let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 1)) }
+        let(:ask_order) { add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 5)) }
+        let(:bid_order) { add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3)) }
+        subject.execute_transaction
+      end
+
+      it 'matchs the correct limit order' do
+        orders = subject.execute_transaction
+        expect(orders['ask']['user_id']).to eq(andres.id)
+        expect(subject.orders['bid']['user_id']).to eq(fdom.id)
+      end
+
+      it { expect(subject.ask_orders.size).to eq(1) }
     end
   end
 end
