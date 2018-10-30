@@ -24,6 +24,9 @@ es:
         wont_lunch: "Aun no se distinguir entre los que no han contestado y los que contestaron que no, pero aquí van los que no contestaron que sí: %{subject}"
         dinner_is_served: "Está listo amiguito, *suba* a almorzar ;)"
         friend_added: "Perfecto @%{subject}, anoté a tu invitado como invitado_de_%{subject}."
+        selling_lunch: 'tengo tu almuerzo en venta!'
+        bought_lunch: 'ya te conseguí almuerzo!'
+        transaction: 'le compró almuerzo a'
         help:
           thanks:
             usage: gracias
@@ -69,4 +72,4 @@ es:
             description: Pon una orden de venta de almuerzo
           buy_lunch:
             usage: vende mi almuerzo
-            description: Pon una orden de venta de almuerzo
+            description: Pon una orden de compra de almuerzo

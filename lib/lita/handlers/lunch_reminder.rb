@@ -199,9 +199,9 @@ module Lita
         end
         if @market.add_limit_order(order)
           response.reply_privately(
-            "@#{user.mention_name}, tengo tu almuerzo en venta!"
+            "@#{user.mention_name}, #{t(:selling_lunch)}"
           )
-          broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
+          broadcast_to_channel("@#{user.mention_name}, #{t(:selling_lunch)}", '#cooking')
         end
       end
 
@@ -216,7 +216,7 @@ module Lita
         seller_user = Lita::User.find_by_id(order['user_id'])
         response.reply_privately("@#{user.mention_name}, ya te consegui almuerzo!")
         broadcast_to_channel(
-          "@#{user.mention_name} le compró almuerzo a @#{seller_user.mention_name}",
+          "@#{user.mention_name} #{t(:transaction)} @#{seller_user.mention_name}",
           '#cooking'
         )
       end
