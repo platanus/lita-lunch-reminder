@@ -192,14 +192,16 @@ module Lita
       route(/vend[oe] (mi|\s)? ?almuerzo/i, command: true) do |response|
         user = response.user
         order = create_order(user, 'limit')
-        unless @market.add_limit_order(order)
+        unless winning_list.include?(user.mention_name)
           response.reply('No puedes vender algo que no tienes!')
           next
         end
-        response.reply_privately(
-          "@#{user.mention_name}, tengo tu almuerzo en venta!"
-        )
-        broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
+        if @market.add_limit_order(order)
+          response.reply_privately(
+            "@#{user.mention_name}, tengo tu almuerzo en venta!"
+          )
+          broadcast_to_channel("@#{user.mention_name}, tengo tu almuerzo en venta!", '#cooking')
+        end
       end
 
       route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i, command: true) do |response|
@@ -275,6 +277,10 @@ module Lita
           type: type,
           created_at: Time.now
         }.to_json
+      end
+
+      def winning_list
+        @winning_list ||= @assigner.winning_lunchers_list
       end
 
       Lita.register_handler(self)
