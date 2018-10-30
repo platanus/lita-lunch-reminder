@@ -309,11 +309,24 @@ describe Lita::Services::MarketManager, lita: true do
   end
 
   describe '#execute_transaction' do
-    before do
-      let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5)) }
-      let(:bid_order) { add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3)) }
+    context 'exists one order' do
+      before do
+        let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5)) }
+        subject.execute_transaction
+      end
+
+      it { expect(subject.ask_orders.size).to eq(1) }
     end
 
-    it { expect(subject.execute_transaction).to eq('ask': ask_order, 'bid': bid_order) }
+    context 'exists two or more orders' do
+      before do
+        let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5)) }
+        let(:bid_order) { add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3)) }
+        subject.execute_transaction
+      end
+
+      it { expect(subject.ask_orders.size).to eq(0) }
+      it { expect(subject.bid_orders.size).to eq(0) }
+    end
   end
 end
