@@ -34,12 +34,12 @@ module Lita
       end
       route(/por\sfavor\sconsidera\sa\s([^\s]+)\s(para|en) (el|los) almuerzos?/,
         command: true, help: help_msg(:consider_user)) do |response|
+        karma_for_new_user = @karmanager.average_karma(@assigner.lunchers_list)
         mention_name = clean_mention_name(response.matches[0][0])
         success = @assigner.add_to_lunchers(mention_name)
         if success
           response.reply(t(:will_ask_daily, subject: mention_name))
           user = Lita::User.find_by_mention_name(mention_name)
-          karma_for_new_user = @karmanager.average_karma(@assigner.lunchers_list)
           @karmanager.set_karma(user.id, karma_for_new_user)
           response.reply("Le asigne #{karma_for_new_user} a #{user.mention_name} con id #{user.id}")
           broadcast_to_audit_channel("Se empezó a considerar a #{user.mention_name}. " +
