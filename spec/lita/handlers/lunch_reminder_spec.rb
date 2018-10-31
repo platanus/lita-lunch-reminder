@@ -59,7 +59,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     expect(replies.last).to match('Tienes 1 puntos de karma, mi padawan')
   end
 
-  describe 'place limit order' do
+  describe 'sell lunch' do
     context 'user has lunch' do
       before do
         allow_any_instance_of(Lita::Services::MarketManager).to\
@@ -88,24 +88,24 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     end
   end
 
-  describe 'place market order' do
-    context 'user can place market order' do
+  describe 'buy lunch' do
+    context 'user can place limit order' do
       let(:user) { double(mention_name: 'felipe.dominguez') }
       let(:lita_user) { Lita::User }
       let!(:user2) { Lita::User.create(124, mention_name: 'armando') }
       before do
         allow_any_instance_of(Lita::Services::MarketManager).to \
-          receive(:add_market_order).and_return('user_id': 123)
+          receive(:add_limit_order).and_return(true)
         allow(lita_user).to receive(:find_by_id).and_return(user)
         allow(lita_user).to receive(:create).and_return(user2)
       end
-      it 'responds that market order was placed' do
+      it 'responds that limit order was placed' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita compro almuerzo', as: armando)
         expect(replies.last).to match('@armando le compró almuerzo a @felipe.dominguez')
       end
     end
-    context "user cant' place market order" do
+    context "user cant' place limit order" do
       before do
         allow_any_instance_of(Lita::Services::MarketManager).to\
           receive(:add_market_order).and_return(false)

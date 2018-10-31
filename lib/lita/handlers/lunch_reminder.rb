@@ -192,7 +192,7 @@ module Lita
       route(/vend[oe] (mi|\s)? ?almuerzo/i,
         command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
-        order = create_order(user, 'limit')
+        order = create_order(user, 'ask')
         unless winning_list.include?(user.mention_name)
           response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
@@ -208,8 +208,8 @@ module Lita
       route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
-        order = @market.add_market_order(user.id)
-        unless order
+        order = create_order(user, 'bid')
+        if winning_list.include?(user.mention_name)
           response.reply(t(:cant_buy))
           next
         end
