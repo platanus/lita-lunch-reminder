@@ -36,13 +36,12 @@ describe Lita::Services::MarketManager, lita: true do
   end
 
   def setup_lunchers
-    [andres, fdom, oscar].each do |user|
+    [andres, fdom].each do |user|
       lunch_assigner.add_to_lunchers(user.mention_name)
       lunch_assigner.add_to_current_lunchers(user.mention_name)
-      lunch_assigner.add_to_winning_lunchers(user.mention_name)
     end
 
-    lunch_assigner.add_to_lunchers(fernanda.mention_name)
+    lunch_assigner.add_to_winning_lunchers(andres.mention_name)
   end
 
   before do
@@ -220,64 +219,6 @@ describe Lita::Services::MarketManager, lita: true do
     end
   end
 
-  describe '#add_market_order' do
-    context 'user with karma' do
-      before do
-        karmanager.set_karma(fdom.id, 100)
-      end
-
-      context 'no limit orders' do
-        it { expect(subject.add_market_order(fdom.id)).to be_nil }
-      end
-
-      context 'exists one order' do
-        before do
-          add_limit_order(SecureRandom.uuid, andres, 'ask', Time.now)
-          subject.add_market_order(fdom.id)
-        end
-
-        it { expect(subject.orders.size).to eq(0) }
-      end
-
-      context 'exists more than one order' do
-        before do
-          setup_lunchers
-          add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
-          add_limit_order(SecureRandom.uuid, fdom, 'ask', Time.new(2018, 10, 3))
-          add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 4))
-          karmanager.set_karma(fdom.id, 100)
-          karmanager.set_karma(fernanda.id, 100)
-        end
-
-        it 'places market order' do
-          subject.add_market_order(fernanda.id)
-          expect(subject.orders.size).to eq(2)
-        end
-      end
-    end
-
-    context 'user without karma' do
-      before do
-        karmanager.set_karma(fdom.id, 0)
-      end
-
-      context 'no limit orders' do
-        it { expect(subject.add_market_order(fdom.id)).to be_nil }
-      end
-
-      context 'exists one order' do
-        before do
-          add_limit_order(SecureRandom.uuid, andres, 'ask', Time.now)
-        end
-
-        it "doesn't place market order" do
-          subject.add_market_order(fdom.id)
-          expect(subject.orders.size).to eq(1)
-        end
-      end
-    end
-  end
-
   describe '#reset_limit_orders' do
     before do
       add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
@@ -291,54 +232,64 @@ describe Lita::Services::MarketManager, lita: true do
 
   describe '#execute_transaction' do
     context 'exists one order' do
-      before do
-        let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5)) }
+      it "doesn't execute the transaction" do
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
         subject.execute_transaction
+        expect(subject.ask_orders.size).to eq(1)
       end
-
-      it { expect(subject.ask_orders.size).to eq(1) }
     end
 
     context 'exists two orders' do
       before do
-        let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5)) }
-        let(:bid_order) { add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3)) }
         karmanager.set_karma(fdom.id, 100)
         karmanager.set_karma(andres.id, 100)
-        subject.execute_transaction
+        setup_lunchers
       end
 
-      it { expect(subject.ask_orders.size).to eq(0) }
-      it { expect(subject.bid_orders.size).to eq(0) }
+      it 'removes orders' do
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
+        add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3))
+        subject.execute_transaction
+        expect(subject.ask_orders.size).to eq(0)
+        expect(subject.bid_orders.size).to eq(0)
+      end
 
       it 'transfers karma from buyer to asker' do
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
+        add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3))
         karma_fdom = karmanager.get_karma(fdom.id)
         karma_andres = karmanager.get_karma(andres.id)
-        subject.add_market_order(andres.id)
+        subject.execute_transaction
         expect(karmanager.get_karma(fdom.id)).to eq(karma_fdom - 1)
         expect(karmanager.get_karma(andres.id)).to eq(karma_andres + 1)
       end
+
       it 'adds buyer to winning lunchers' do
-        subject.add_market_order(fernanda.id)
-        expect(lunch_assigner.winning_lunchers_list).to include(fernanda.mention_name)
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 5))
+        add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3))
+        subject.execute_transaction
+        expect(lunch_assigner.winning_lunchers_list).to include(fdom.mention_name)
       end
     end
 
     context 'exists more than two orders' do
       before do
-        let(:ask_order) { add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 1)) }
-        let(:ask_order) { add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 5)) }
-        let(:bid_order) { add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3)) }
-        subject.execute_transaction
+        add_limit_order(SecureRandom.uuid, andres, 'ask', Time.new(2018, 10, 1))
+        add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 5))
+        add_limit_order(SecureRandom.uuid, fdom, 'bid', Time.new(2018, 10, 3))
+        setup_lunchers
       end
 
       it 'matchs the correct limit order' do
         orders = subject.execute_transaction
-        expect(orders['ask']['user_id']).to eq(andres.id)
-        expect(subject.orders['bid']['user_id']).to eq(fdom.id)
+        expect(orders[:ask]['user_id']).to eq(andres.id)
+        expect(orders[:bid]['user_id']).to eq(fdom.id)
       end
 
-      it { expect(subject.ask_orders.size).to eq(1) }
+      it 'remove order from limit orders' do
+        subject.execute_transaction
+        expect(subject.ask_orders.size).to eq(1)
+      end
     end
   end
 end

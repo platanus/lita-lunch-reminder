@@ -42,20 +42,9 @@ module Lita
         orders.map { |order| order['user_id'] }.include? user_id
       end
 
-      def add_market_order(lunch_buyer_id)
-        return unless @karmanager.get_karma(lunch_buyer_id) > 0
-        order = remove_order
-        return if order.nil?
-        lunch_seller = Lita::User.find_by_id(order['user_id'])
-        lunch_buyer = Lita::User.find_by_id(lunch_buyer_id)
-        @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
-        @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
-        order
-      end
-
       def remove_orders
         new_ask_orders = ask_orders
-        new_bid_orders = ask_orders
+        new_bid_orders = bid_orders
         return if new_ask_orders.empty? || new_bid_orders.empty?
         reset_limit_orders
         new_ask_orders[1..-1].each do |order|
@@ -64,7 +53,7 @@ module Lita
         new_bid_orders[1..-1].each do |order|
           @redis.sadd('orders', order.to_json)
         end
-        { 'ask': new_ask_orders.first, 'bid': new_bid_orders }
+        { 'ask': new_ask_orders.first, 'bid': new_bid_orders.first }
       end
 
       def reset_limit_orders
@@ -72,12 +61,13 @@ module Lita
       end
 
       def execute_transaction
-        orders = remove_orders
-        return unless orders
-        lunch_seller = Lita::User.find_by_id(orders['ask']['user_id'])
-        lunch_buyer = Lita::User.find_by_id(orders['bid']['user_id'])
+        executed_orders = remove_orders
+        return if executed_orders.nil?
+        lunch_seller = Lita::User.find_by_id(executed_orders[:ask]['user_id'])
+        lunch_buyer = Lita::User.find_by_id(executed_orders[:bid]['user_id'])
         @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
         @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
+        executed_orders
       end
     end
   end
