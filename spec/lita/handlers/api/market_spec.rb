@@ -69,7 +69,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   describe '#execute_transaction' do
     context 'not authorized' do
       it 'responds with not autorized' do
-        response = JSON.parse(http.get('market/execute_transaction').body)
+        response = JSON.parse(http.post('market/execute_transaction').body)
         expect(response['status']).to eq(401)
         expect(response['message']).to eq('Not authorized')
       end
@@ -88,7 +88,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
       end
 
       it 'includes both orders' do
-        response = JSON.parse(http.get('market/execute_transaction').body)
+        response = JSON.parse(http.post('market/execute_transaction').body)
         expect(JSON.parse(response['orders'])['ask'].to_json).to eq(ask_order.to_json)
         expect(JSON.parse(response['orders'])['bid'].to_json).to eq(bid_order.to_json)
       end
