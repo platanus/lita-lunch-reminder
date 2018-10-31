@@ -24,7 +24,7 @@ module Lita
         def place_limit_order(request, response)
           return respond_not_authorized(response) unless authorized?(request)
           user = current_user(request)
-          order = limit_order_for_user(user)
+          order = limit_order_for_user(user, 'ask')
           if user
             if winning_list.include?(user.mention_name) && market_manager.add_limit_order(order)
               respond(response, success: true, order: order)
@@ -42,11 +42,11 @@ module Lita
 
         private
 
-        def limit_order_for_user(user)
+        def limit_order_for_user(user, type)
           {
             id: SecureRandom.uuid,
             user_id: user.id,
-            type: 'limit',
+            type: type,
             created_at: Time.now
           }.to_json
         end

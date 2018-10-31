@@ -7,7 +7,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   let(:user) { double }
   let(:order_id) { SecureRandom.uuid }
   let(:time) { Time.now }
-  let(:limit_order) { { id: order_id, user_id: 127, type: 'sell', created_at: time } }
+  let(:limit_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
   let(:market_order) { { user_id: '127' } }
   let(:winning_list) { [user] }
 
@@ -50,7 +50,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     end
 
     context 'authorized' do
-      let(:limit_order) { { id: order_id, user_id: 127, type: 'sell', created_at: time } }
+      let(:limit_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
       before do
         allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:authorized?).and_return(true)
         allow_any_instance_of(Lita::Handlers::Api::Market)
@@ -96,7 +96,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
         order = JSON.parse(response['order'])
         expect(order).not_to be_nil
         expect(order['id']).not_to be_nil
-        expect(order['type']).to eq('limit')
+        expect(order['type']).to eq('ask')
         expect(order['created_at']).not_to be_nil
       end
     end
