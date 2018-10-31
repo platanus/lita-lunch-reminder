@@ -24,7 +24,6 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
 
   it { is_expected.to route_http(:get, 'market/limit_orders') }
   it { is_expected.to route_http(:post, 'market/limit_orders') }
-  it { is_expected.to route_http(:post, 'market/market_orders') }
 
   before do
     ENV['MAX_LUNCHERS'] = '20'
@@ -99,32 +98,6 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
         expect(order['id']).not_to be_nil
         expect(order['type']).to eq('limit')
         expect(order['created_at']).not_to be_nil
-      end
-    end
-  end
-
-  describe 'POST market order' do
-    context 'not authorized' do
-      it 'responds with not autorized' do
-        response = JSON.parse(http.post('market/market_orders').body)
-        expect(response['status']).to eq(401)
-        expect(response['message']).to eq('Not authorized')
-      end
-    end
-
-    context 'authorized' do
-      before do
-        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:authorized?).and_return(true)
-        allow(market).to receive(:add_market_order).and_return(true)
-        allow(winning_list).to receive(:include?).and_return(false)
-      end
-
-      it 'responds with success' do
-        response = JSON.parse(http.post do |req|
-          req.url 'market/market_orders'
-          req.body = market_order.to_s
-        end.body)
-        expect(response['success']).to eq(true)
       end
     end
   end

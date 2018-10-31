@@ -14,7 +14,6 @@ module Lita
 
         http.get 'market/limit_orders', :limit_orders
         http.post 'market/limit_orders', :place_limit_order
-        http.post 'market/market_orders', :place_market_order
 
         def limit_orders(request, response)
           return respond_not_authorized(response) unless authorized?(request)
@@ -32,22 +31,6 @@ module Lita
             else
               response.status = 403
               respond(response, status: 403, message: 'Can not place order')
-            end
-          else
-            response.status = 404
-            respond(response, status: 404, message: 'Error in parameters')
-          end
-        end
-
-        def place_market_order(request, response)
-          return respond_not_authorized(response) unless authorized?(request)
-          user = current_user(request)
-          if user
-            if !winning_list.include?(user.mention_name) && market_manager.add_market_order(user.id)
-              respond(response, success: true)
-            else
-              response.status = 403
-              respond(response, status: 403, message: 'Can not buy lunch')
             end
           else
             response.status = 404
