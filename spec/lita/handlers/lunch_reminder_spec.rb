@@ -89,31 +89,30 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
   end
 
   describe 'buy lunch' do
-    context 'user can place limit order' do
-      let(:user) { double(mention_name: 'felipe.dominguez') }
-      let(:lita_user) { Lita::User }
-      let!(:user2) { Lita::User.create(124, mention_name: 'armando') }
-      before do
-        allow_any_instance_of(Lita::Services::MarketManager).to \
-          receive(:add_limit_order).and_return(true)
-        allow(lita_user).to receive(:find_by_id).and_return(user)
-        allow(lita_user).to receive(:create).and_return(user2)
-      end
-      it 'responds that limit order was placed' do
-        armando = Lita::User.create(124, mention_name: 'armando')
-        send_message('@lita compro almuerzo', as: armando)
-        expect(replies.last).to match('@armando le compró almuerzo a @felipe.dominguez')
-      end
-    end
-    context "user cant' place limit order" do
+    context 'user has lunch' do
       before do
         allow_any_instance_of(Lita::Services::MarketManager).to\
-          receive(:add_market_order).and_return(false)
+          receive(:add_limit_order).and_return(false)
+        allow_any_instance_of(Lita::Services::LunchAssigner).to\
+          receive(:winning_lunchers_list).and_return(['armando'])
       end
       it 'responds with an error' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita compro almuerzo', as: armando)
         expect(replies.last).to match('no te puedo comprar almuerzo...')
+      end
+    end
+    context 'user without lunch' do
+      before do
+        allow_any_instance_of(Lita::Services::MarketManager).to\
+          receive(:add_limit_order).and_return(true)
+        allow_any_instance_of(Lita::Services::LunchAssigner).to\
+          receive(:winning_lunchers_list).and_return([])
+      end
+      it 'responds that limit order was placed' do
+        armando = Lita::User.create(124, mention_name: 'armando')
+        send_message('@lita compro almuerzo', as: armando)
+        expect(replies.last).to match('tengo tu almuerzo en venta!')
       end
     end
   end
