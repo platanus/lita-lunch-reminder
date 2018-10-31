@@ -23,6 +23,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   end
 
   it { is_expected.to route_http(:get, 'market/limit_orders') }
+  it { is_expected.to route_http(:get, 'market/execute_transaction') }
   it { is_expected.to route_http(:post, 'market/limit_orders') }
 
   before do
@@ -61,6 +62,35 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
       it 'includes the limit orders' do
         response = JSON.parse(http.get('market/limit_orders').body)
         expect(response['limit_orders'].first.to_json).to eq(limit_order.to_json)
+      end
+    end
+  end
+
+  describe '#execute_transaction' do
+    context 'not authorized' do
+      it 'responds with not autorized' do
+        response = JSON.parse(http.get('market/execute_transaction').body)
+        expect(response['status']).to eq(401)
+        expect(response['message']).to eq('Not authorized')
+      end
+    end
+
+    context 'authorized' do
+      let(:ask_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
+      let(:bid_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
+      before do
+        allow_any_instance_of(Lita::Handlers::Api::Market).to \
+          receive(:authorized?).and_return(true)
+        allow_any_instance_of(Lita::Handlers::Api::Market)
+          .to receive(:market_manager).and_return(market)
+        allow(market).to receive(:execute_transaction)
+          .and_return('ask': ask_order, 'bid': bid_order)
+      end
+
+      it 'includes both orders' do
+        response = JSON.parse(http.get('market/execute_transaction').body)
+        expect(JSON.parse(response['orders'])['ask'].to_json).to eq(ask_order.to_json)
+        expect(JSON.parse(response['orders'])['bid'].to_json).to eq(bid_order.to_json)
       end
     end
   end

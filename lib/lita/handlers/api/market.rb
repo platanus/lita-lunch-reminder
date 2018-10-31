@@ -13,12 +13,26 @@ module Lita
         end
 
         http.get 'market/limit_orders', :limit_orders
+        http.get 'market/execute_transaction', :execute_transaction
         http.post 'market/limit_orders', :place_limit_order
 
         def limit_orders(request, response)
           return respond_not_authorized(response) unless authorized?(request)
           orders = market_manager.orders
           respond(response, limit_orders: orders)
+        end
+
+        def execute_transaction(request, response)
+          return respond_not_authorized(response) unless authorized?(request)
+          user = current_user(request)
+          if user
+            executed_orders = market_manager.execute_transaction
+            unless executed_orders
+              response.status = 403
+              respond(response, status: 403, message: 'Can not place order')
+            end
+            respond(response, success: true, orders: executed_orders.to_json)
+          end
         end
 
         def place_limit_order(request, response)
