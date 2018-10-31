@@ -23,8 +23,8 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   end
 
   it { is_expected.to route_http(:get, 'market/limit_orders') }
-  it { is_expected.to route_http(:get, 'market/execute_transaction') }
   it { is_expected.to route_http(:post, 'market/limit_orders') }
+  it { is_expected.to route_http(:post, 'market/execute_transaction') }
 
   before do
     ENV['MAX_LUNCHERS'] = '20'

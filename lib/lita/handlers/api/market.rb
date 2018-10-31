@@ -13,8 +13,8 @@ module Lita
         end
 
         http.get 'market/limit_orders', :limit_orders
-        http.get 'market/execute_transaction', :execute_transaction
         http.post 'market/limit_orders', :place_limit_order
+        http.post 'market/execute_transaction', :execute_transaction
 
         def limit_orders(request, response)
           return respond_not_authorized(response) unless authorized?(request)
