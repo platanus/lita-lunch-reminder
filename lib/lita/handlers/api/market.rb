@@ -29,7 +29,7 @@ module Lita
             executed_orders = market_manager.execute_transaction
             unless executed_orders
               response.status = 403
-              respond(response, status: 403, message: 'Can not place order')
+              respond(response, status: 403, message: 'Any transaction possible')
             end
             respond(response, success: true, orders: executed_orders.to_json)
           end
