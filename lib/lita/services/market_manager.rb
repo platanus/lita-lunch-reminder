@@ -61,13 +61,19 @@ module Lita
       end
 
       def execute_transaction
+        return unless transaction_possible?
         executed_orders = remove_orders
-        return if executed_orders.nil?
         lunch_seller = Lita::User.find_by_id(executed_orders[:ask]['user_id'])
         lunch_buyer = Lita::User.find_by_id(executed_orders[:bid]['user_id'])
         @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
         @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
         executed_orders
+      end
+
+      def transaction_possible?
+        new_ask_orders = ask_orders
+        new_bid_orders = bid_orders
+        return true unless new_ask_orders.empty? || new_bid_orders.empty?
       end
     end
   end
