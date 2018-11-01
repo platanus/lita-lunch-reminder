@@ -38,10 +38,14 @@ module Lita
         def place_limit_order(request, response)
           return respond_not_authorized(response) unless authorized?(request)
           user = current_user(request)
-          order = limit_order_for_user(user, 'ask')
+          type = request.params['type']
           if user
-            if winning_list.include?(user.mention_name) && market_manager.add_limit_order(order)
-              respond(response, success: true, order: order)
+            new_order = limit_order_for_user(user, type)
+            has_lunch = winning_list.include?(user.mention_name)
+            if has_lunch && type == 'ask' && market_manager.add_limit_order(new_order)
+              respond(response, success: true, order: new_order)
+            elsif !has_lunch && type == 'bid' && market_manager.add_limit_order(new_order)
+              respond(response, success: true, order: new_order)
             else
               response.status = 403
               respond(response, status: 403, message: 'Can not place order')

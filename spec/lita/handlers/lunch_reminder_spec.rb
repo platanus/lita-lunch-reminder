@@ -89,8 +89,8 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         before do
           allow_any_instance_of(Lita::Services::MarketManager).to \
             receive(:execute_transaction).and_return(orders)
-            allow(lita_user).to receive(:find_by_id).with(123).and_return(user)
-            allow(lita_user).to receive(:find_by_id).with(124).and_return(user2)
+          allow(lita_user).to receive(:find_by_id).with(123).and_return(user)
+          allow(lita_user).to receive(:find_by_id).with(124).and_return(user2)
           allow(lita_user).to receive(:create).and_return(user2)
         end
 

@@ -7,8 +7,6 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   let(:user) { double }
   let(:order_id) { SecureRandom.uuid }
   let(:time) { Time.now }
-  let(:limit_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
-  let(:market_order) { { user_id: '127' } }
   let(:winning_list) { [user] }
 
   def add_limit_order(order_id, user, type, created_at)
@@ -77,7 +75,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
 
     context 'authorized' do
       let(:ask_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
-      let(:bid_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
+      let(:bid_order) { { id: order_id, user_id: 127, type: 'bid', created_at: time } }
       before do
         allow_any_instance_of(Lita::Handlers::Api::Market).to \
           receive(:authorized?).and_return(true)
@@ -105,29 +103,52 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
     end
 
     context 'authorized' do
-      before do
-        allow_any_instance_of(Lita::Handlers::Api::Market).to receive(:authorized?).and_return(true)
-        allow(winning_list).to receive(:include?).and_return(true)
+      let(:ask_order) { { user_id: 127, type: 'ask' } }
+      context 'incorrect order' do
+        before do
+          allow_any_instance_of(Lita::Handlers::Api::Market).to \
+            receive(:authorized?).and_return(true)
+          allow(winning_list).to receive(:include?).and_return(false)
+        end
+
+        it 'responds with error' do
+          response = JSON.parse(http.post do |res|
+            res.url 'market/limit_orders'
+            res.params['type'] = 'ask'
+            res.body = ask_order.to_json
+          end.body)
+          expect(response['status']).to eq(403)
+          expect(response['message']).to eq('Can not place order')
+        end
       end
 
-      it 'responds with success' do
-        response = JSON.parse(http.post do |req|
-          req.url 'market/limit_orders'
-          req.body = limit_order.to_s
-        end.body)
-        expect(response['success']).to be(true)
-      end
+      context 'correct order' do
+        before do
+          allow_any_instance_of(Lita::Handlers::Api::Market).to \
+            receive(:authorized?).and_return(true)
+          allow(winning_list).to receive(:include?).and_return(true)
+        end
+        it 'responds with success' do
+          response = JSON.parse(http.post do |res|
+            res.url 'market/limit_orders'
+            res.params['type'] = 'ask'
+            res.body = ask_order.to_json
+          end.body)
+          expect(response['success']).to be(true)
+        end
 
-      it 'responds with an order' do
-        response = JSON.parse(http.post do |req|
-          req.url 'market/limit_orders'
-          req.body = limit_order.to_s
-        end.body)
-        order = JSON.parse(response['order'])
-        expect(order).not_to be_nil
-        expect(order['id']).not_to be_nil
-        expect(order['type']).to eq('ask')
-        expect(order['created_at']).not_to be_nil
+        it 'responds with an order' do
+          response = JSON.parse(http.post do |res|
+            res.url 'market/limit_orders'
+            res.params['type'] = 'ask'
+            res.body = ask_order.to_json
+          end.body)
+          order = JSON.parse(response['order'])
+          expect(order).not_to be_nil
+          expect(order['id']).not_to be_nil
+          expect(order['type']).to eq('ask')
+          expect(order['created_at']).not_to be_nil
+        end
       end
     end
   end

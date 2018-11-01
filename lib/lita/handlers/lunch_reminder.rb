@@ -258,7 +258,7 @@ module Lita
       end
 
       def announce_winners
-        notify(@assigner.winning_lunchers_list, "Yeah baby, almuerzas con nosotros!")
+        notify(@assigner.winning_lunchers_list, 'Yeah baby, almuerzas con nosotros!')
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
@@ -301,9 +301,7 @@ module Lita
         robot.send_message(Source.new(user: seller_user), seller_message) if seller_user
         robot.send_message(Source.new(user: buyer_user), buyer_message) if buyer_user
         broadcast_to_channel(
-          t(:transaction,
-            subject1: buyer_user.mention_name,
-            subject2: seller_user.mention_name),
+          t(:transaction, subject1: buyer_user.mention_name, subject2: seller_user.mention_name),
           '#cooking'
         )
       end
