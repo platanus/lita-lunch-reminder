@@ -40,12 +40,9 @@ module Lita
           user = current_user(request)
           type = request.params['type']
           if user
-            new_order = limit_order_for_user(user, type)
-            has_lunch = winning_list.include?(user.mention_name)
-            if has_lunch && type == 'ask' && market_manager.add_limit_order(new_order)
-              respond(response, success: true, order: new_order)
-            elsif !has_lunch && type == 'bid' && market_manager.add_limit_order(new_order)
-              respond(response, success: true, order: new_order)
+            limit_order = add_limit_order(user, type)
+            if limit_order
+              respond(response, success: true, order: limit_order)
             else
               response.status = 403
               respond(response, status: 403, message: 'Can not place order')
@@ -59,6 +56,14 @@ module Lita
         Lita.register_handler(self)
 
         private
+
+        def add_limit_order(user, type)
+          order = limit_order_for_user(user, type)
+          has_lunch = winning_list.include?(user.mention_name)
+          if (has_lunch && type == 'ask') || (!has_lunch && type == 'bid')
+            return order if market_manager.add_limit_order(order)
+          end
+        end
 
         def limit_order_for_user(user, type)
           {
