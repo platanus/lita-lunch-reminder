@@ -296,6 +296,10 @@ module Lita
         bid_order = executed_orders[:bid]
         seller_user = Lita::User.find_by_id(ask_order[:user_id])
         buyer_user = Lita::User.find_by_id(bid_order[:user_id])
+        notify_transaction(buyer_user, seller_user)
+      end
+
+      def notify_transaction(buyer_user, seller_user)
         seller_message = "@#{seller_user.mention_name}, #{t(:sold_lunch)}"
         buyer_message = "@#{buyer_user.mention_name}, #{t(:bought_lunch)}"
         robot.send_message(Source.new(user: seller_user), seller_message) if seller_user
