@@ -65,7 +65,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         allow_any_instance_of(Lita::Services::LunchAssigner).to\
           receive(:winning_lunchers_list).and_return(['armando'])
       end
-      context 'no ask orders placed' do
+      context 'no bid orders placed' do
         before do
           allow_any_instance_of(Lita::Services::MarketManager).to\
             receive(:add_limit_order).and_return(true)
@@ -77,7 +77,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         end
       end
 
-      context 'one or more ask orders placed' do
+      context 'one or more bid orders placed' do
         let(:ask_order) { { 'id': 1111, 'user_id': 123, 'type': 'ask' } }
         let(:bid_order) { { 'id': 2222, 'user_id': 124, 'type': 'bid' } }
         let(:orders) { { 'ask': ask_order, 'bid': bid_order } }
@@ -128,7 +128,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       it 'responds with an error' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita compro almuerzo', as: armando)
-        expect(replies.last).to match('no te puedo comprar almuerzo...')
+        expect(replies.last).to match('@armando no te puedo comprar almuerzo...')
       end
     end
 
