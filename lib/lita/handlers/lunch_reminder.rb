@@ -198,10 +198,10 @@ module Lita
           next
         end
         order = @market.add_limit_order(new_order)
-        transaction_users = execute_transaction
         return unless order
-        if transaction_users
-          notify_transaction(transaction_users[0], transaction_users[1])
+        transaction = execute_transaction
+        if transaction
+          notify_transaction(transaction[:buyer], transaction[:seller])
         else
           response.reply_privately(
             "@#{user.mention_name}, #{t(:selling_lunch)}"
@@ -219,10 +219,10 @@ module Lita
           next
         end
         order = @market.add_limit_order(new_order)
-        transaction_users = execute_transaction
         return unless order
-        if transaction_users
-          notify_transaction(transaction_users[0], transaction_users[1])
+        transaction = execute_transaction
+        if transaction
+          notify_transaction(transaction[:buyer], transaction[:seller])
         else
           response.reply_privately(
             "@#{user.mention_name}, #{t(:buying_lunch)}"
@@ -302,7 +302,13 @@ module Lita
         bid_order = executed_orders[:bid]
         seller_user = Lita::User.find_by_id(ask_order[:user_id])
         buyer_user = Lita::User.find_by_id(bid_order[:user_id])
-        [buyer_user, seller_user]
+        {
+          buyer: buyer_user,
+          seller: seller_user,
+          timestamp: Time.now,
+          bid_order: bid_order,
+          ask_order: ask_order
+        }
       end
 
       def notify_transaction(buyer_user, seller_user)
