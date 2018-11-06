@@ -303,9 +303,9 @@ describe Lita::Services::MarketManager, lita: true do
     end
 
     context 'transaction not possible' do
-      it 'returns nil' do
+      it 'returns false' do
         add_limit_order(SecureRandom.uuid, oscar, 'ask', Time.new(2018, 10, 5))
-        expect(subject.transaction_possible?).to be(nil)
+        expect(subject.transaction_possible?).to be(false)
       end
     end
   end

@@ -71,9 +71,7 @@ module Lita
       end
 
       def transaction_possible?
-        new_ask_orders = ask_orders
-        new_bid_orders = bid_orders
-        return true unless new_ask_orders.empty? || new_bid_orders.empty?
+        ask_orders.any? && bid_orders.any?
       end
     end
   end
