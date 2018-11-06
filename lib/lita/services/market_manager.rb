@@ -19,6 +19,20 @@ module Lita
               .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
       end
 
+      def ask_orders
+        orders = @redis.smembers('orders') || []
+        orders.map { |order| JSON.parse(order) }
+              .select { |z| z['type'] == 'ask' }
+              .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
+      end
+
+      def bid_orders
+        orders = @redis.smembers('orders') || []
+        orders.map { |order| JSON.parse(order) }
+              .select { |z| z['type'] == 'bid' }
+              .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
+      end
+
       def add_limit_order(new_order)
         return if placed_limit_order?(JSON.parse(new_order)['user_id'])
         @redis.sadd('orders', new_order)
@@ -28,29 +42,36 @@ module Lita
         orders.map { |order| order['user_id'] }.include? user_id
       end
 
-      def add_market_order(lunch_buyer_id)
-        return unless @karmanager.get_karma(lunch_buyer_id) > 0
-        order = remove_order
-        return if order.nil?
-        lunch_seller = Lita::User.find_by_id(order['user_id'])
-        lunch_buyer = Lita::User.find_by_id(lunch_buyer_id)
-        @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
-        @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
-        order
-      end
-
-      def remove_order
-        return if orders.empty?
-        new_orders = orders
+      def remove_orders
+        new_ask_orders = ask_orders
+        new_bid_orders = bid_orders
+        return if new_ask_orders.empty? || new_bid_orders.empty?
         reset_limit_orders
-        new_orders[1..-1].each do |order|
+        new_ask_orders[1..-1].each do |order|
           @redis.sadd('orders', order.to_json)
         end
-        new_orders.first
+        new_bid_orders[1..-1].each do |order|
+          @redis.sadd('orders', order.to_json)
+        end
+        { 'ask': new_ask_orders.first, 'bid': new_bid_orders.first }
       end
 
       def reset_limit_orders
         @redis.del('orders')
+      end
+
+      def execute_transaction
+        return unless transaction_possible?
+        executed_orders = remove_orders
+        lunch_seller = Lita::User.find_by_id(executed_orders[:ask]['user_id'])
+        lunch_buyer = Lita::User.find_by_id(executed_orders[:bid]['user_id'])
+        @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
+        @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
+        executed_orders
+      end
+
+      def transaction_possible?
+        ask_orders.any? && bid_orders.any?
       end
     end
   end

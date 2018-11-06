@@ -14,7 +14,6 @@ module Lita
 
         http.get 'market/limit_orders', :limit_orders
         http.post 'market/limit_orders', :place_limit_order
-        http.post 'market/market_orders', :place_market_order
 
         def limit_orders(request, response)
           return respond_not_authorized(response) unless authorized?(request)
@@ -25,33 +24,18 @@ module Lita
         def place_limit_order(request, response)
           return respond_not_authorized(response) unless authorized?(request)
           user = current_user(request)
-          order = limit_order_for_user(user)
-          if user
-            if winning_list.include?(user.mention_name) && market_manager.add_limit_order(order)
-              respond(response, success: true, order: order)
+          type = request.params['type']
+          limit_order = add_limit_order(user, type)
+          if limit_order
+            executed_orders = market_manager.execute_transaction
+            if executed_orders
+              respond(response, success: true, executed_orders: executed_orders.to_json)
             else
-              response.status = 403
-              respond(response, status: 403, message: 'Can not place order')
+              respond(response, success: true, order: limit_order)
             end
           else
-            response.status = 404
-            respond(response, status: 404, message: 'Error in parameters')
-          end
-        end
-
-        def place_market_order(request, response)
-          return respond_not_authorized(response) unless authorized?(request)
-          user = current_user(request)
-          if user
-            if !winning_list.include?(user.mention_name) && market_manager.add_market_order(user.id)
-              respond(response, success: true)
-            else
-              response.status = 403
-              respond(response, status: 403, message: 'Can not buy lunch')
-            end
-          else
-            response.status = 404
-            respond(response, status: 404, message: 'Error in parameters')
+            response.status = 403
+            respond(response, status: 403, message: 'Can not place order')
           end
         end
 
@@ -59,11 +43,18 @@ module Lita
 
         private
 
-        def limit_order_for_user(user)
+        def add_limit_order(user, type)
+          order = limit_order_for_user(user, type)
+          has_lunch = winning_list.include?(user.mention_name)
+          return unless (has_lunch && type == 'ask') || (!has_lunch && type == 'bid')
+          return order if market_manager.add_limit_order(order)
+        end
+
+        def limit_order_for_user(user, type)
           {
             id: SecureRandom.uuid,
             user_id: user.id,
-            type: 'limit',
+            type: type,
             created_at: Time.now
           }.to_json
         end
