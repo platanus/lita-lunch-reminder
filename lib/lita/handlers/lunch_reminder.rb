@@ -201,7 +201,7 @@ module Lita
         return unless order
         transaction = execute_transaction
         if transaction
-          notify_transaction(transaction[:buyer], transaction[:seller])
+          notify_transaction(transaction['buyer'], transaction['seller'])
         else
           response.reply_privately(
             "@#{user.mention_name}, #{t(:selling_lunch)}"
@@ -222,7 +222,7 @@ module Lita
         return unless order
         transaction = execute_transaction
         if transaction
-          notify_transaction(transaction[:buyer], transaction[:seller])
+          notify_transaction(transaction['buyer'], transaction['seller'])
         else
           response.reply_privately(
             "@#{user.mention_name}, #{t(:buying_lunch)}"
@@ -298,16 +298,16 @@ module Lita
       def execute_transaction
         executed_orders = @market.execute_transaction
         return unless executed_orders
-        ask_order = executed_orders[:ask]
-        bid_order = executed_orders[:bid]
+        ask_order = executed_orders['ask']
+        bid_order = executed_orders['bid']
         seller_user = Lita::User.find_by_id(ask_order['user_id'])
         buyer_user = Lita::User.find_by_id(bid_order['user_id'])
         {
-          buyer: buyer_user,
-          seller: seller_user,
-          timestamp: Time.now,
-          bid_order: bid_order,
-          ask_order: ask_order
+          'buyer' => buyer_user,
+          'seller' => seller_user,
+          'timestamp' => Time.now,
+          'bid_order' => bid_order,
+          'ask_order' => ask_order
         }
       end
 
