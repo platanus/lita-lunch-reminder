@@ -78,14 +78,12 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
 
       context 'one or more bid orders placed' do
-        let(:ask_order) { { 'id': 1111, 'user_id': 124, 'type': 'ask' } }
-        let(:bid_order) { { 'id': 2222, 'user_id': 123, 'type': 'bid' } }
+        let(:ask_order) { { 'id' => 1111, 'user_id' => 124, 'type' => 'ask' } }
+        let(:bid_order) { { 'id' => 2222, 'user_id' => 123, 'type' => 'bid' } }
         let(:orders) { { 'ask': ask_order, 'bid': bid_order } }
-
         let(:user) { double(mention_name: 'felipe.dominguez') }
         let(:lita_user) { Lita::User }
         let!(:user2) { Lita::User.create(124, mention_name: 'armando') }
-
         before do
           allow_any_instance_of(Lita::Services::MarketManager).to \
             receive(:execute_transaction).and_return(orders)
@@ -146,14 +144,12 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
 
       context 'one or more ask orders placed' do
-        let(:ask_order) { { 'id': 1111, 'user_id': 123, 'type': 'ask' } }
-        let(:bid_order) { { 'id': 2222, 'user_id': 124, 'type': 'bid' } }
+        let(:ask_order) { { 'id' => 1111, 'user_id' => 123, 'type' => 'ask' } }
+        let(:bid_order) { { 'id' => 2222, 'user_id' => 124, 'type' => 'bid' } }
         let(:orders) { { 'ask': ask_order, 'bid': bid_order } }
-
         let(:user) { double(mention_name: 'felipe.dominguez') }
         let(:lita_user) { Lita::User }
         let!(:user2) { Lita::User.create(124, mention_name: 'armando') }
-
         before do
           allow_any_instance_of(Lita::Services::MarketManager).to \
             receive(:execute_transaction).and_return(orders)

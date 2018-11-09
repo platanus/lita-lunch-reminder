@@ -300,8 +300,8 @@ module Lita
         return unless executed_orders
         ask_order = executed_orders[:ask]
         bid_order = executed_orders[:bid]
-        seller_user = Lita::User.find_by_id(ask_order[:user_id])
-        buyer_user = Lita::User.find_by_id(bid_order[:user_id])
+        seller_user = Lita::User.find_by_id(ask_order['user_id'])
+        buyer_user = Lita::User.find_by_id(bid_order['user_id'])
         {
           buyer: buyer_user,
           seller: seller_user,
