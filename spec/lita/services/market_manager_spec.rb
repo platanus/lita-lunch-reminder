@@ -282,8 +282,8 @@ describe Lita::Services::MarketManager, lita: true do
 
       it 'matchs the correct limit order' do
         orders = subject.execute_transaction
-        expect(orders[:ask]['user_id']).to eq(andres.id)
-        expect(orders[:bid]['user_id']).to eq(fdom.id)
+        expect(orders['ask']['user_id']).to eq(andres.id)
+        expect(orders['bid']['user_id']).to eq(fdom.id)
       end
 
       it 'remove order from limit orders' do

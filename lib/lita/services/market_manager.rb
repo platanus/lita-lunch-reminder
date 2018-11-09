@@ -53,7 +53,7 @@ module Lita
         new_bid_orders[1..-1].each do |order|
           @redis.sadd('orders', order.to_json)
         end
-        { 'ask': new_ask_orders.first, 'bid': new_bid_orders.first }
+        { 'ask' => new_ask_orders.first, 'bid' => new_bid_orders.first }
       end
 
       def reset_limit_orders
@@ -63,8 +63,8 @@ module Lita
       def execute_transaction
         return unless transaction_possible?
         executed_orders = remove_orders
-        lunch_seller = Lita::User.find_by_id(executed_orders[:ask]['user_id'])
-        lunch_buyer = Lita::User.find_by_id(executed_orders[:bid]['user_id'])
+        lunch_seller = Lita::User.find_by_id(executed_orders['ask']['user_id'])
+        lunch_buyer = Lita::User.find_by_id(executed_orders['bid']['user_id'])
         @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
         @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
         executed_orders
