@@ -24,7 +24,7 @@ module Lita
         def place_limit_order(request, response)
           return respond_not_authorized(response) unless authorized?(request)
           user = current_user(request)
-          type = request.params['type']
+          type = request.params[:type]
           limit_order = add_limit_order(user, type)
           if limit_order
             executed_orders = market_manager.execute_transaction
