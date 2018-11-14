@@ -102,6 +102,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
 
         context 'no transaction possible' do
           before do
+            allow_any_instance_of(Rack::Request).to receive(:params).and_return(type: 'ask')
             allow(market).to \
               receive(:execute_transaction).and_return(nil)
           end
@@ -140,6 +141,7 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
 
         context 'transaction possible' do
           before do
+            allow_any_instance_of(Rack::Request).to receive(:params).and_return(type: 'ask')
             allow(market).to \
               receive(:execute_transaction).and_return('ask': ask_order, 'bid': bid_order)
           end
