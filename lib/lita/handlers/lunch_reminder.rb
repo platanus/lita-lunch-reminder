@@ -240,7 +240,6 @@ module Lita
         response.reply("apostaste #{wager} puntos de karma")
       end
 
-
       def broadcast_to_channel(message, channel)
         target = Source.new(room: channel)
         robot.send_message(target, message)
@@ -273,8 +272,33 @@ module Lita
         end
       end
 
+      def announce_waggers(waggers)
+        case waggers.sum
+        when 1..ENV['MAX_LUNCHERS'].to_i
+          broadcast_to_channel(t(:low_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        when ENV['MAX_LUNCHERS'].to_i..20
+          broadcast_to_channel(t(:mid_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        when 20..40
+          broadcast_to_channel(t(:high_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        else
+          broadcast_to_channel(t(:crazy_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        end
+      end
+
       def announce_winners
         notify(@assigner.winning_lunchers_list, 'Yeah baby, almuerzas con nosotros!')
+        broadcast_to_channel(
+          t(:current_lunchers_list,
+            subject1: @assigner.winning_lunchers_list.length,
+            subject2: @assigner.winning_lunchers_list.join(', ')),
+          '#cooking'
+        )
+        waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values
+        announce_waggers(waggers.shuffle)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 

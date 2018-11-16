@@ -1,4 +1,4 @@
-es:
+en:
   lita:
     handlers:
       lunch_reminder:
@@ -10,6 +10,10 @@ es:
         current_lunchers_one: "Eres el primero en avisar que almuerza hoy, pero no te aseguro nada..."
         current_lunchers_some: "Hmm.. Ya van %{subject} que les gustaría almorzar aquí hoy."
         current_lunchers_too_many: "Ups, saliste escogido, no cabes :("
+        low_wagger: "¿Hay lentejas? ¿Feriado? Las apuestas fueron: %{waggers}"
+        mid_wagger: "Las apuestas fueron: %{waggers}"
+        high_wagger: "Wow! ¿Con ganas de apostar? Veo algunos ludopatas. Las apuestas fueron: %{waggers}"
+        crazy_wagger: "OMGGGGG! ¿Hay lomo saltado? La volaiiita... Las apuestas fueron: %{waggers}"
         thanks_for_answering: "Ok! Gracias por avisar. Suerte!"
         no_one_lunches: "Hasta el momento.. no hay nadie que almuerce aquí hoy!"
         only_one_lunches: "Aparte de %{subject}, nadie más ha dicho que almuerza en la oficina..."
