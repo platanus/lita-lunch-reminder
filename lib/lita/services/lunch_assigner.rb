@@ -20,8 +20,12 @@ module Lita
         @redis.get("#{user.id}:karma").to_i || 0
       end
 
+      def can_wager?(mention_name, wager)
+        get_karma(mention_name) >= wager && wager.positive?
+      end
+
       def set_wager(mention_name, wager)
-        can_wager = wager <= get_karma(mention_name).abs / 2
+        can_wager = can_wager?(mention_name, wager.to_i)
         @redis.set("#{mention_name}:wager", wager.to_i) if can_wager
         can_wager
       end
