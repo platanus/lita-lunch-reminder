@@ -127,15 +127,12 @@ module Lita
         list.map { |m| [m, get_wager(m)] }.to_h
       end
 
-      def karma_hash_with_wager(list)
-        list.map { |m| [m, get_wager(m)] }.to_h
-      end
-
       def pick_winners(amount)
         wh = wager_hash(current_lunchers_list)
         winners = Lita::Services::WeightedPicker.new(
-          karma_hash_with_wager(current_lunchers_list)
-        ).truncate(amount)
+          wager_hash(current_lunchers_list),
+          karma_hash(current_lunchers_list)
+        ).choose(amount)
 
         winners.each do |w|
           decrease_karma w, wh[w]
