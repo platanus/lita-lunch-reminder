@@ -4,6 +4,7 @@ module Lita
   module Handlers
     class LunchReminder < Handler
       MAX_LUNCHERS = ENV.fetch('MAX_LUNCHERS').to_i
+      MIN_LUNCHERS = MAX_LUNCHERS - 4
 
       on :loaded, :load_on_start
 
@@ -310,7 +311,7 @@ module Lita
           refresh
           scheduler.in(ENV['WAIT_RESPONSES_SECONDS'].to_i) do
             @assigner.do_the_assignment
-            announce_winners
+            announce_winners if @assigner.winning_lunchers_list.count >= MIN_LUNCHERS
           end
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
