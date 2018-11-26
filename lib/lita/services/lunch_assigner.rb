@@ -21,7 +21,7 @@ module Lita
       end
 
       def can_wager?(mention_name, wager)
-        get_karma(mention_name) >= wager && wager.positive?
+        get_karma(mention_name) >= wager && wager > 0
       end
 
       def set_wager(mention_name, wager)
