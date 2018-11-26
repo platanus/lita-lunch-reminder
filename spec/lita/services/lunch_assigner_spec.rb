@@ -182,12 +182,12 @@ describe Lita::Services::LunchAssigner, lita: true do
   end
 
   describe 'set_wager' do
-    before do
-      subject.set_karma(agustin.mention_name, -100)
-      redis.del('agustin:wager')
-    end
-
     context 'with enough karma points' do
+      before do
+        subject.set_karma(agustin.mention_name, 100)
+        redis.del('agustin:wager')
+      end
+
       it "sets and retrieves wager" do
         subject.set_wager("agustin", 50)
         expect(subject.get_wager("agustin")).to eq(50)
@@ -195,6 +195,11 @@ describe Lita::Services::LunchAssigner, lita: true do
     end
 
     context 'with not enough karma points' do
+      before do
+        subject.set_karma(agustin.mention_name, 1)
+        redis.del('agustin:wager')
+      end
+
       it "sets and retrieves wager" do
         subject.set_wager("agustin", 51)
         expect(subject.get_wager("agustin")).to eq(1)
@@ -202,7 +207,7 @@ describe Lita::Services::LunchAssigner, lita: true do
     end
   end
 
-  describe 'karma_hash_with_wager' do
+  describe 'karma_hash' do
     before do
       subject.add_to_lunchers(agustin.mention_name)
       subject.add_to_lunchers(jaime.mention_name)
@@ -213,7 +218,7 @@ describe Lita::Services::LunchAssigner, lita: true do
     end
 
     it "get hash correctly" do
-      expect(subject.karma_hash_with_wager([jaime.mention_name, agustin.mention_name])).to(
+      expect(subject.wager_hash([jaime.mention_name, agustin.mention_name])).to(
         include(agustin.mention_name => 5, jaime.mention_name => 10)
       )
     end
@@ -246,11 +251,11 @@ describe Lita::Services::LunchAssigner, lita: true do
   describe 'winners lose wagered points' do
     before do
       subject.add_to_current_lunchers(jaime.mention_name)
-      subject.set_karma(jaime.mention_name, -10)
+      subject.set_karma(jaime.mention_name, 10)
       subject.set_wager(jaime.mention_name, 5)
       subject.pick_winners(1)
     end
 
-    it { expect(subject.get_karma(jaime.mention_name)).to eq(-15) }
+    it { expect(subject.get_karma(jaime.mention_name)).to eq(5) }
   end
 end
