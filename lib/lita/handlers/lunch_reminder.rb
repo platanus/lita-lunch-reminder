@@ -3,6 +3,9 @@
 module Lita
   module Handlers
     class LunchReminder < Handler
+      MAX_LUNCHERS = ENV.fetch('MAX_LUNCHERS').to_i
+      MIN_LUNCHERS = MAX_LUNCHERS - 4
+
       on :loaded, :load_on_start
 
       def initialize(robot)
@@ -231,6 +234,15 @@ module Lita
         end
       end
 
+      route(/apuesto ([^\D]+) puntos( de karma)?/i, command: true) do |response|
+        wager = response.matches[0][0].to_i
+        unless @assigner.set_wager(response.user.mention_name, wager)
+          response.reply("no puedes apostar tanto karma, amiguito")
+          next
+        end
+        response.reply("apostaste #{wager} puntos de karma")
+      end
+
       def broadcast_to_channel(message, channel)
         target = Source.new(room: channel)
         robot.send_message(target, message)
@@ -263,8 +275,33 @@ module Lita
         end
       end
 
+      def announce_waggers(waggers)
+        case waggers.sum
+        when 1..MAX_LUNCHERS
+          broadcast_to_channel(t(:low_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        when MAX_LUNCHERS..20
+          broadcast_to_channel(t(:mid_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        when 20..40
+          broadcast_to_channel(t(:high_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        else
+          broadcast_to_channel(t(:crazy_wagger, waggers: waggers.join(', ')),
+            '#cooking')
+        end
+      end
+
       def announce_winners
-        notify(@assigner.winning_lunchers_list, 'Yeah baby, almuerzas con nosotros!')
+        notify(@assigner.winning_lunchers_list.shuffle, 'Yeah baby, almuerzas con nosotros!')
+        broadcast_to_channel(
+          t(:current_lunchers_list,
+            subject1: @assigner.winning_lunchers_list.length,
+            subject2: @assigner.winning_lunchers_list.join(', ')),
+          '#cooking'
+        )
+        waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values
+        announce_waggers(waggers)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
@@ -274,7 +311,7 @@ module Lita
           refresh
           scheduler.in(ENV['WAIT_RESPONSES_SECONDS'].to_i) do
             @assigner.do_the_assignment
-            announce_winners
+            announce_winners if @assigner.winning_lunchers_list.count >= MIN_LUNCHERS
           end
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
