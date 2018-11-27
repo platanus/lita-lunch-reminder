@@ -69,8 +69,7 @@ module Lita
       end
       route(/^s[íi]$|^hoy almuerzo aqu[íi]$/i,
         command: true, help: help_msg(:confirm_yes)) do |response|
-        @assigner.add_to_current_lunchers(response.user.mention_name)
-        @assigner.add_to_winning_lunchers(response.user.mention_name) if @assigner.already_assigned?
+        add_user_to_lunchers(response.user.mention_name)
         lunchers = @assigner.current_lunchers_list.length
         case lunchers
         when 1
@@ -240,7 +239,13 @@ module Lita
           response.reply("no puedes apostar tanto karma, amiguito")
           next
         end
+        add_user_to_lunchers(response.user.mention_name)
         response.reply("apostaste #{wager} puntos de karma")
+      end
+
+      def add_user_to_lunchers(mention_name)
+        @assigner.add_to_current_lunchers(mention_name)
+        @assigner.add_to_winning_lunchers(mention_name) if @assigner.already_assigned?
       end
 
       def broadcast_to_channel(message, channel)
