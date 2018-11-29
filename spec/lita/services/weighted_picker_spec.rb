@@ -133,14 +133,14 @@ describe Lita::Services::WeightedPicker do
     end
   end
 
-  describe '#truncate' do
+  describe '#choose_winners' do
     context 'with no participants' do
       let(:wager_hash) { {} }
       let(:karma_hash) { {} }
       let(:subject) { init_subject(wager_hash, karma_hash) }
 
       it 'returns empty array' do
-        expect(subject.send(:truncate, 3)).to eq([])
+        expect(subject.send(:choose_winners, 3)).to eq([])
       end
     end
 
@@ -151,27 +151,27 @@ describe Lita::Services::WeightedPicker do
 
       context 'with sample of size 0' do
         it 'returns empty array' do
-          expect(subject.send(:truncate, 0)).to eq([])
+          expect(subject.send(:choose_winners, 0)).to eq([])
         end
       end
 
       context 'with sample smaller than lunchers' do
         it 'returns array of size equal to sample argument' do
-          expect(subject.send(:truncate, 3).count).to eq(3)
+          expect(subject.send(:choose_winners, 3).count).to eq(3)
         end
       end
 
       context 'with sample size equal to lunchers size' do
         it 'returns array of size equal to sample argument' do
-          expect(subject.send(:truncate, 4).count).to eq(4)
+          expect(subject.send(:choose_winners, 4).count).to eq(4)
         end
 
         it 'returns array of size equal to lunchers size' do
-          expect(subject.send(:truncate, 4).count).to eq(karma_hash.count)
+          expect(subject.send(:choose_winners, 4).count).to eq(karma_hash.count)
         end
 
         it 'returns array with every participant' do
-          expect(subject.send(:truncate, 4)).to contain_exactly(
+          expect(subject.send(:choose_winners, 4)).to contain_exactly(
             'agustin',
             'giovanni',
             'ham',
@@ -182,11 +182,11 @@ describe Lita::Services::WeightedPicker do
 
       context 'with sample size bigger than lunchers size' do
         it 'returns array of size equal to lunchers size' do
-          expect(subject.send(:truncate, 5).count).to eq(karma_hash.count)
+          expect(subject.send(:choose_winners, 5).count).to eq(karma_hash.count)
         end
 
         it 'returns array with every participant' do
-          expect(subject.send(:truncate, 5).sort).to contain_exactly(
+          expect(subject.send(:choose_winners, 5).sort).to contain_exactly(
             'agustin',
             'giovanni',
             'ham',
@@ -237,13 +237,13 @@ describe Lita::Services::WeightedPicker do
 
       context 'there is a tie in the last positions' do
         before do
-          allow(subject).to receive(:truncate).and_return(['giovanni', 'andres'])
+          allow(subject).to receive(:choose_winners).and_return(['giovanni', 'andres'])
           allow(subject).to receive(:sample).and_return(['juan', 'agustin'])
         end
 
-        it 'receives truncate method' do
+        it 'receives choose_winners method' do
           subject.choose(4)
-          expect(subject).to have_received(:truncate).with(2, wager_hash)
+          expect(subject).to have_received(:choose_winners).with(2, wager_hash)
         end
 
         it 'receives sample method' do

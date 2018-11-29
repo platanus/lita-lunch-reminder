@@ -14,7 +14,7 @@ module Lita
         return hash.keys unless sorted_hash.size >= n
         tied_users = choose_tied_users(n, sorted_hash)
         loosers = choose_loosers(n, sorted_hash)
-        winners = truncate(hash.size - tied_users.size - loosers.size, sorted_hash)
+        winners = choose_winners(hash.size - tied_users.size - loosers.size, sorted_hash)
         tied_users = @karma_hash.slice(*tied_users.keys)
         winners.concat sample(n - winners.size, tied_users.to_h)
       end
@@ -41,19 +41,19 @@ module Lita
         winners
       end
 
-      def truncate(n, hash = @wager_hash)
+      def choose_winners(n, hash = @wager_hash)
         sample_size = [n, hash.count].min
         hash.sort_by { |_, points| -points }.to_a.first(sample_size).to_h.keys
       end
 
       def choose_loosers(n, sorted_hash)
         reference_user = sorted_hash.to_a[n - 1]
-        sorted_hash.select { |_, karma| karma < reference_user[1] }
+        sorted_hash.select { |_, wager| wager < reference_user[1] }
       end
 
       def choose_tied_users(n, sorted_hash)
         reference_user = sorted_hash.to_a[n - 1]
-        sorted_hash.select { |_, karma| karma == reference_user[1] }
+        sorted_hash.select { |_, wager| wager == reference_user[1] }
       end
 
       def cumulative_weighted_hash(hash)
