@@ -281,7 +281,7 @@ module Lita
       end
 
       def announce_waggers(waggers)
-        case waggers.sum
+        case waggers.inject(0, :+)
         when 1..MAX_LUNCHERS
           broadcast_to_channel(t(:low_wagger, waggers: waggers.join(', ')),
             '#cooking')
