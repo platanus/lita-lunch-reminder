@@ -305,7 +305,7 @@ module Lita
             subject2: @assigner.winning_lunchers_list.shuffle.join(', ')),
           '#cooking'
         )
-        waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values
+        waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values.sort.reverse
         announce_waggers(waggers)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
