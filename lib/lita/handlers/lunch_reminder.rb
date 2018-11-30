@@ -281,7 +281,7 @@ module Lita
       end
 
       def announce_waggers(waggers)
-        case waggers.sum
+        case waggers.inject(0, :+)
         when 1..MAX_LUNCHERS
           broadcast_to_channel(t(:low_wagger, waggers: waggers.join(', ')),
             '#cooking')
@@ -305,7 +305,7 @@ module Lita
             subject2: @assigner.winning_lunchers_list.shuffle.join(', ')),
           '#cooking'
         )
-        waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values
+        waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values.sort.reverse
         announce_waggers(waggers)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
