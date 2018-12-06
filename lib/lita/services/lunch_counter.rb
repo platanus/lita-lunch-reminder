@@ -3,6 +3,8 @@ require 'date'
 module Lita
   module Services
     class LunchCounter
+      attr_accessor :orgs, :lunchers
+
       def initialize
         @sm = Lita::Services::SpreadsheetManager.new('ALMORZADORES')
         @orgs = {}
@@ -18,18 +20,15 @@ module Lita
         write_counts
       end
 
-      private
-
       def write_counts
         @sm.load_worksheet('Monthly Counter')
         counts = [
           Date.today.prev_month.strftime('%B'),
-          orgs['Platanus']['lunches'].to_s,
-          orgs['Fintual']['lunches'].to_s,
-          sorgs['Buda']['lunches'].to_s
+          @orgs['Platanus']['lunches'].to_s,
+          @orgs['Fintual']['lunches'].to_s,
+          @orgs['Buda']['lunches'].to_s
         ]
-        @sm.insert_new_row(counts)
-        counts
+        return counts if @sm.insert_new_row(counts)
       end
 
       def add_lunches_to_orgs
@@ -48,9 +47,11 @@ module Lita
           sheet = @sm.load_worksheet(org)
           @orgs[org] = Hash.new(0)
           org_members = []
-          sheet.rows.each { |row| org_members << row.first }
+          sheet.rows.each do |row|
+            org_members << row.first
+            @lunchers[row.first] = 0
+          end
           @orgs[org]['members'] = org_members
-          sheet.rows.each { |row| @lunchers[row.first] = 0 }
         end
       end
 
@@ -60,13 +61,14 @@ module Lita
       end
 
       def manage_repeated_members
-        repeated_members.each do |user|
+        find_repeated_members.each do |user|
           @lunchers[user] /= 2.0
         end
       end
 
       def count_lunches
         sheet = @sm.load_worksheet('ALMORZADORES')
+        total_rows = sheet.num_rows
         inital_row = find_first_day_row
         (inital_row..total_rows).each do |n|
           user = sheet[n, 2]
@@ -81,13 +83,12 @@ module Lita
 
       def find_first_day_row
         sheet = @sm.worksheet
-        total_rows = sheet.num_rows
-        inital_row = total_rows
+        inital_row = sheet.num_rows
         time = Date.today
         obj_time = Date.today.prev_month - Date.today.mday + 1
         until obj_time > time
           inital_row -= 1
-          year, month, day = ws[inital_row, 1].split('-').map(&:to_i)
+          year, month, day = sheet[inital_row, 1].split('-').map(&:to_i)
           time = Date.new(year, month, day)
         end
         inital_row + 1

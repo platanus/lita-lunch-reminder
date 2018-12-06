@@ -370,13 +370,16 @@ module Lita
       def count_lunches
         counter = Lita::Services::LunchCounter.new
         counts = counter.persist_lunches_count
+        return unless counts
         user = Lita::User.find_by_mention_name('jesus')
-        message = t(:announce_count,
-                    subject: user.mention_name,
-                    month: counts[0],
-                    count1: counts[1],
-                    count2: counts[2],
-                    count3: counts[3])
+        message = t(
+          :announce_count,
+          subject: user.mention_name,
+          month: counts[0],
+          count1: counts[1],
+          count2: counts[2],
+          count3: counts[3]
+        )
         robot.send_message(Source.new(user: user), message) if user
       end
 

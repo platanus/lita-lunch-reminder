@@ -89,7 +89,6 @@ describe Lita::Services::LunchCounter, lita: true do
       subject.count_lunches
       subject.manage_repeated_members
       subject.add_lunches_to_orgs
-
     end
 
     it 'counts lunches for everybody' do
