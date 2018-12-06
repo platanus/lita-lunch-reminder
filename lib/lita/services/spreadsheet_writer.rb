@@ -3,10 +3,10 @@ require "base64"
 module Lita
   module Services
     class SpreadsheetWriter
-      def initialize
+      def initialize(ws_title)
         @session = GoogleDrive::Session.from_service_account_key(credentials_io)
         @spreadsheet = @session.spreadsheet_by_key(ENV.fetch('GOOGLE_SP_KEY'))
-        @ws = @spreadsheet.worksheets[0]
+        @ws = @spreadsheet.worksheet_by_title[ws_title]
       end
 
       def credentials_io
