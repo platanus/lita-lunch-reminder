@@ -233,7 +233,7 @@ module Lita
         end
       end
 
-      route(/apuesto ([^\D]+) puntos( de karma)?/i, command: true) do |response|
+      route(/apuesto ([^\D]+)( puntos)?( de karma)?/i, command: true) do |response|
         wager = response.matches[0][0].to_i
         unless @assigner.set_wager(response.user.mention_name, wager)
           response.reply("no puedes apostar tanto karma, amiguito")
