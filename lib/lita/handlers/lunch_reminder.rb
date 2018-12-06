@@ -322,6 +322,9 @@ module Lita
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
         end
+        scheduler.cron(ENV['COUNTS_CRON']) do
+          count_lunches
+        end
       end
 
       def create_order(user, type)
@@ -362,6 +365,19 @@ module Lita
           t(:transaction, subject1: buyer_user.mention_name, subject2: seller_user.mention_name),
           '#cooking'
         )
+      end
+
+      def count_lunches
+        counter = Lita::Services::LunchCounter.new
+        counts = counter.persist_lunches_count
+        user = Lita::User.find_by_mention_name('jesus')
+        message = t(:announce_count,
+                    subject: user.mention_name,
+                    month: counts[0],
+                    count1: counts[1],
+                    count2: counts[2],
+                    count3: counts[3])
+        robot.send_message(Source.new(user: user), message) if user
       end
 
       Lita.register_handler(self)

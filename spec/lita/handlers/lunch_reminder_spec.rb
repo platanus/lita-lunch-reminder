@@ -7,6 +7,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     ENV['WAIT_RESPONSES_SECONDS'] = '0 0 * * *'
     ENV['ASK_CRON'] = '0 0 * * *'
     ENV['PERSIST_CRON'] = '0 0 * * *'
+    ENV['COUNTS_CRON'] = '00 04 1 * *'
   end
 
   it 'responds to invite announcement' do
