@@ -91,7 +91,7 @@ module Lita
       end
 
       def persist_winning_lunchers
-        sw = Lita::Services::SpreadsheetWriter.new('ALMORZADORES')
+        sw = Lita::Services::SpreadsheetManager.new('ALMORZADORES')
         time = Time.now.strftime('%Y-%m-%d')
         winning_lunchers_list.each do |winner|
           user = User.find_by_mention_name(winner) || User.find_by_name(winner)
