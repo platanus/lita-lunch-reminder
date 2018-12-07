@@ -5,11 +5,14 @@ require 'date'
 
 describe Lita::Services::LunchCounter, lita: true do
   before do
+    allow(ENV).to receive(:fetch)
+      .with('MAIN_SHEET')
+      .and_return('SHEET')
     allow(Lita::Services::SpreadsheetManager).to receive(:new).and_return(sh_manager)
     allow(sh_manager).to receive(:load_worksheet).with('Platanus').and_return(platanus_ws)
     allow(sh_manager).to receive(:load_worksheet).with('Fintual').and_return(fintual_ws)
     allow(sh_manager).to receive(:load_worksheet).with('Buda').and_return(buda_ws)
-    allow(sh_manager).to receive(:load_worksheet).with('ALMORZADORES').and_return(main_ws)
+    allow(sh_manager).to receive(:load_worksheet).with(ENV.fetch('MAIN_SHEET')).and_return(main_ws)
     allow(sh_manager).to receive(:load_worksheet).with('Monthly Counter').and_return(true)
     allow(main_ws).to receive(:num_rows).and_return(5)
     allow(main_ws).to receive(:[]).with(1, 1).and_return('2018-10-30')
