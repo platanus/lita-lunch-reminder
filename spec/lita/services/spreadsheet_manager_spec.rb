@@ -11,9 +11,9 @@ context 'on a new empty worksheet' do
     )
   end
 
-  let(:spreadsheetWriter) do
+  let(:spreadsheetManager) do
     instance_double(
-      'SpreadsheetWriter',
+      'spreadsheetManager',
       spreadsheet: google_spreasheet_mock
     )
   end
@@ -92,11 +92,11 @@ context 'on a new empty worksheet' do
       it "should write the array in the last row, each value in it's own column" do
         array = [*0..5]
 
-        allow(spreadsheetWriter).to receive(:write_new_row).with(array).and_return(true)
-        allow(spreadsheetWriter.spreadsheet.worksheets[0]).to receive_message_chain('rows.last')
+        allow(spreadsheetManager).to receive(:write_new_row).with(array).and_return(true)
+        allow(spreadsheetManager.spreadsheet.worksheets[0]).to receive_message_chain('rows.last')
           .and_return([*0..5].map(&:to_s))
 
-        write_flag = spreadsheetWriter.write_new_row(array)
+        write_flag = spreadsheetManager.write_new_row(array)
         expect(write_flag).to eq(true)
         expect(google_spreasheet_mock.worksheets[0].rows.last).to eq(array.map(&:to_s))
       end
@@ -104,9 +104,9 @@ context 'on a new empty worksheet' do
 
     context 'given an empty array' do
       it 'should not write in the worksheet and return false' do
-        allow(spreadsheetWriter).to receive(:write_new_row).with([]).and_return(false)
+        allow(spreadsheetManager).to receive(:write_new_row).with([]).and_return(false)
 
-        write_flag = spreadsheetWriter.write_new_row([])
+        write_flag = spreadsheetManager.write_new_row([])
         expect(write_flag).to eq(false)
       end
     end
