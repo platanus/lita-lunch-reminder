@@ -140,6 +140,8 @@ module Lita
 
         winners.each do |w|
           decrease_karma w, wh[w]
+          ham = Lita::User.find_by_mention_name('ham')
+          @karmanager.increase_karma_by(ham.id, wh[w]) if ham
           add_to_winning_lunchers w
         end
       end
