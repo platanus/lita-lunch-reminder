@@ -6,9 +6,10 @@ module Lita
       attr_accessor :orgs, :lunchers
 
       def initialize
-        @sm = Lita::Services::SpreadsheetManager.new('ALMORZADORES')
+        @sm = Lita::Services::SpreadsheetManager.new(ENV.fetch('MAIN_SHEET'))
         @orgs = {}
         @lunchers = {}
+        @orgs_names = ['Platanus', 'Fintual', 'Buda']
       end
 
       def persist_lunches_count
@@ -22,28 +23,23 @@ module Lita
 
       def write_counts
         @sm.load_worksheet('Monthly Counter')
-        counts = [
-          Date.today.prev_month.strftime('%B'),
-          @orgs['Platanus']['lunches'].to_s,
-          @orgs['Fintual']['lunches'].to_s,
-          @orgs['Buda']['lunches'].to_s
-        ]
-        return counts if @sm.insert_new_row(counts)
+        row = [Date.today.prev_month.strftime('%B')]
+        @orgs_names.each do |org|
+          row << @orgs[org]['lunches'].to_s
+        end
+        return row if @sm.insert_new_row(row)
       end
 
       def add_lunches_to_orgs
         @lunchers.keys.each do |user|
-          @orgs['Platanus']['lunches'] += @lunchers[user] if @orgs['Platanus']['members']
-                                                             .include? user
-          @orgs['Fintual']['lunches'] += @lunchers[user] if @orgs['Fintual']['members']
-                                                            .include? user
-          @orgs['Buda']['lunches'] += @lunchers[user] if @orgs['Buda']['members']
-                                                         .include? user
+          @orgs_names.each do |org|
+            @orgs[org]['lunches'] += @lunchers[user] if @orgs[org]['members'].include? user
+          end
         end
       end
 
       def build_orgs
-        ['Platanus', 'Fintual', 'Buda'].each do |org|
+        @orgs_names.each do |org|
           sheet = @sm.load_worksheet(org)
           @orgs[org] = Hash.new(0)
           org_members = []
@@ -56,7 +52,10 @@ module Lita
       end
 
       def find_repeated_members
-        all = @orgs['Platanus']['members'] + @orgs['Buda']['members'] + @orgs['Fintual']['members']
+        all = []
+        @orgs_names.each do |org|
+          all += @orgs[org]['members']
+        end
         all.reject { |e| all.count(e) < 2 }.uniq
       end
 
@@ -67,16 +66,17 @@ module Lita
       end
 
       def count_lunches
-        sheet = @sm.load_worksheet('ALMORZADORES')
+        sheet = @sm.load_worksheet(ENV.fetch('MAIN_SHEET'))
+        user_column = 2
         total_rows = sheet.num_rows
         inital_row = find_first_day_row
         (inital_row..total_rows).each do |n|
-          user = sheet[n, 2]
+          user = sheet[n, user_column]
           if user.include? 'invitado'
             user = user.split('_')[-1]
             @lunchers[user] += 1
           else
-            @lunchers[sheet[n, 2]] += 1
+            @lunchers[sheet[n, user_column]] += 1
           end
         end
       end

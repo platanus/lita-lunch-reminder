@@ -35,7 +35,7 @@ en:
         transaction: "@%{subject1} le compró almuerzo a @%{subject2}"
         cant_buy: 'no te puedo comprar almuerzo...'
         cant_sell: 'no puedes vender algo que no tienes!'
-        announce_count: '%{subject1} la cuenta de almuerzos en %{mes} fue: Platanus: %{count1}, Fintual: %{count2}, Buda: %{count3}'
+        announce_count: '%{subject1} la cuenta de almuerzos en %{month} fue: Platanus: %{count1}, Fintual: %{count2}, Buda: %{count3}'
         help:
           thanks:
             usage: gracias
