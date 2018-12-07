@@ -162,13 +162,19 @@ module Lita
         giver = response.user
         mention_name = clean_mention_name(response.matches[0][0])
         destinatary = Lita::User.find_by_mention_name(mention_name)
-        @karmanager.transfer_karma(giver.id, destinatary.id, 1)
-        response.reply(
-          "@#{giver.mention_name}, le has dado uno de tus puntos de " +
-          "karma a @#{destinatary.mention_name}."
-        )
-        broadcast_to_channel("@#{giver.mention_name}, le ha dado un punto de " +
-          "karma a @#{destinatary.mention_name}.", '#karma-audit')
+        transfered = @karmanager.transfer_karma(giver.id, destinatary.id, 1)
+        if transfered
+          response.reply(
+            "@#{giver.mention_name}, le has dado uno de tus puntos de " +
+            "karma a @#{destinatary.mention_name}."
+          )
+          broadcast_to_channel("@#{giver.mention_name}, le ha dado un punto de " +
+            "karma a @#{destinatary.mention_name}.", '#karma-audit')
+        else
+          response.reply(
+            "@#{giver.mention_name}, no se pudo transferir el karma"
+          )
+        end
       end
 
       route(/c[eé]dele mi puesto a ([^\s]+)/i, command: true) do |response|
@@ -264,9 +270,13 @@ module Lita
       end
 
       def refresh
+        lunchers_list = @assigner.lunchers_list
         @assigner.reset_lunchers
+        @karmanager.reset_daily_transfers(
+          lunchers_list.map { |name| Lita::User.find_by_mention_name(name).id }
+        )
         @market.reset_limit_orders
-        @assigner.lunchers_list.each do |luncher|
+        lunchers_list.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
           message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
           robot.send_message(Source.new(user: user), message) if user
