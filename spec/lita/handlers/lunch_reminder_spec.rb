@@ -50,14 +50,37 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     send_message('@lita cuánto karma tiene fernando?', as: usr1)
     expect(replies.last).to match('@fernando tiene 0 puntos de karma.')
   end
-  it 'transfers karma' do
-    armando = Lita::User.create(124, mention_name: 'armando')
-    jilberto = Lita::User.create(125, mention_name: 'jilberto')
-    send_message('@lita transfierele karma a armando', as: jilberto)
-    send_message('@lita cuánto karma tengo?', as: jilberto)
-    expect(replies.last).to match('Tienes -1 puntos de karma, mi padawan')
-    send_message('@lita cuánto karma tengo?', as: armando)
-    expect(replies.last).to match('Tienes 1 puntos de karma, mi padawan')
+
+  describe 'transfer karma' do
+    context 'can transfer' do
+      before do
+        allow_any_instance_of(Lita::Services::Karmanager).to(
+          receive(:transfer_karma).and_return(true)
+        )
+      end
+
+      it 'transfers karma' do
+        armando = Lita::User.create(124, mention_name: 'armando')
+        jilberto = Lita::User.create(125, mention_name: 'jilberto')
+        send_message('@lita transfierele karma a armando', as: jilberto)
+        expect(replies.last).to match('@jilberto, le ha dado un punto de karma a @armando.')
+      end
+    end
+
+    context 'can not transfer' do
+      before do
+        allow_any_instance_of(Lita::Services::Karmanager).to(
+          receive(:transfer_karma).and_return(false)
+        )
+      end
+
+      it 'not transfer karma' do
+        armando = Lita::User.create(124, mention_name: 'armando')
+        jilberto = Lita::User.create(125, mention_name: 'jilberto')
+        send_message('@lita transfierele karma a armando', as: jilberto)
+        expect(replies.last).to match('@jilberto, no se pudo transferir el karma')
+      end
+    end
   end
 
   describe 'sell lunch' do
