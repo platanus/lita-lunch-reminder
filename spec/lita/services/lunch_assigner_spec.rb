@@ -167,6 +167,16 @@ describe Lita::Services::LunchAssigner, lita: true do
       expect(subject.winning_lunchers_list).to include('pedro')
       expect(subject.winning_lunchers_list.count).to eq(3)
     end
+
+    it 'transfers spent karma to ham' do
+      ham = Lita::User.create(127, mention_name: 'ham')
+      subject.add_to_lunchers('pedro')
+      subject.add_to_current_lunchers('pedro')
+      karmanager.set_karma(pedro.id, 100)
+      subject.set_wager(pedro.mention_name, 30)
+      subject.pick_winners(1)
+      expect(karmanager.get_karma(ham.id)).to eq(30)
+    end
   end
 
   describe '#weekday_name_plus' do
