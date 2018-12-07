@@ -322,7 +322,7 @@ module Lita
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
         end
-        scheduler.cron(ENV['COUNTS_CRON']) do
+        scheduler.cron(ENV.fetch('COUNTS_CRON')) do
           count_lunches
         end
       end
@@ -371,7 +371,7 @@ module Lita
         counter = Lita::Services::LunchCounter.new
         counts = counter.persist_lunches_count
         return unless counts
-        user = Lita::User.find_by_mention_name('jesus')
+        user = Lita::User.find_by_mention_name(ENV.fetch('LUNCH_ADMIN', 'jesus'))
         message = t(
           :announce_count,
           subject: user.mention_name,
