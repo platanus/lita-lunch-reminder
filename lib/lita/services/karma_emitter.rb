@@ -14,22 +14,28 @@ module Lita
 
       def emit(users, acc = 0)
         users = users.select { |user| @karmanager.get_karma(user.id) < KARMA_LIMIT }
-        total_karma = @karmanager.get_karma(@ham.id)
-        karma_per_user = total_karma / users.size
-        return acc if karma_per_user == 0
+        karma_per_user = @karmanager.get_karma(@ham.id) / users.size
+        save_last_emission_date if acc > 0
+        return acc unless karma_per_user > 0
+
         users.each do |user|
-          acc += karma_to_emit(user, karma_per_user)
-          @karmanager.transfer_karma(
-            @ham.id,
-            user.id,
-            karma_to_emit(user, karma_per_user),
-            check_limit: false
-          )
+          karma_to_emit = karma_to_emit(user, karma_per_user)
+          acc += karma_to_emit
+          @karmanager.transfer_karma(@ham.id, user.id, karma_to_emit, check_limit: false)
         end
+
         emit(users, acc)
       end
 
+      def last_emission_date
+        Date.parse(@redis.get('karma_emitter:last_emission_date') || '2000-01-01')
+      end
+
       private
+
+      def save_last_emission_date
+        @redis.set('karma_emitter:last_emission_date', Date.today.to_s)
+      end
 
       def karma_to_emit(user, karma_per_user)
         karma_to_emit = karma_per_user

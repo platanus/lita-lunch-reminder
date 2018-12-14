@@ -31,6 +31,13 @@ describe Lita::Services::KarmaEmitter, lita: true do
       karmanager.set_karma(andres.id, andres_karma)
     end
 
+    it { expect(subject.last_emission_date).to eq(Date.parse('2000-01-01')) }
+
+    it 'changed the emission date to today' do
+      subject.emit(users)
+      expect(subject.last_emission_date).to eq(Date.today)
+    end
+
     context 'with ham having zero karma' do
       let(:ham_karma) { 0 }
 
