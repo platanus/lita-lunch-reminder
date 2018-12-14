@@ -36,8 +36,8 @@ module Lita
         @redis.set("#{user_id}:karma_transfered", karma_transfered + amount)
       end
 
-      def transfer_karma(giver_id, receiver_id, amount)
-        return false unless can_transfer?(giver_id, amount)
+      def transfer_karma(giver_id, receiver_id, amount, options = { check_limit: true })
+        return false unless !options[:check_limit] || can_transfer?(giver_id, amount)
         decrease_karma_by(giver_id, amount)
         increase_karma_by(receiver_id, amount)
         true
