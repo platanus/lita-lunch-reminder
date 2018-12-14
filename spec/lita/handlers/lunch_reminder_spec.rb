@@ -197,4 +197,37 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       .with('armando', 5)
     send_message("@lita apuesto 5 puntos de karma", as: armando)
   end
+
+  describe 'karma emission' do
+    let!(:ham) { Lita::User.create(124, mention_name: 'ham') }
+    let!(:andres) { Lita::User.create(125, mention_name: 'andres') }
+
+    before do
+      allow_any_instance_of(Lita::Services::KarmaEmitter).to(
+        receive(:last_emission_date).and_return(last_emission_date)
+      )
+      allow_any_instance_of(Lita::Services::KarmaEmitter).to(
+        receive(:emit).and_return(10)
+      )
+    end
+
+    context 'emission not done in 30 days' do
+      let(:last_emission_date) { Date.new }
+
+      it 'does emit karma' do
+        send_message('@lita reparte tu karma', as: andres)
+        expect(replies.last).to match("Repartí 10 karmas entre todos. Recuerda: el que guarda siempre tiene")
+      end
+    end
+
+    context 'emission done in less than 30 days' do
+      let(:last_emission_date) { Date.today }
+
+      it 'does not emit karma' do
+        send_message('@lita reparte tu karma', as: andres)
+        send_message('@lita reparte tu karma', as: andres)
+        expect(replies.last).to match("No pude repartir el karma. Faltan 30 días para que pueda emitir de nuevo")
+      end
+    end
+  end
 end
