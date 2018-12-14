@@ -5,6 +5,7 @@ module Lita
     class LunchReminder < Handler
       MAX_LUNCHERS = ENV.fetch('MAX_LUNCHERS').to_i
       MIN_LUNCHERS = MAX_LUNCHERS - 4
+      EMISSION_INTERVAL_DAYS = ENV.fetch('EMISSION_INTERVAL_DAYS', 30)
 
       on :loaded, :load_on_start
 
@@ -252,7 +253,7 @@ module Lita
 
       route(/reparte tu karma/i, command: true) do |response|
         days_since = (Date.today - @emitter.last_emission_date).to_i
-        if days_since > 30
+        if days_since > EMISSION_INTERVAL_DAYS
           users = @assigner.lunchers_list.map do |mention_name|
             Lita::User.find_by_mention_name(mention_name)
           end
@@ -260,7 +261,7 @@ module Lita
           response.reply(t(:karma_emitted, karma_amount: emitted_karma))
           broadcast_to_channel(t(:karma_emitted, karma_amount: emitted_karma), '#cooking')
         else
-          response.reply(t(:karma_not_emitted, days_remaining: 30 - days_since))
+          response.reply(t(:karma_not_emitted, days_remaining: EMISSION_INTERVAL_DAYS - days_since))
         end
       end
 
