@@ -216,7 +216,9 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
 
       it 'does emit karma' do
         send_message('@lita reparte tu karma', as: andres)
-        expect(replies.last).to match("Repartí 10 karmas entre todos. Recuerda: el que guarda siempre tiene")
+        expect(replies.last).to(
+          match('Repartí 10 karmas entre todos. Recuerda: el que guarda siempre tiene')
+        )
       end
     end
 
@@ -226,7 +228,9 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       it 'does not emit karma' do
         send_message('@lita reparte tu karma', as: andres)
         send_message('@lita reparte tu karma', as: andres)
-        expect(replies.last).to match("No pude repartir el karma. Faltan 30 días para que pueda emitir de nuevo")
+        expect(replies.last).to(
+          match('No pude repartir el karma. Faltan 30 días para que pueda emitir de nuevo')
+        )
       end
     end
   end
