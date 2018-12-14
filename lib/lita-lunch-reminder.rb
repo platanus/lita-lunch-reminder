@@ -17,6 +17,7 @@ require 'lita/services/weighted_picker'
 require 'lita/services/karmanager'
 require 'lita/services/market_manager'
 require 'lita/services/lunch_counter'
+require 'lita/services/karma_emitter'
 
 Lita::Handlers::LunchReminder.template_root File.expand_path(
   File.join('..', '..', 'templates'), __FILE__

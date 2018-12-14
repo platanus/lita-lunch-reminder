@@ -14,6 +14,8 @@ en:
         mid_wagger: "Las apuestas fueron: %{waggers}"
         high_wagger: "Wow! Las apuestas fueron: %{waggers}"
         crazy_wagger: "La volaiiita... Las apuestas fueron: %{waggers}"
+        karma_emitted: "Repartí %{karma_amount} karmas entre todos. Recuerda: el que guarda siempre tiene"
+        karma_not_emitted: "No pude repartir el karma. Faltan %{days_remaining} días para que pueda emitir de nuevo"
         thanks_for_answering: "Ok! Gracias por avisar. Suerte!"
         no_one_lunches: "Hasta el momento.. no hay nadie que almuerce aquí hoy!"
         only_one_lunches: "Aparte de %{subject}, nadie más ha dicho que almuerza en la oficina..."
