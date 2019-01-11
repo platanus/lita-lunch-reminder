@@ -337,6 +337,15 @@ module Lita
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
+      def mention_in_thread(user, thread_ts)
+        @slack_client.chat_postMessage(
+          channel: 'cooking-dev',
+          text: "<@#{user}>",
+          thread_ts: thread_ts,
+          as_user: true
+        )
+      end
+
       def create_schedule
         scheduler = Rufus::Scheduler.new
         scheduler.cron(ENV['ASK_CRON']) do
