@@ -266,6 +266,10 @@ module Lita
         end
       end
 
+      route(/quiero pedir/i, command: true) do |response|
+        mention_in_thread(response.user.mention_name, get_winners_msg_ts)
+      end
+
       def add_user_to_lunchers(mention_name)
         @assigner.add_to_current_lunchers(mention_name)
         @assigner.add_to_winning_lunchers(mention_name) if @assigner.already_assigned?
@@ -326,12 +330,13 @@ module Lita
 
       def announce_winners
         notify(@assigner.winning_lunchers_list, 'Yeah baby, almuerzas con nosotros!')
-        broadcast_to_channel(
+        winners_msg = broadcast_to_channel(
           t(:current_lunchers_list,
             subject1: @assigner.winning_lunchers_list.length,
             subject2: @assigner.winning_lunchers_list.shuffle.join(', ')),
           '#cooking'
         )
+        save_winners_msg_ts(winners_msg['ts'])
         waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values.sort.reverse
         announce_waggers(waggers)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
@@ -417,6 +422,14 @@ module Lita
           count3: counts[3]
         )
         robot.send_message(Source.new(user: user), message) if user
+      end
+
+      def save_winners_msg_ts(ts)
+        redis.set('winners_msg_ts', ts)
+      end
+  
+      def get_winners_msg_ts
+        redis.get('winners_msg_ts')
       end
 
       Lita.register_handler(self)
