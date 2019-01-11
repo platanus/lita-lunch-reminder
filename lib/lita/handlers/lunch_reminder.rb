@@ -15,6 +15,7 @@ module Lita
         @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
         @emitter = Lita::Services::KarmaEmitter.new(redis, @karmanager)
         @market = Lita::Services::MarketManager.new(redis, @assigner, @karmanager)
+        @slack_client = Slack::Web::Client.new
       end
 
       def self.help_msg(route)
