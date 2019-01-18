@@ -267,9 +267,9 @@ module Lita
       end
 
       route(/quiero pedir/i, command: true, help: help_msg(:want_delivery)) do |response|
-        mention_msg = mention_in_thread(response.user.mention_name, get_winners_msg_ts)
+        mention_msg = mention_in_thread(response.user.mention_name, get_winners_msg_timestamp)
         response.reply(t(:food_delivery_link,
-          channel_code: mention_msg['channel'], ts: mention_msg['ts'].remove('.')))
+          channel_code: mention_msg['channel'], timestamp: mention_msg['ts'].remove('.')))
       end
 
       def add_user_to_lunchers(mention_name)
@@ -339,23 +339,23 @@ module Lita
           '#cooking'
         )
         comment_in_thread(t(:food_delivery), winners_msg['ts'])
-        save_winners_msg_ts(winners_msg['ts'])
+        save_winners_msg_timestamp(winners_msg['ts'])
         waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values.sort.reverse
         announce_waggers(waggers)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
-      def comment_in_thread(msg, thread_ts)
+      def comment_in_thread(msg, thread_timestamp)
         @slack_client.chat_postMessage(
           channel: 'cooking',
           text: msg,
-          thread_ts: thread_ts,
+          thread_ts: thread_timestamp,
           as_user: true
         )
       end
 
-      def mention_in_thread(user, thread_ts)
-        comment_in_thread("<@#{user}>", thread_ts)
+      def mention_in_thread(user, thread_timestamp)
+        comment_in_thread("<@#{user}>", thread_timestamp)
       end
 
       def create_schedule
@@ -431,12 +431,12 @@ module Lita
         robot.send_message(Source.new(user: user), message) if user
       end
 
-      def save_winners_msg_ts(ts)
-        redis.set('winners_msg_ts', ts)
+      def save_winners_msg_timestamp(timestamp)
+        redis.set('winners_msg_timestamp', timestamp)
       end
 
-      def get_winners_msg_ts
-        redis.get('winners_msg_ts')
+      def get_winners_msg_timestamp
+        redis.get('winners_msg_timestamp')
       end
 
       Lita.register_handler(self)
