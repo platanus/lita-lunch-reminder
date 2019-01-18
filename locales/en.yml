@@ -9,7 +9,7 @@ en:
         already_considered_you: "No te preocupes @%{subject}, ya te tenía considerado para los almuerzos."
         current_lunchers_one: "Eres el primero en avisar que almuerza hoy, pero no te aseguro nada..."
         current_lunchers_some: "Hmm.. Ya van %{subject} que les gustaría almorzar aquí hoy."
-        current_lunchers_too_many: "Ups, saliste escogido, no cabes :("
+        current_lunchers_too_many: "Ups, saliste escogido, no cabes :(. Avísame si quieres pedir comida!"
         low_wagger: "¿Hay lentejas? ¿Feriado? Las apuestas fueron: %{waggers}"
         mid_wagger: "Las apuestas fueron: %{waggers}"
         high_wagger: "Wow! Las apuestas fueron: %{waggers}"
@@ -38,6 +38,8 @@ en:
         cant_buy: 'no te puedo comprar almuerzo...'
         cant_sell: 'no puedes vender algo que no tienes!'
         announce_count: '%{subject1} la cuenta de almuerzos en %{month} fue: Platanus: %{count1}, Fintual: %{count2}, Buda: %{count3}'
+        food_delivery: 'Pizza? Subway? Mechada? Vean que quieren pedir!'
+        food_delivery_link: 'Te incluí aquí https://platanus.slack.com/archives/%{channel_code}/p%{timestamp} para que veas que pedir con los demás hambrientos'
         help:
           thanks:
             usage: gracias
@@ -82,5 +84,8 @@ en:
             usage: vende mi almuerzo
             description: Pon una orden de venta de almuerzo
           buy_lunch:
-            usage: vende mi almuerzo
+            usage: compro almuerzo
             description: Pon una orden de compra de almuerzo
+          want_delivery:
+            usage: quiero pedir
+            description: Incluirme en un thread para quienes quieren pedir delivery

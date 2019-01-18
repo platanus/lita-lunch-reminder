@@ -15,6 +15,7 @@ module Lita
         @assigner = Lita::Services::LunchAssigner.new(redis, @karmanager)
         @emitter = Lita::Services::KarmaEmitter.new(redis, @karmanager)
         @market = Lita::Services::MarketManager.new(redis, @assigner, @karmanager)
+        @slack_client = Slack::Web::Client.new
       end
 
       def self.help_msg(route)
@@ -265,6 +266,12 @@ module Lita
         end
       end
 
+      route(/quiero pedir/i, command: true, help: help_msg(:want_delivery)) do |response|
+        mention_msg = mention_in_thread(response.user.mention_name, get_winners_msg_timestamp)
+        response.reply(t(:food_delivery_link,
+          channel_code: mention_msg['channel'], timestamp: mention_msg['ts'].remove('.')))
+      end
+
       def add_user_to_lunchers(mention_name)
         @assigner.add_to_current_lunchers(mention_name)
         @assigner.add_to_winning_lunchers(mention_name) if @assigner.already_assigned?
@@ -325,15 +332,30 @@ module Lita
 
       def announce_winners
         notify(@assigner.winning_lunchers_list, 'Yeah baby, almuerzas con nosotros!')
-        broadcast_to_channel(
+        winners_msg = broadcast_to_channel(
           t(:current_lunchers_list,
             subject1: @assigner.winning_lunchers_list.length,
             subject2: @assigner.winning_lunchers_list.shuffle.join(', ')),
           '#cooking'
         )
+        comment_in_thread(t(:food_delivery), winners_msg['ts'])
+        save_winners_msg_timestamp(winners_msg['ts'])
         waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values.sort.reverse
         announce_waggers(waggers)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
+      end
+
+      def comment_in_thread(msg, thread_timestamp)
+        @slack_client.chat_postMessage(
+          channel: 'cooking',
+          text: msg,
+          thread_ts: thread_timestamp,
+          as_user: true
+        )
+      end
+
+      def mention_in_thread(user, thread_timestamp)
+        comment_in_thread("<@#{user}>", thread_timestamp)
       end
 
       def create_schedule
@@ -407,6 +429,14 @@ module Lita
           count3: counts[3]
         )
         robot.send_message(Source.new(user: user), message) if user
+      end
+
+      def save_winners_msg_timestamp(timestamp)
+        redis.set('winners_msg_timestamp', timestamp)
+      end
+
+      def get_winners_msg_timestamp
+        redis.get('winners_msg_timestamp')
       end
 
       Lita.register_handler(self)
