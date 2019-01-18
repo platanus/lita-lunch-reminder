@@ -266,7 +266,7 @@ module Lita
         end
       end
 
-      route(/quiero pedir/i, command: true) do |response|
+      route(/quiero pedir/i, command: true, help: help_msg(:want_delivery)) do |response|
         mention_msg = mention_in_thread(response.user.mention_name, get_winners_msg_ts)
         response.reply(t(:food_delivery_link,
           channel_code: mention_msg['channel'], ts: mention_msg['ts'].remove('.')))

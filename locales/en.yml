@@ -84,5 +84,8 @@ en:
             usage: vende mi almuerzo
             description: Pon una orden de venta de almuerzo
           buy_lunch:
-            usage: vende mi almuerzo
+            usage: compro almuerzo
             description: Pon una orden de compra de almuerzo
+          want_delivery:
+            usage: quiero pedir
+            description: Incluirme en un thread para quienes quieren pedir delivery
