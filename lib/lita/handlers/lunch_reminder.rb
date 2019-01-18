@@ -267,7 +267,9 @@ module Lita
       end
 
       route(/quiero pedir/i, command: true) do |response|
-        mention_in_thread(response.user.mention_name, get_winners_msg_ts)
+        mention_msg = mention_in_thread(response.user.mention_name, get_winners_msg_ts)
+        response.reply(t(:food_delivery_link,
+          channel_code: mention_msg['channel'], ts: mention_msg['ts'].remove('.')))
       end
 
       def add_user_to_lunchers(mention_name)
@@ -353,7 +355,7 @@ module Lita
       end
 
       def mention_in_thread(user, thread_ts)
-        comment_in_thread('<@#{user}>', thread_ts)
+        comment_in_thread("<@#{user}>", thread_ts)
       end
 
       def create_schedule
