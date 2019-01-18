@@ -9,7 +9,7 @@ en:
         already_considered_you: "No te preocupes @%{subject}, ya te tenía considerado para los almuerzos."
         current_lunchers_one: "Eres el primero en avisar que almuerza hoy, pero no te aseguro nada..."
         current_lunchers_some: "Hmm.. Ya van %{subject} que les gustaría almorzar aquí hoy."
-        current_lunchers_too_many: "Ups, saliste escogido, no cabes :("
+        current_lunchers_too_many: "Ups, saliste escogido, no cabes :(. Avísame si quieres pedir comida!"
         low_wagger: "¿Hay lentejas? ¿Feriado? Las apuestas fueron: %{waggers}"
         mid_wagger: "Las apuestas fueron: %{waggers}"
         high_wagger: "Wow! Las apuestas fueron: %{waggers}"
