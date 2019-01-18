@@ -38,6 +38,7 @@ en:
         cant_buy: 'no te puedo comprar almuerzo...'
         cant_sell: 'no puedes vender algo que no tienes!'
         announce_count: '%{subject1} la cuenta de almuerzos en %{month} fue: Platanus: %{count1}, Fintual: %{count2}, Buda: %{count3}'
+        food_delivery: 'Pizza? Subway? Mechada? Vean que quieren pedir!'
         help:
           thanks:
             usage: gracias

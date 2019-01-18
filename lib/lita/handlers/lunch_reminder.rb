@@ -336,19 +336,24 @@ module Lita
             subject2: @assigner.winning_lunchers_list.shuffle.join(', ')),
           '#cooking'
         )
+        comment_in_thread(t(:food_delivery), winners_msg['ts'])
         save_winners_msg_ts(winners_msg['ts'])
         waggers = @assigner.wager_hash(@assigner.winning_lunchers_list).values.sort.reverse
         announce_waggers(waggers)
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
-      def mention_in_thread(user, thread_ts)
+      def comment_in_thread(msg, thread_ts)
         @slack_client.chat_postMessage(
           channel: 'cooking-dev',
-          text: "<@#{user}>",
+          text: msg,
           thread_ts: thread_ts,
           as_user: true
         )
+      end
+
+      def mention_in_thread(user, thread_ts)
+        comment_in_thread('<@#{user}>', thread_ts)
       end
 
       def create_schedule
