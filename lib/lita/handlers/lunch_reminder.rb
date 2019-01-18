@@ -347,7 +347,7 @@ module Lita
 
       def comment_in_thread(msg, thread_ts)
         @slack_client.chat_postMessage(
-          channel: 'cooking-dev',
+          channel: 'cooking',
           text: msg,
           thread_ts: thread_ts,
           as_user: true
@@ -434,7 +434,7 @@ module Lita
       def save_winners_msg_ts(ts)
         redis.set('winners_msg_ts', ts)
       end
-  
+
       def get_winners_msg_ts
         redis.get('winners_msg_ts')
       end
