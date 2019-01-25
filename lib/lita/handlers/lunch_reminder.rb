@@ -6,6 +6,8 @@ module Lita
       MAX_LUNCHERS = ENV.fetch('MAX_LUNCHERS').to_i
       MIN_LUNCHERS = MAX_LUNCHERS - 4
       EMISSION_INTERVAL_DAYS = ENV.fetch('EMISSION_INTERVAL_DAYS', 30)
+      COOKING_CHANNEL = ENV.fetch('COOKING_CHANNEL')
+      KARMA_AUDIT_CHANNEL = ENV.fetch('KARMA_AUDIT_CHANNEL')
 
       on :loaded, :load_on_start
 
@@ -49,7 +51,7 @@ module Lita
           @karmanager.set_karma(user.id, karma_for_new_user)
           response.reply("Le asigne #{karma_for_new_user} a #{user.mention_name} con id #{user.id}")
           broadcast_to_channel("Se empezó a considerar a #{user.mention_name}. " +
-            "Nuevo karma:  #{karma_for_new_user}", '#karma-audit')
+            "Nuevo karma:  #{karma_for_new_user}", KARMA_AUDIT_CHANNEL)
         else
           response.reply(t(:already_considered, subject: mention_name))
         end
@@ -68,7 +70,7 @@ module Lita
         mention_name = clean_mention_name(response.matches[0][0])
         @assigner.remove_from_lunchers(mention_name)
         response.reply(t(:thanks_for_answering))
-        broadcast_to_channel("Se dejó de considerar a #{mention_name}", '#karma-audit')
+        broadcast_to_channel("Se dejó de considerar a #{mention_name}", KARMA_AUDIT_CHANNEL)
       end
       route(/^s[íi]$|^hoy almuerzo aqu[íi]$/i,
         command: true, help: help_msg(:confirm_yes)) do |response|
@@ -172,7 +174,7 @@ module Lita
             "karma a @#{destinatary.mention_name}."
           )
           broadcast_to_channel("@#{giver.mention_name}, le ha dado un punto de " +
-            "karma a @#{destinatary.mention_name}.", '#karma-audit')
+            "karma a @#{destinatary.mention_name}.", KARMA_AUDIT_CHANNEL)
         else
           response.reply(
             "@#{giver.mention_name}, no se pudo transferir el karma"
@@ -217,7 +219,7 @@ module Lita
           response.reply_privately(
             "@#{user.mention_name}, #{t(:selling_lunch)}"
           )
-          broadcast_to_channel("@#{user.mention_name}, #{t(:selling_lunch)}", '#cooking')
+          broadcast_to_channel("@#{user.mention_name}, #{t(:selling_lunch)}", COOKING_CHANNEL)
         end
       end
 
@@ -238,7 +240,7 @@ module Lita
           response.reply_privately(
             "@#{user.mention_name}, #{t(:buying_lunch)}"
           )
-          broadcast_to_channel("@#{user.mention_name}, #{t(:buying_lunch)}", '#cooking')
+          broadcast_to_channel("@#{user.mention_name}, #{t(:buying_lunch)}", COOKING_CHANNEL)
         end
       end
 
@@ -260,7 +262,7 @@ module Lita
           end
           emitted_karma = @emitter.emit(users)
           response.reply(t(:karma_emitted, karma_amount: emitted_karma))
-          broadcast_to_channel(t(:karma_emitted, karma_amount: emitted_karma), '#cooking')
+          broadcast_to_channel(t(:karma_emitted, karma_amount: emitted_karma), COOKING_CHANNEL)
         else
           response.reply(t(:karma_not_emitted, days_remaining: EMISSION_INTERVAL_DAYS - days_since))
         end
@@ -317,16 +319,16 @@ module Lita
         case waggers.inject(0, :+)
         when 1..MAX_LUNCHERS
           broadcast_to_channel(t(:low_wagger, waggers: waggers.join(', ')),
-            '#cooking')
+            COOKING_CHANNEL)
         when MAX_LUNCHERS..20
           broadcast_to_channel(t(:mid_wagger, waggers: waggers.join(', ')),
-            '#cooking')
+            COOKING_CHANNEL)
         when 20..40
           broadcast_to_channel(t(:high_wagger, waggers: waggers.join(', ')),
-            '#cooking')
+            COOKING_CHANNEL)
         else
           broadcast_to_channel(t(:crazy_wagger, waggers: waggers.join(', ')),
-            '#cooking')
+            COOKING_CHANNEL)
         end
       end
 
@@ -336,7 +338,7 @@ module Lita
           t(:current_lunchers_list,
             subject1: @assigner.winning_lunchers_list.length,
             subject2: @assigner.winning_lunchers_list.shuffle.join(', ')),
-          '#cooking'
+          COOKING_CHANNEL
         )
         comment_in_thread(t(:food_delivery), winners_msg['ts'])
         save_winners_msg_timestamp(winners_msg['ts'])
@@ -347,7 +349,7 @@ module Lita
 
       def comment_in_thread(msg, thread_timestamp)
         @slack_client.chat_postMessage(
-          channel: 'cooking',
+          channel: COOKING_CHANNEL.delete('#'),
           text: msg,
           thread_ts: thread_timestamp,
           as_user: true
@@ -411,7 +413,7 @@ module Lita
         robot.send_message(Source.new(user: buyer_user), buyer_message) if buyer_user
         broadcast_to_channel(
           t(:transaction, subject1: buyer_user.mention_name, subject2: seller_user.mention_name),
-          '#cooking'
+          COOKING_CHANNEL
         )
       end
 
