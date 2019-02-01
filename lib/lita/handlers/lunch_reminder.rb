@@ -224,7 +224,7 @@ module Lita
       end
 
       route(/ya no (me )?vend(o|as)( (mi )?almuerzo)?/i,
-        command: true) do |response|
+        command: true, help: help_msg(:cancel_lunch_sell_order)) do |response|
         user = response.user
         order = @market.find_order('ask', user.id)
         if order.nil?
@@ -240,7 +240,7 @@ module Lita
       end
 
       route(/ya no (me )?compr(o|es)( (un )?almuerzo)?/i,
-        command: true) do |response|
+        command: true, help: help_msg(:cancel_lunch_buy_order)) do |response|
         user = response.user
         order = @market.find_order('bid', user.id)
         if order.nil?

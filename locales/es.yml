@@ -93,3 +93,9 @@ en:
           want_delivery:
             usage: quiero pedir
             description: Incluirme en un thread para quienes quieren pedir delivery
+          cancel_lunch_sell_order:
+            usage: ya no vendo
+            description: Cancelar tu orden de venta de almuerzo
+          cancel_lunch_buy_order:
+            usage: ya no compro
+            description: Cancelar tu orden de compra de almuerzo
