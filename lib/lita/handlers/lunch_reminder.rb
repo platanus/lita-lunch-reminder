@@ -211,7 +211,7 @@ module Lita
           next
         end
         order = @market.add_limit_order(new_order)
-        return unless order
+        next unless order
         transaction = execute_transaction
         if transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
@@ -264,7 +264,7 @@ module Lita
           next
         end
         order = @market.add_limit_order(new_order)
-        return unless order
+        next unless order
         transaction = execute_transaction
         if transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
