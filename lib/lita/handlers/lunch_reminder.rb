@@ -223,6 +223,38 @@ module Lita
         end
       end
 
+      route(/ya no (me )?vend(o|as)( (mi )?almuerzo)?/i,
+        command: true) do |response|
+        user = response.user
+        order = @market.find_order('ask', user.id)
+        if order.nil?
+          response.reply(t(:not_selling_lunch))
+          next
+        end
+        @market.remove_order(order)
+        response.reply_privately("@#{user.mention_name}, #{t(:selling_lunch_cancelled)}")
+        broadcast_to_channel(
+          "@#{user.mention_name}, #{t(:selling_lunch_cancelled)}",
+          COOKING_CHANNEL
+        )
+      end
+
+      route(/ya no (me )?compr(o|es)( (un )?almuerzo)?/i,
+        command: true) do |response|
+        user = response.user
+        order = @market.find_order('bid', user.id)
+        if order.nil?
+          response.reply(t(:not_buying_lunch))
+          next
+        end
+        @market.remove_order(order)
+        response.reply_privately("@#{user.mention_name}, #{t(:buying_lunch_cancelled)}")
+        broadcast_to_channel(
+          "@#{user.mention_name}, #{t(:buying_lunch_cancelled)}",
+          COOKING_CHANNEL
+        )
+      end
+
       route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user

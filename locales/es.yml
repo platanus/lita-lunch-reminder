@@ -31,7 +31,11 @@ en:
         dinner_is_served: "Está listo amiguito, *suba* a almorzar ;)"
         friend_added: "Perfecto @%{subject}, anoté a tu invitado como invitado_de_%{subject}."
         selling_lunch: 'tengo tu almuerzo en venta!'
+        selling_lunch_cancelled: 'ya no venderé tu almuerzo'
+        not_selling_lunch: 'Nunca estuviste vendiendo :unamused:'
         buying_lunch: 'voy a tratar de conseguirte almuerzo!'
+        buying_lunch_cancelled: 'ya no te conseguiré almuerzo'
+        not_buying_lunch: 'Nunca estuviste comprando :unamused:'
         bought_lunch: 'ya te conseguí almuerzo!'
         sold_lunch: 'ya te vendí almuerzo!'
         transaction: "@%{subject1} le compró almuerzo a @%{subject2}"

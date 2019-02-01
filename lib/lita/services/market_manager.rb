@@ -33,6 +33,14 @@ module Lita
               .sort { |x, y| Time.parse(x['created_at']) <=> Time.parse(y['created_at']) }
       end
 
+      def find_order(type, user_id)
+        orders.find { |order| order['type'] == type && order['user_id'] == user_id }
+      end
+
+      def remove_order(order)
+        @redis.srem('orders', order.to_json)
+      end
+
       def add_limit_order(new_order)
         return if placed_limit_order?(JSON.parse(new_order)['user_id'])
         @redis.sadd('orders', new_order)
