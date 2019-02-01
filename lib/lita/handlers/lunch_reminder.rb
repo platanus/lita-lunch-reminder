@@ -202,7 +202,7 @@ module Lita
         end
       end
 
-      route(/vend[oe] (mi|\s)? ?almuerzo/i,
+      route(/^vend[oe] (mi|\s)? ?almuerzo/i,
         command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
         new_order = create_order(user, 'ask')
@@ -255,7 +255,7 @@ module Lita
         )
       end
 
-      route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
+      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
         new_order = create_order(user, 'bid')
