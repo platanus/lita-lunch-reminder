@@ -391,6 +391,10 @@ module Lita
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
+      def announce_karma_list
+        broadcast_to_channel(karma_list_message, KARMA_AUDIT_CHANNEL)
+      end
+
       def comment_in_thread(msg, thread_timestamp)
         @slack_client.chat_postMessage(
           channel: COOKING_CHANNEL.delete('#'),
@@ -404,7 +408,7 @@ module Lita
         comment_in_thread("<@#{user}>", thread_timestamp)
       end
 
-      def create_schedule
+      def create_schedule # rubocop:disable Metric/MethodLength
         scheduler = Rufus::Scheduler.new
         scheduler.cron(ENV['ASK_CRON']) do
           refresh
@@ -418,6 +422,9 @@ module Lita
         end
         scheduler.cron(ENV.fetch('COUNTS_CRON')) do
           count_lunches
+        end
+        scheduler.cron(ENV.fetch('KARMA_LIST_CRON')) do
+          announce_karma_list
         end
       end
 
