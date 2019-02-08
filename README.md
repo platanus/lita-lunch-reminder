@@ -28,6 +28,7 @@ The following environment variables should be defined in your Lita instance:
 - WAIT_RESPONSES_SECONDS
 - PERSIST_CRON
 - COUNTS_CRON
+- KARMA_LIST_CRON
 - LUNCH_ADMIN
 - KARMA_LIMIT: max karma users can have - default: 50
 - MAIN_SHEET
