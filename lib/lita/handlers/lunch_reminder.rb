@@ -299,7 +299,14 @@ module Lita
           user = Lita::User.find_by_mention_name(luncher)
           message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
           attachment = get_lunch_buttons(message)
-          robot.chat_service.send_attachment(user, [attachment]) if user
+
+          if user
+            @slack_client.chat_postMessage(
+              channel: user.id,
+              as_user: true,
+              attachments: [attachment]
+            )
+          end
         end
       end
 
