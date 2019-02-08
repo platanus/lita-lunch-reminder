@@ -279,7 +279,7 @@ module Lita
       end
 
       route(/(show me the money)|(mu(e|é)stra(me)? la lista( de karma)?)/i,
-        command: true, help: help_msg(:want_delivery)) do |response|
+        command: true, help: help_msg(:karma_list)) do |response|
         response.reply_privately(karma_list_message)
       end
 

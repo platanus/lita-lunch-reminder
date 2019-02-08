@@ -101,3 +101,6 @@ en:
           cancel_lunch_buy_order:
             usage: ya no compro
             description: Cancelar tu orden de compra de almuerzo
+          karma_list:
+            usage: show me the money
+            description: Pedir listado de karma de todos los almorzadores
