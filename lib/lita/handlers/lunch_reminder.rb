@@ -202,7 +202,7 @@ module Lita
         end
       end
 
-      route(/vend[oe] (mi|\s)? ?almuerzo/i,
+      route(/^vend[oe] (mi|\s)? ?almuerzo/i,
         command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
         new_order = create_order(user, 'ask')
@@ -211,7 +211,7 @@ module Lita
           next
         end
         order = @market.add_limit_order(new_order)
-        return unless order
+        next unless order
         transaction = execute_transaction
         if transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
@@ -223,7 +223,17 @@ module Lita
         end
       end
 
-      route(/c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
+      route(/ya no (me )?vend(o|as)( (mi )?almuerzo)?/i,
+        command: true, help: help_msg(:cancel_lunch_sell_order)) do |response|
+        cancel_order(response, 'ask')
+      end
+
+      route(/ya no (me )?compr(o|es)( (un )?almuerzo)?/i,
+        command: true, help: help_msg(:cancel_lunch_buy_order)) do |response|
+        cancel_order(response, 'bid')
+      end
+
+      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
         new_order = create_order(user, 'bid')
@@ -232,7 +242,7 @@ module Lita
           next
         end
         order = @market.add_limit_order(new_order)
-        return unless order
+        next unless order
         transaction = execute_transaction
         if transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
@@ -384,6 +394,22 @@ module Lita
           type: type,
           created_at: Time.now
         }.to_json
+      end
+
+      def cancel_order(response, order_type)
+        user = response.user
+        order = @market.find_order(order_type, user.id)
+        action = order_type == 'bid' ? 'buying' : 'selling'
+        if order.nil?
+          response.reply(t("not_#{action}_lunch".to_sym))
+          return
+        end
+        @market.remove_order(order)
+        response.reply_privately("@#{user.mention_name}, #{t("#{action}_lunch_cancelled".to_sym)}")
+        broadcast_to_channel(
+          "@#{user.mention_name}, #{t("#{action}_lunch_cancelled")}",
+          COOKING_CHANNEL
+        )
       end
 
       def winning_list

@@ -31,7 +31,11 @@ en:
         dinner_is_served: "Está listo amiguito, *suba* a almorzar ;)"
         friend_added: "Perfecto @%{subject}, anoté a tu invitado como invitado_de_%{subject}."
         selling_lunch: 'tengo tu almuerzo en venta!'
+        selling_lunch_cancelled: 'ya no venderé tu almuerzo'
+        not_selling_lunch: 'Nunca estuviste vendiendo :unamused:'
         buying_lunch: 'voy a tratar de conseguirte almuerzo!'
+        buying_lunch_cancelled: 'ya no te conseguiré almuerzo'
+        not_buying_lunch: 'Nunca estuviste comprando :unamused:'
         bought_lunch: 'ya te conseguí almuerzo!'
         sold_lunch: 'ya te vendí almuerzo!'
         transaction: "@%{subject1} le compró almuerzo a @%{subject2}"
@@ -89,3 +93,9 @@ en:
           want_delivery:
             usage: quiero pedir
             description: Incluirme en un thread para quienes quieren pedir delivery
+          cancel_lunch_sell_order:
+            usage: ya no vendo
+            description: Cancelar tu orden de venta de almuerzo
+          cancel_lunch_buy_order:
+            usage: ya no compro
+            description: Cancelar tu orden de compra de almuerzo
