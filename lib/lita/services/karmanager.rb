@@ -87,6 +87,14 @@ module Lita
         end
         total_karma / list.length
       end
+
+      def karma_list(lunchers_list)
+        lunchers_list.map do |m|
+          usr = Lita::User.find_by_mention_name(m)
+          raise Exception.new("Can't find mention name '#{m}'") if !usr
+          [m, get_karma(usr.id)]
+        end
+      end
     end
   end
 end

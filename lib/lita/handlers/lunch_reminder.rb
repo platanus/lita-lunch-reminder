@@ -283,6 +283,19 @@ module Lita
           channel_code: mention_msg['channel'], timestamp: mention_msg['ts'].remove('.')))
       end
 
+      route(/(show me the money)|(mu(e|é)stra(me)? la lista( de karma)?)/i,
+        command: true, help: help_msg(:karma_list)) do |response|
+        response.reply_privately(karma_list_message)
+      end
+
+      def karma_list_message
+        karma_list = @karmanager.karma_list(@assigner.lunchers_list)
+        entries = karma_list.map do |mention_name, karma|
+          t(:karma_list_entry, mention_name: mention_name, karma: karma)
+        end.join("\n")
+        t(:karma_list, entries: entries)
+      end
+
       def add_user_to_lunchers(mention_name)
         @assigner.add_to_current_lunchers(mention_name)
         @assigner.add_to_winning_lunchers(mention_name) if @assigner.already_assigned?
@@ -387,6 +400,10 @@ module Lita
         notify(@assigner.loosing_lunchers_list, t(:current_lunchers_too_many))
       end
 
+      def announce_karma_list
+        broadcast_to_channel(karma_list_message, KARMA_AUDIT_CHANNEL)
+      end
+
       def comment_in_thread(msg, thread_timestamp)
         @slack_client.chat_postMessage(
           channel: COOKING_CHANNEL.delete('#'),
@@ -400,7 +417,7 @@ module Lita
         comment_in_thread("<@#{user}>", thread_timestamp)
       end
 
-      def create_schedule
+      def create_schedule # rubocop:disable Metric/MethodLength
         scheduler = Rufus::Scheduler.new
         scheduler.cron(ENV['ASK_CRON']) do
           refresh
@@ -414,6 +431,9 @@ module Lita
         end
         scheduler.cron(ENV.fetch('COUNTS_CRON')) do
           count_lunches
+        end
+        scheduler.cron(ENV.fetch('KARMA_LIST_CRON')) do
+          announce_karma_list
         end
       end
 

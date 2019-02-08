@@ -44,6 +44,8 @@ en:
         announce_count: '%{subject1} la cuenta de almuerzos en %{month} fue: Platanus: %{count1}, Fintual: %{count2}, Buda: %{count3}'
         food_delivery: 'Pizza? Subway? Mechada? Vean que quieren pedir!'
         food_delivery_link: 'Te incluí aquí https://platanus.slack.com/archives/%{channel_code}/p%{timestamp} para que veas que pedir con los demás hambrientos'
+        karma_list_entry: '@%{mention_name} tiene %{karma}'
+        karma_list: ":frog: aquí va la lista de :karma::\n%{entries}"
         help:
           thanks:
             usage: gracias
@@ -99,3 +101,6 @@ en:
           cancel_lunch_buy_order:
             usage: ya no compro
             description: Cancelar tu orden de compra de almuerzo
+          karma_list:
+            usage: show me the money
+            description: Pedir listado de karma de todos los almorzadores
