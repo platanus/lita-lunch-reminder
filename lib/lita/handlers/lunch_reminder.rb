@@ -28,6 +28,11 @@ module Lita
       def load_on_start(_payload)
         create_schedule
       end
+
+      route(/askme/i, command: true) do |response|
+        ask_luncher(response.user.mention_name)
+      end
+
       route(/gracias/i, command: true, help: help_msg(:thanks)) do |response|
         response.reply(t(:yourwelcome, subject: response.user.mention_name))
       end
@@ -306,17 +311,7 @@ module Lita
         )
         @market.reset_limit_orders
         lunchers_list.each do |luncher|
-          user = Lita::User.find_by_mention_name(luncher)
-          message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
-          attachment = get_lunch_buttons(message)
-
-          if user
-            @slack_client.chat_postMessage(
-              channel: user.id,
-              as_user: true,
-              attachments: [attachment]
-            )
-          end
+          ask_luncher(luncher)
         end
       end
 
@@ -337,6 +332,20 @@ module Lita
           payload["response_url"],
           { "text": "#{original_message}\n_#{reply_msg}_" }.to_json
         )
+      end
+
+      def ask_luncher(luncher)
+        user = Lita::User.find_by_mention_name(luncher)
+        message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
+        attachment = get_lunch_buttons(message)
+
+        if user
+          @slack_client.chat_postMessage(
+            channel: user.id,
+            as_user: true,
+            attachments: [attachment]
+          )
+        end
       end
 
       def notify(list, message)
