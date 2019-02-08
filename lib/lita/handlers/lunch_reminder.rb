@@ -278,6 +278,19 @@ module Lita
           channel_code: mention_msg['channel'], timestamp: mention_msg['ts'].remove('.')))
       end
 
+      route(/(show me the money)|(mu(e|é)stra(me)? la lista( de karma)?)/i,
+        command: true, help: help_msg(:want_delivery)) do |response|
+        response.reply_privately(karma_list_message)
+      end
+
+      def karma_list_message
+        karma_list = @karmanager.karma_list(@assigner.lunchers_list)
+        entries = karma_list.map do |mention_name, karma|
+          t(:karma_list_entry, mention_name: mention_name, karma: karma)
+        end.join("\n")
+        t(:karma_list, entries: entries)
+      end
+
       def add_user_to_lunchers(mention_name)
         @assigner.add_to_current_lunchers(mention_name)
         @assigner.add_to_winning_lunchers(mention_name) if @assigner.already_assigned?
