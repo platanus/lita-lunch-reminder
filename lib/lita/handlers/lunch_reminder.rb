@@ -10,6 +10,7 @@ module Lita
       KARMA_AUDIT_CHANNEL = ENV.fetch('KARMA_AUDIT_CHANNEL')
 
       on :loaded, :load_on_start
+      on :lunch_answer, :lunch_answer_cb
 
       def initialize(robot)
         super
@@ -75,18 +76,11 @@ module Lita
       route(/^s[íi]$|^hoy almuerzo aqu[íi]$/i,
         command: true, help: help_msg(:confirm_yes)) do |response|
         add_user_to_lunchers(response.user.mention_name)
-        lunchers = @assigner.current_lunchers_list.length
-        case lunchers
-        when 1
-          response.reply(t(:current_lunchers_one))
-        else
-          response.reply(t(:current_lunchers_some, subject: lunchers))
-        end
+        response.reply(get_current_lunchers_msg)
       end
       route(/no almuerzo/i, command: true, help: help_msg(:confirm_no)) do |response|
-        @assigner.remove_from_current_lunchers response.user.mention_name
+        remove_user_from_luncher_lists response.user.mention_name
         response.reply(t(:thanks_for_answering))
-        @assigner.remove_from_winning_lunchers response.user.mention_name
       end
 
       route(/tengo un invitado/i, command: true) do |response|
@@ -314,8 +308,35 @@ module Lita
         lunchers_list.each do |luncher|
           user = Lita::User.find_by_mention_name(luncher)
           message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
-          robot.send_message(Source.new(user: user), message) if user
+          attachment = get_lunch_buttons(message)
+
+          if user
+            @slack_client.chat_postMessage(
+              channel: user.id,
+              as_user: true,
+              attachments: [attachment]
+            )
+          end
         end
+      end
+
+      def lunch_answer_cb(payload)
+        user_id = payload["user"]["id"]
+        target = Source.new(user: User.find_by_id(user_id))
+        original_message = payload["original_message"]["attachments"][0]["text"]
+
+        if payload["actions"][0]["value"] == "yes"
+          add_user_to_lunchers(target.user.mention_name)
+          reply_msg = get_current_lunchers_msg
+        else
+          remove_user_from_luncher_lists target.user.mention_name
+          reply_msg = t(:thanks_for_answering)
+        end
+
+        http.post(
+          payload["response_url"],
+          { "text": "#{original_message}\n_#{reply_msg}_" }.to_json
+        )
       end
 
       def notify(list, message)
@@ -465,6 +486,42 @@ module Lita
 
       def get_winners_msg_timestamp
         redis.get('winners_msg_timestamp')
+      end
+
+      def get_lunch_buttons(message)
+        {
+          callback_id: "lunch_answer",
+          text: message,
+          actions: [{
+            name: "lunch_answer",
+            text: "Si",
+            type: "button",
+            value: "yes",
+            style: "good"
+          }, {
+            name: "lunch_answer",
+            text: "No",
+            type: "button",
+            value: "no",
+            style: "danger"
+          }],
+          fallback: "Hubo un problema. Intenta respondiendo a mano."
+        }
+      end
+
+      def get_current_lunchers_msg
+        lunchers = @assigner.current_lunchers_list.length
+        case lunchers
+        when 1
+          t(:current_lunchers_one)
+        else
+          t(:current_lunchers_some, subject: lunchers)
+        end
+      end
+
+      def remove_user_from_luncher_lists(mention_name)
+        @assigner.remove_from_current_lunchers mention_name
+        @assigner.remove_from_winning_lunchers mention_name
       end
 
       Lita.register_handler(self)
