@@ -331,7 +331,7 @@ module Lita
       def lunch_answer_cb(payload)
         user_id = payload["user"]["id"]
         target = Source.new(user: User.find_by_id(user_id))
-        original_message = payload["original_message"]["attachments"][0]["text"]
+        original_message = payload["original_message"]["text"]
 
         if payload["actions"][0]["value"] == "yes"
           add_user_to_lunchers(target.user.mention_name)
@@ -350,12 +350,13 @@ module Lita
       def ask_luncher(luncher)
         user = Lita::User.find_by_mention_name(luncher)
         message = t(:question, day: @assigner.weekday_name_plus(1), subject: luncher)
-        attachment = get_lunch_buttons(message)
+        attachment = get_lunch_buttons
 
         if user
           @slack_client.chat_postMessage(
             channel: user.id,
             as_user: true,
+            text: message,
             attachments: [attachment]
           )
         end
@@ -517,10 +518,9 @@ module Lita
         redis.get('winners_msg_timestamp')
       end
 
-      def get_lunch_buttons(message)
+      def get_lunch_buttons
         {
           callback_id: "lunch_answer",
-          text: message,
           actions: [{
             name: "lunch_answer",
             text: "Si",
