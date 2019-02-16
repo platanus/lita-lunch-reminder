@@ -194,7 +194,9 @@ module Lita
       end
 
       route(/.*/i, command: false) do |response|
-        if quiet_time? && Lita::Room.find_by_name('lita-test').id == response.room.id
+        silenced_room = Lita::Room.find_by_name('lita-test')
+        next unless silenced_room && response.room
+        if quiet_time? && silenced_room.id == response.room.id
           user = Lita::User.find_by_mention_name('agustin')
           message = 'Estoy empezando a sugerir que evitemos hablar en #coffeebar entre las 10 y' \
           'las 12 del día para que la gente en la oficina pueda concentrarse. Las interrupciones' \
