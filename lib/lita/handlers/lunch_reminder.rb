@@ -1,5 +1,7 @@
 # coding: utf-8
 
+require 'slack-ruby-client'
+
 module Lita
   module Handlers
     class LunchReminder < Handler
