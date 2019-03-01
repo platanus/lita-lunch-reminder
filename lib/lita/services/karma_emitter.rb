@@ -4,7 +4,7 @@ module Lita
     class KarmaEmitter
       attr_accessor :redis
 
-      KARMA_LIMIT = ENV.fetch('KARMA_LIMIT', 50)
+      KARMA_LIMIT = ENV.fetch('KARMA_LIMIT', 50).to_i
 
       def initialize(redis_instance, karmanager_instance)
         @redis = redis_instance
