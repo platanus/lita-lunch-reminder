@@ -80,7 +80,7 @@ describe Lita::Services::MarketManager, lita: true do
         expect(subject.orders.last['user_id']).to eq(fdom.id)
         expect(subject.orders.last['id']).to eq(order_id)
         expect(subject.orders.last['type']).to eq('ask')
-        expect(subject.orders.last['created_at']).to eq(order_time.strftime('%F %T %z'))
+        expect(Time.parse(subject.orders.last['created_at']).to_i).to eq(order_time.to_i)
       end
     end
 
