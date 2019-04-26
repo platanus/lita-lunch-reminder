@@ -289,7 +289,7 @@ module Lita
       end
 
       def karma_list_message
-        karma_list = @karmanager.karma_list(@assigner.lunchers_list)
+        karma_list = @karmanager.karma_list(@assigner.lunchers_list).sort_by { |u| u[1] }.reverse
         entries = karma_list.map do |mention_name, karma|
           t(:karma_list_entry, mention_name: mention_name, karma: karma)
         end.join("\n")
