@@ -215,7 +215,7 @@ module Lita
         end
         next unless @market.add_limit_order(user: user, type: 'ask', price: price)
         if transaction = @market.execute_transaction
-          notify_transaction(transaction['buyer'], transaction['seller'], price)
+          notify_transaction(transaction['buyer'], transaction['seller'], transaction['price'])
         else
           response.reply_privately(
             "@#{user.mention_name}, #{t(:selling_lunch, price: price)}"

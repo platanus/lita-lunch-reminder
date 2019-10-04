@@ -117,7 +117,8 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
             'buyer' => buyer,
             'seller' => seller,
             'ask_order' => ask_order,
-            'bid_order' => bid_order
+            'bid_order' => bid_order,
+            'price' => 1
           }
         end
         let(:lita_user) { Lita::User }
@@ -182,7 +183,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
 
       context 'with transaction executed' do
-        let(:executed_tx) { { 'buyer' => buyer, 'seller' => seller } }
+        let(:executed_tx) { { 'buyer' => buyer, 'seller' => seller, 'price' => 12 } }
 
         it 'responds that tx was executed' do
           send_message('@lita vendo almuerzo a 12 karmas', as: seller)
