@@ -44,19 +44,10 @@ module Lita
         private
 
         def add_limit_order(user, type)
-          order = limit_order_for_user(user, type)
           has_lunch = winning_list.include?(user.mention_name)
           return unless (has_lunch && type == 'ask') || (!has_lunch && type == 'bid')
-          return order if market_manager.add_limit_order(order)
-        end
 
-        def limit_order_for_user(user, type)
-          {
-            id: SecureRandom.uuid,
-            user_id: user.id,
-            type: type,
-            created_at: Time.now
-          }.to_json
+          market_manager.add_limit_order(user: user, type: type)
         end
 
         def winning_list

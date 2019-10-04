@@ -208,13 +208,11 @@ module Lita
       route(/^vend[oe] (mi|\s)? ?almuerzo/i,
         command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
-        new_order = create_order(user, 'ask')
         unless winning_list.include?(user.mention_name)
           response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
         end
-        order = @market.add_limit_order(new_order)
-        next unless order
+        next unless @market.add_limit_order(user: user, type: 'ask')
         transaction = execute_transaction
         if transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
@@ -239,13 +237,11 @@ module Lita
       route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
-        new_order = create_order(user, 'bid')
         if winning_list.include?(user.mention_name)
           response.reply("@#{user.mention_name} #{t(:cant_buy)}")
           next
         end
-        order = @market.add_limit_order(new_order)
-        next unless order
+        next unless @market.add_limit_order(user: user, type: 'bid')
         transaction = execute_transaction
         if transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
@@ -440,15 +436,6 @@ module Lita
         scheduler.cron(ENV.fetch('KARMA_LIST_CRON')) do
           announce_karma_list
         end
-      end
-
-      def create_order(user, type)
-        {
-          id: SecureRandom.uuid,
-          user_id: user.id,
-          type: type,
-          created_at: Time.now
-        }.to_json
       end
 
       def cancel_order(response, order_type)
