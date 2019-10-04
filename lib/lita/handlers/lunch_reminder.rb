@@ -213,8 +213,7 @@ module Lita
           next
         end
         next unless @market.add_limit_order(user: user, type: 'ask')
-        transaction = execute_transaction
-        if transaction
+        if transaction = @market.execute_transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
         else
           response.reply_privately(
@@ -242,8 +241,7 @@ module Lita
           next
         end
         next unless @market.add_limit_order(user: user, type: 'bid')
-        transaction = execute_transaction
-        if transaction
+        if transaction = @market.execute_transaction
           notify_transaction(transaction['buyer'], transaction['seller'])
         else
           response.reply_privately(
@@ -456,22 +454,6 @@ module Lita
 
       def winning_list
         @winning_list ||= @assigner.winning_lunchers_list
-      end
-
-      def execute_transaction
-        executed_orders = @market.execute_transaction
-        return unless executed_orders
-        ask_order = executed_orders['ask']
-        bid_order = executed_orders['bid']
-        seller_user = Lita::User.find_by_id(ask_order['user_id'])
-        buyer_user = Lita::User.find_by_id(bid_order['user_id'])
-        {
-          'buyer' => buyer_user,
-          'seller' => seller_user,
-          'timestamp' => Time.now,
-          'bid_order' => bid_order,
-          'ask_order' => ask_order
-        }
       end
 
       def notify_transaction(buyer_user, seller_user)

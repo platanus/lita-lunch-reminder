@@ -27,9 +27,9 @@ module Lita
           type = request.params[:type]
           limit_order = add_limit_order(user, type)
           if limit_order
-            executed_orders = market_manager.execute_transaction
-            if executed_orders
-              respond(response, success: true, executed_orders: executed_orders.to_json)
+            executed_tx = market_manager.execute_transaction
+            if executed_tx
+              respond(response, success: true, executed_orders: executed_tx.to_json)
             else
               respond(response, success: true, order: limit_order)
             end

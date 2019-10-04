@@ -78,7 +78,13 @@ module Lita
         lunch_buyer = Lita::User.find_by_id(executed_orders['bid']['user_id'])
         @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, 1)
         @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
-        executed_orders
+        {
+          'buyer' => lunch_buyer,
+          'seller' => lunch_seller,
+          'timestamp' => Time.now,
+          'bid_order' => executed_orders['bid'],
+          'ask_order' => executed_orders['ask']
+        }
       end
 
       def transaction_possible?

@@ -104,16 +104,21 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       context 'one or more bid orders placed' do
         let(:ask_order) { { 'id' => 1111, 'user_id' => 124, 'type' => 'ask' } }
         let(:bid_order) { { 'id' => 2222, 'user_id' => 123, 'type' => 'bid' } }
-        let(:orders) { { 'ask' => ask_order, 'bid' => bid_order } }
-        let(:user) { double(mention_name: 'felipe.dominguez') }
+        let(:orders) do
+          {
+            'buyer' => user,
+            'seller' => user2,
+            'ask_order' => ask_order,
+            'bid_order' => bid_order
+          }
+        end
         let(:lita_user) { Lita::User }
-        let!(:user2) { Lita::User.create(124, mention_name: 'armando') }
+        let(:user) { Lita::User.create(123, mention_name: 'felipe.dominguez') }
+        let(:user2) { Lita::User.create(124, mention_name: 'armando') }
+
         before do
           allow_any_instance_of(Lita::Services::MarketManager).to \
             receive(:execute_transaction).and_return(orders)
-          allow(lita_user).to receive(:find_by_id).with(123).and_return(user)
-          allow(lita_user).to receive(:find_by_id).with(124).and_return(user2)
-          allow(lita_user).to receive(:create).and_return(user2)
         end
 
         it 'responds with transaction' do
@@ -168,23 +173,27 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
 
       context 'one or more ask orders placed' do
-        let(:ask_order) { { 'id' => 1111, 'user_id' => 123, 'type' => 'ask' } }
-        let(:bid_order) { { 'id' => 2222, 'user_id' => 124, 'type' => 'bid' } }
-        let(:orders) { { 'ask' => ask_order, 'bid' => bid_order } }
-        let(:user) { double(mention_name: 'felipe.dominguez') }
+        let(:ask_order) { { 'id' => 1111, 'user_id' => seller.id, 'type' => 'ask' } }
+        let(:bid_order) { { 'id' => 2222, 'user_id' => buyer.id, 'type' => 'bid' } }
+        let(:orders) do
+          {
+            'ask_order' => ask_order,
+            'bid_order' => bid_order,
+            'buyer' => buyer,
+            'seller' => seller
+          }
+        end
         let(:lita_user) { Lita::User }
-        let!(:user2) { Lita::User.create(124, mention_name: 'armando') }
+        let(:seller) { Lita::User.create(123, mention_name: 'felipe.dominguez') }
+        let(:buyer) { Lita::User.create(124, mention_name: 'armando') }
+
         before do
           allow_any_instance_of(Lita::Services::MarketManager).to \
             receive(:execute_transaction).and_return(orders)
-          allow(lita_user).to receive(:find_by_id).with(123).and_return(user)
-          allow(lita_user).to receive(:find_by_id).with(124).and_return(user2)
-          allow(lita_user).to receive(:create).and_return(user2)
         end
 
         it 'responds with transaction' do
-          armando = Lita::User.create(124, mention_name: 'armando')
-          send_message('@lita compro almuerzo', as: armando)
+          send_message('@lita compro almuerzo', as: buyer)
           expect(replies.last).to match('@armando le compró almuerzo a @felipe.dominguez')
         end
       end
