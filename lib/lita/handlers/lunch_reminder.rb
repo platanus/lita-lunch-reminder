@@ -213,7 +213,7 @@ module Lita
           response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
         end
-        next unless @market.add_limit_order(user: user, type: 'ask')
+        next unless @market.add_limit_order(user: user, type: 'ask', price: price)
         if transaction = @market.execute_transaction
           notify_transaction(transaction['buyer'], transaction['seller'], price)
         else
@@ -245,7 +245,7 @@ module Lita
           response.reply("@#{user.mention_name} #{t(:cant_buy)}")
           next
         end
-        next unless @market.add_limit_order(user: user, type: 'bid')
+        next unless @market.add_limit_order(user: user, type: 'bid', price: price)
         if transaction = @market.execute_transaction
           notify_transaction(transaction['buyer'], transaction['seller'], price)
         else

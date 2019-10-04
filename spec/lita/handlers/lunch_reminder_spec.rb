@@ -84,16 +84,24 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
   end
 
   describe 'sell lunch' do
+    let(:market) { double }
+
+    before do
+      allow(Lita::Services::MarketManager).to receive(:new).and_return(market)
+    end
+
     context 'user has lunch' do
       before do
         allow_any_instance_of(Lita::Services::LunchAssigner).to\
           receive(:winning_lunchers_list).and_return(['armando'])
       end
+
       context 'no bid orders placed' do
         before do
-          allow_any_instance_of(Lita::Services::MarketManager).to\
-            receive(:add_limit_order).and_return(true)
+          allow(market).to receive(:add_limit_order).and_return(true)
+          allow(market).to receive(:execute_transaction).and_return(nil)
         end
+
         it 'responds that limit order was placed' do
           armando = Lita::User.create(124, mention_name: 'armando')
           send_message('@lita vendo almuerzo', as: armando)
@@ -102,29 +110,37 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
 
       context 'one or more bid orders placed' do
-        let(:ask_order) { { 'id' => 1111, 'user_id' => 124, 'type' => 'ask' } }
-        let(:bid_order) { { 'id' => 2222, 'user_id' => 123, 'type' => 'bid' } }
+        let(:ask_order) { { 'id' => 1111, 'user_id' => seller.id, 'type' => 'ask' } }
+        let(:bid_order) { { 'id' => 2222, 'user_id' => buyer.id, 'type' => 'bid' } }
         let(:orders) do
           {
-            'buyer' => user,
-            'seller' => user2,
+            'buyer' => buyer,
+            'seller' => seller,
             'ask_order' => ask_order,
             'bid_order' => bid_order
           }
         end
         let(:lita_user) { Lita::User }
-        let(:user) { Lita::User.create(123, mention_name: 'felipe.dominguez') }
-        let(:user2) { Lita::User.create(124, mention_name: 'armando') }
+        let(:buyer) { Lita::User.create(123, mention_name: 'felipe.dominguez') }
+        let(:seller) { Lita::User.create(124, mention_name: 'armando') }
 
         before do
-          allow_any_instance_of(Lita::Services::MarketManager).to \
-            receive(:execute_transaction).and_return(orders)
+          allow(market).to receive(:add_limit_order).and_return(true)
+          allow(market).to receive(:execute_transaction).and_return(orders)
         end
 
         it 'responds with transaction' do
-          armando = Lita::User.create(124, mention_name: 'armando')
-          send_message('@lita vendo almuerzo', as: armando)
-          expect(replies.last).to match('@felipe.dominguez le compró almuerzo a @armando')
+          send_message('@lita vendo almuerzo', as: seller)
+          expect(replies.last).to(
+            match('@felipe.dominguez le compró almuerzo a @armando a 1 karma/s')
+          )
+        end
+
+        it 'calls add_limit_order' do
+          send_message('@lita vendo almuerzo', as: seller)
+          expect(market).to(
+            have_received(:add_limit_order).with(user: seller, type: 'ask', price: 1)
+          )
         end
       end
     end
@@ -134,6 +150,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         allow_any_instance_of(Lita::Services::LunchAssigner).to\
           receive(:winning_lunchers_list).and_return([])
       end
+
       it 'responds with an error' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita vende mi almuerzo', as: armando)
@@ -176,13 +193,19 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
   end
 
   describe 'buy lunch' do
+    let(:market) { double }
+
+    before do
+      allow(Lita::Services::MarketManager).to receive(:new).and_return(market)
+    end
+
     context 'user has lunch' do
       before do
-        allow_any_instance_of(Lita::Services::MarketManager).to\
-          receive(:add_limit_order).and_return(false)
+        allow(market).to receive(:add_limit_order).and_return(false)
         allow_any_instance_of(Lita::Services::LunchAssigner).to\
           receive(:winning_lunchers_list).and_return(['armando'])
       end
+
       it 'responds with an error' do
         armando = Lita::User.create(124, mention_name: 'armando')
         send_message('@lita compro almuerzo', as: armando)
@@ -192,17 +215,25 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
 
     context 'user without lunch' do
       context 'no ask orders placed' do
+        let(:armando) { Lita::User.create(124, mention_name: 'armando') }
+
         before do
-          allow_any_instance_of(Lita::Services::MarketManager).to\
-            receive(:add_limit_order).and_return(true)
+          allow(market).to receive(:add_limit_order).and_return(true)
+          allow(market).to receive(:execute_transaction).and_return(nil)
           allow_any_instance_of(Lita::Services::LunchAssigner).to\
             receive(:winning_lunchers_list).and_return([])
         end
 
         it 'responds that limit order was placed' do
-          armando = Lita::User.create(124, mention_name: 'armando')
           send_message('@lita compro almuerzo', as: armando)
           expect(replies.last).to match('voy a tratar de conseguirte almuerzo a 1 karma/s!')
+        end
+
+        it 'calls add_limit_order' do
+          send_message('@lita compro almuerzo', as: armando)
+          expect(market).to(
+            have_received(:add_limit_order).with(user: armando, type: 'bid', price: 1)
+          )
         end
       end
 
@@ -222,13 +253,20 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         let(:buyer) { Lita::User.create(124, mention_name: 'armando') }
 
         before do
-          allow_any_instance_of(Lita::Services::MarketManager).to \
-            receive(:execute_transaction).and_return(orders)
+          allow(market).to receive(:add_limit_order).and_return(true)
+          allow(market).to receive(:execute_transaction).and_return(orders)
         end
 
         it 'responds with transaction' do
           send_message('@lita compro almuerzo', as: buyer)
           expect(replies.last).to match('@armando le compró almuerzo a @felipe.dominguez')
+        end
+
+        it 'calls add_limit_order' do
+          send_message('@lita compro almuerzo', as: buyer)
+          expect(market).to(
+            have_received(:add_limit_order).with(user: buyer, type: 'bid', price: 1)
+          )
         end
       end
     end
@@ -253,6 +291,13 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
           send_message('@lita compro almuerzo a 12 karmas', as: buyer)
           expect(replies.last).to match('@armando, voy a tratar de conseguirte almuerzo a 12 karma/s!')
         end
+
+        it 'calls add_limit_order' do
+          send_message('@lita compro almuerzo a 12 karmas', as: buyer)
+          expect(market).to(
+            have_received(:add_limit_order).with(user: buyer, type: 'bid', price: 12)
+          )
+        end
       end
 
       context 'with transaction executed' do
@@ -261,6 +306,13 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         it 'responds that tx was executed' do
           send_message('@lita compro almuerzo a 12 karmas', as: buyer)
           expect(replies.last).to match('@armando le compró almuerzo a @jorge a 12 karma/s')
+        end
+
+        it 'calls add_limit_order' do
+          send_message('@lita compro almuerzo a 12 karmas', as: buyer)
+          expect(market).to(
+            have_received(:add_limit_order).with(user: buyer, type: 'bid', price: 12)
+          )
         end
       end
     end

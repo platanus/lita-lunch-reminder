@@ -41,8 +41,10 @@ module Lita
         @redis.srem('orders', order.to_json)
       end
 
-      def add_limit_order(user:, type:, created_at: Time.now)
-        new_order = build_new_order(user: user, type: type, created_at: created_at)
+      def add_limit_order(user:, type:, created_at: Time.now, price: 1)
+        new_order = build_new_order(
+          user: user, type: type, created_at: created_at, price: price
+        )
         return if placed_limit_order?(new_order[:user_id])
 
         @redis.sadd('orders', new_order.to_json)
@@ -93,12 +95,13 @@ module Lita
 
       private
 
-      def build_new_order(user:, type:, created_at:)
+      def build_new_order(user:, type:, created_at:, price:)
         {
           id: SecureRandom.uuid,
           user_id: user.id,
           type: type,
-          created_at: created_at
+          created_at: created_at,
+          price: price
         }
       end
     end
