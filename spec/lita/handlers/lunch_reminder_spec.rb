@@ -97,7 +97,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         it 'responds that limit order was placed' do
           armando = Lita::User.create(124, mention_name: 'armando')
           send_message('@lita vendo almuerzo', as: armando)
-          expect(replies.last).to match('tengo tu almuerzo en venta!')
+          expect(replies.last).to match('tengo tu almuerzo en venta a 1 karma/s!')
         end
       end
 
@@ -140,6 +140,39 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         expect(replies.last).to match('@armando no puedes vender algo que no tienes!')
       end
     end
+
+    context 'with user selling at more than 1' do
+      let(:market) { double }
+      let(:executed_tx) { nil }
+      let(:buyer) { Lita::User.create(124, mention_name: 'armando') }
+      let(:seller) { Lita::User.create(121, mention_name: 'jorge') }
+
+      before do
+        allow(Lita::Services::MarketManager).to receive(:new).and_return(market)
+        allow(market).to receive(:add_limit_order).and_return(true)
+        allow_any_instance_of(Lita::Services::LunchAssigner).to \
+          receive(:winning_lunchers_list).and_return(['jorge'])
+        allow(market).to receive(:execute_transaction).and_return(executed_tx)
+      end
+
+      context 'with transaction not executed' do
+        let(:executed_tx) { nil }
+
+        it 'responds that limit order was placed' do
+          send_message('@lita vendo almuerzo a 12 karmas', as: seller)
+          expect(replies.last).to match('@jorge, tengo tu almuerzo en venta a 12 karma/s!')
+        end
+      end
+
+      context 'with transaction executed' do
+        let(:executed_tx) { { 'buyer' => buyer, 'seller' => seller } }
+
+        it 'responds that tx was executed' do
+          send_message('@lita vendo almuerzo a 12 karmas', as: seller)
+          expect(replies.last).to match('@armando le compró almuerzo a @jorge a 12 karma/s')
+        end
+      end
+    end
   end
 
   describe 'buy lunch' do
@@ -165,10 +198,11 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
           allow_any_instance_of(Lita::Services::LunchAssigner).to\
             receive(:winning_lunchers_list).and_return([])
         end
+
         it 'responds that limit order was placed' do
           armando = Lita::User.create(124, mention_name: 'armando')
           send_message('@lita compro almuerzo', as: armando)
-          expect(replies.last).to match('voy a tratar de conseguirte almuerzo!')
+          expect(replies.last).to match('voy a tratar de conseguirte almuerzo a 1 karma/s!')
         end
       end
 
@@ -195,6 +229,38 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         it 'responds with transaction' do
           send_message('@lita compro almuerzo', as: buyer)
           expect(replies.last).to match('@armando le compró almuerzo a @felipe.dominguez')
+        end
+      end
+    end
+
+    context 'with user buying at more than 1' do
+      let(:market) { double }
+      let(:executed_tx) { nil }
+      let(:buyer) { Lita::User.create(124, mention_name: 'armando') }
+      let(:seller) { Lita::User.create(121, mention_name: 'jorge') }
+
+      before do
+        allow(Lita::Services::MarketManager).to receive(:new).and_return(market)
+        allow(market).to receive(:add_limit_order).and_return(true)
+        allow(market).to receive(:winning_lunchers_list).and_return([])
+        allow(market).to receive(:execute_transaction).and_return(executed_tx)
+      end
+
+      context 'with transaction not executed' do
+        let(:executed_tx) { nil }
+
+        it 'responds that limit order was placed' do
+          send_message('@lita compro almuerzo a 12 karmas', as: buyer)
+          expect(replies.last).to match('@armando, voy a tratar de conseguirte almuerzo a 12 karma/s!')
+        end
+      end
+
+      context 'with transaction executed' do
+        let(:executed_tx) { { 'buyer' => buyer, 'seller' => seller } }
+
+        it 'responds that tx was executed' do
+          send_message('@lita compro almuerzo a 12 karmas', as: buyer)
+          expect(replies.last).to match('@armando le compró almuerzo a @jorge a 12 karma/s')
         end
       end
     end

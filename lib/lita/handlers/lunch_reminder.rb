@@ -205,21 +205,25 @@ module Lita
         end
       end
 
-      route(/^vend[oe] (mi|\s)? ?almuerzo/i,
+      route(/^vend[oe] (mi|\s)? ?almuerzo( a )?([^\D]+)?( karma)?/i,
         command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
+        price = (response.matches[0].detect { |match| match.to_i > 0 } || 1).to_i
         unless winning_list.include?(user.mention_name)
           response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
         end
         next unless @market.add_limit_order(user: user, type: 'ask')
         if transaction = @market.execute_transaction
-          notify_transaction(transaction['buyer'], transaction['seller'])
+          notify_transaction(transaction['buyer'], transaction['seller'], price)
         else
           response.reply_privately(
-            "@#{user.mention_name}, #{t(:selling_lunch)}"
+            "@#{user.mention_name}, #{t(:selling_lunch, price: price)}"
           )
-          broadcast_to_channel("@#{user.mention_name}, #{t(:selling_lunch)}", COOKING_CHANNEL)
+          broadcast_to_channel(
+            "@#{user.mention_name}, #{t(:selling_lunch, price: price)}",
+            COOKING_CHANNEL
+          )
         end
       end
 
@@ -233,21 +237,25 @@ module Lita
         cancel_order(response, 'bid')
       end
 
-      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
+      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo( a )?([^\D]+)?( karma)?/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
+        price = (response.matches[0].detect { |match| match.to_i > 0 } || 1).to_i
         if winning_list.include?(user.mention_name)
           response.reply("@#{user.mention_name} #{t(:cant_buy)}")
           next
         end
         next unless @market.add_limit_order(user: user, type: 'bid')
         if transaction = @market.execute_transaction
-          notify_transaction(transaction['buyer'], transaction['seller'])
+          notify_transaction(transaction['buyer'], transaction['seller'], price)
         else
           response.reply_privately(
-            "@#{user.mention_name}, #{t(:buying_lunch)}"
+            "@#{user.mention_name}, #{t(:buying_lunch, price: price)}"
           )
-          broadcast_to_channel("@#{user.mention_name}, #{t(:buying_lunch)}", COOKING_CHANNEL)
+          broadcast_to_channel(
+            "@#{user.mention_name}, #{t(:buying_lunch, price: price)}",
+            COOKING_CHANNEL
+          )
         end
       end
 
@@ -456,13 +464,18 @@ module Lita
         @winning_list ||= @assigner.winning_lunchers_list
       end
 
-      def notify_transaction(buyer_user, seller_user)
+      def notify_transaction(buyer_user, seller_user, price)
         seller_message = "@#{seller_user.mention_name}, #{t(:sold_lunch)}"
         buyer_message = "@#{buyer_user.mention_name}, #{t(:bought_lunch)}"
         robot.send_message(Source.new(user: seller_user), seller_message) if seller_user
         robot.send_message(Source.new(user: buyer_user), buyer_message) if buyer_user
         broadcast_to_channel(
-          t(:transaction, subject1: buyer_user.mention_name, subject2: seller_user.mention_name),
+          t(
+            :transaction,
+            subject1: buyer_user.mention_name,
+            subject2: seller_user.mention_name,
+            price: price
+          ),
           COOKING_CHANNEL
         )
       end
