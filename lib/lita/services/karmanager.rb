@@ -4,7 +4,7 @@ module Lita
     class Karmanager
       attr_accessor :redis
 
-      MAX_DAILY_TRANSFER_BY_USER = 5
+      MAX_DAILY_TRANSFER_BY_USER = ENV.fetch('MAX_DAILY_TRANSFER_BY_USER', 5)
 
       def initialize(redis_instance)
         @redis = redis_instance
@@ -30,15 +30,16 @@ module Lita
         @redis.incrby("#{user_id}:karma", amount)
       end
 
-      def decrease_karma_by(user_id, amount)
+      def decrease_karma_by(user_id, amount, options = { add_to_limit: true })
         @redis.decrby("#{user_id}:karma", amount)
-        karma_transfered = daily_karma_transfered(user_id)
-        @redis.set("#{user_id}:karma_transfered", karma_transfered + amount)
+        transfered = daily_karma_transfered(user_id)
+        @redis.set("#{user_id}:karma_transfered", transfered + amount) if options[:add_to_limit]
       end
 
       def transfer_karma(giver_id, receiver_id, amount, options = { check_limit: true })
         return false unless !options[:check_limit] || can_transfer?(giver_id, amount)
-        decrease_karma_by(giver_id, amount)
+
+        decrease_karma_by(giver_id, amount, add_to_limit: options[:check_limit])
         increase_karma_by(receiver_id, amount)
         true
       end

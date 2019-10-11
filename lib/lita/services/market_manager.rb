@@ -100,7 +100,14 @@ module Lita
 
         lunch_seller = Lita::User.find_by_id(executed_orders['ask']['user_id'])
         lunch_buyer = Lita::User.find_by_id(executed_orders['bid']['user_id'])
-        @karmanager.transfer_karma(lunch_buyer.id, lunch_seller.id, executed_orders['ask']['price'])
+        karma_transfered = @karmanager.transfer_karma(
+          lunch_buyer.id,
+          lunch_seller.id,
+          executed_orders['ask']['price'],
+          check_limit: false
+        )
+        return unless karma_transfered
+
         @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
         {
           'buyer' => lunch_buyer,
