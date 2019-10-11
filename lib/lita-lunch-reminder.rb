@@ -1,3 +1,4 @@
+
 require 'lita'
 require 'redis'
 require 'rufus-scheduler'
@@ -5,6 +6,11 @@ require 'rufus-scheduler'
 Lita.load_locales Dir[File.expand_path(
   File.join('..', '..', 'locales', '*.yml'), __FILE__
 )]
+
+if ENV['RACK_ENV'] != 'production'
+  require 'dotenv'
+  Dotenv.load('.env')
+end
 
 require 'lita/handlers/lunch_reminder'
 require 'lita/handlers/api/api_controller'

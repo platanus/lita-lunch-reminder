@@ -11,17 +11,6 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
   let(:ask_order) { { id: order_id, user_id: 127, type: 'ask', created_at: time } }
   let(:bid_order) { { id: order_id, user_id: 127, type: 'bid', created_at: time } }
 
-  def add_limit_order(order_id, user, type, created_at)
-    order = {
-      id: order_id,
-      user_id: user.id,
-      type: type,
-      created_at: created_at
-    }.to_json
-    market.add_limit_order(order)
-    order
-  end
-
   it { is_expected.to route_http(:get, 'market/limit_orders') }
   it { is_expected.to route_http(:post, 'market/limit_orders') }
 
@@ -122,11 +111,16 @@ describe Lita::Handlers::Api::Market, lita_handler: true do
               res.params['type'] = 'ask'
               res.body = ask_order.to_json
             end.body)
-            order = JSON.parse(response['order'])
-            expect(order).not_to be_nil
-            expect(order['id']).not_to be_nil
-            expect(order['type']).to eq('ask')
-            expect(order['created_at']).not_to be_nil
+            expect(response['order']).not_to be_nil
+          end
+
+          it 'calls MarketManager#add_limit_order' do
+            http.post do |res|
+              res.url 'market/limit_orders'
+              res.params['type'] = 'ask'
+              res.body = ask_order.to_json
+            end
+            expect(market).to have_received(:add_limit_order).with(user: user, type: 'ask')
           end
 
           it "doesn't responds with executed_orders" do

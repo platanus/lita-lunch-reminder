@@ -30,16 +30,18 @@ en:
         wont_lunch: "Aun no se distinguir entre los que no han contestado y los que contestaron que no, pero aquí van los que no contestaron que sí: %{subject}"
         dinner_is_served: "Está listo amiguito, *suba* a almorzar ;)"
         friend_added: "Perfecto @%{subject}, anoté a tu invitado como invitado_de_%{subject}."
-        selling_lunch: 'tengo tu almuerzo en venta!'
-        buying_lunch: 'voy a tratar de conseguirte almuerzo!'
+        selling_lunch: 'tengo tu almuerzo en venta a %{price} karma/s!'
+        buying_lunch: 'voy a tratar de conseguirte almuerzo a %{price} karma/s!'
         bought_lunch: 'ya te conseguí almuerzo!'
         sold_lunch: 'ya te vendí almuerzo!'
-        transaction: "@%{subject1} le compró almuerzo a @%{subject2}"
+        transaction: "@%{subject1} le compró almuerzo a @%{subject2} a %{price} karma/s"
         cant_buy: 'no te puedo comprar almuerzo...'
         cant_sell: 'no puedes vender algo que no tienes!'
         announce_count: '%{subject1} la cuenta de almuerzos en %{month} fue: Platanus: %{count1}, Fintual: %{count2}, Buda: %{count3}'
         food_delivery: 'Pizza? Subway? Mechada? Vean que quieren pedir!'
         food_delivery_link: 'Te incluí aquí https://platanus.slack.com/archives/%{channel_code}/p%{timestamp} para que veas que pedir con los demás hambrientos'
+        order_book_entry: "%{user} %{action} %{price}"
+        order_book: ":chart_with_upwards_trend: Libro de ordenes\nVendiendo :arrow_down:\n%{ask_entries}\n-----------------\n%{bid_entries}\nComprando :arrow_up:"
         help:
           thanks:
             usage: gracias
@@ -89,3 +91,6 @@ en:
           want_delivery:
             usage: quiero pedir
             description: Incluirme en un thread para quienes quieren pedir delivery
+          order_book:
+            usage: cómo está el mercado
+            description: Muestra el libro de ordenes actual

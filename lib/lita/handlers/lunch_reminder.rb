@@ -205,24 +205,25 @@ module Lita
         end
       end
 
-      route(/^vend[oe] (mi|\s)? ?almuerzo/i,
+      route(/^vend[oe] (mi|\s)? ?almuerzo( a )?([^\D]+)?( karma)?/i,
         command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
-        new_order = create_order(user, 'ask')
+        price = (response.matches[0].detect { |match| match.to_i > 0 } || 1).to_i
         unless winning_list.include?(user.mention_name)
           response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
         end
-        order = @market.add_limit_order(new_order)
-        next unless order
-        transaction = execute_transaction
-        if transaction
-          notify_transaction(transaction['buyer'], transaction['seller'])
+        next unless @market.add_limit_order(user: user, type: 'ask', price: price)
+        if transaction = @market.execute_transaction
+          notify_transaction(transaction['buyer'], transaction['seller'], transaction['price'])
         else
           response.reply_privately(
-            "@#{user.mention_name}, #{t(:selling_lunch)}"
+            "@#{user.mention_name}, #{t(:selling_lunch, price: price)}"
           )
-          broadcast_to_channel("@#{user.mention_name}, #{t(:selling_lunch)}", COOKING_CHANNEL)
+          broadcast_to_channel(
+            "@#{user.mention_name}, #{t(:selling_lunch, price: price)}",
+            COOKING_CHANNEL
+          )
         end
       end
 
@@ -236,24 +237,25 @@ module Lita
         cancel_order(response, 'bid')
       end
 
-      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo/i,
+      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo( a )?([^\D]+)?( karma)?/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
-        new_order = create_order(user, 'bid')
+        price = (response.matches[0].detect { |match| match.to_i > 0 } || 1).to_i
         if winning_list.include?(user.mention_name)
           response.reply("@#{user.mention_name} #{t(:cant_buy)}")
           next
         end
-        order = @market.add_limit_order(new_order)
-        next unless order
-        transaction = execute_transaction
-        if transaction
-          notify_transaction(transaction['buyer'], transaction['seller'])
+        next unless @market.add_limit_order(user: user, type: 'bid', price: price)
+        if transaction = @market.execute_transaction
+          notify_transaction(transaction['buyer'], transaction['seller'], price)
         else
           response.reply_privately(
-            "@#{user.mention_name}, #{t(:buying_lunch)}"
+            "@#{user.mention_name}, #{t(:buying_lunch, price: price)}"
           )
-          broadcast_to_channel("@#{user.mention_name}, #{t(:buying_lunch)}", COOKING_CHANNEL)
+          broadcast_to_channel(
+            "@#{user.mention_name}, #{t(:buying_lunch, price: price)}",
+            COOKING_CHANNEL
+          )
         end
       end
 
@@ -292,12 +294,36 @@ module Lita
         response.reply_privately(karma_list_message)
       end
 
+      route(/c(o|ó)mo est(a|á) el mercado/i, command: true, help: help_msg(:order_book)) do |response|
+        response.reply(order_book_message)
+      end
+
       def karma_list_message
         karma_list = @karmanager.karma_list(@assigner.lunchers_list).sort_by { |_, karma| -karma }
         entries = karma_list.map do |mention_name, karma|
           t(:karma_list_entry, mention_name: mention_name, karma: karma)
         end.join("\n")
         t(:karma_list, entries: entries)
+      end
+
+      def order_book_message
+        ask_orders = @market.ask_orders.reverse
+        bid_orders = @market.bid_orders
+        ask_entries = ask_orders.map { |order| order_book_entry_message(order) }.join("\n")
+        bid_entries = bid_orders.map { |order| order_book_entry_message(order) }.join("\n")
+        ask_entries = ask_orders.any? ? ask_entries : ':tumbleweed:'
+        bid_entries = bid_orders.any? ? bid_entries : ':tumbleweed:'
+        t(:order_book, ask_entries: ask_entries, bid_entries: bid_entries)
+      end
+
+      def order_book_entry_message(order)
+        user = Lita::User.find_by_id(order['user_id'])
+        t(
+          :order_book_entry,
+          user: user.mention_name,
+          action: order['type'] == 'ask' ? 'vendiendo a': 'comprando a',
+          price: order['price']
+        )
       end
 
       def add_user_to_lunchers(mention_name)
@@ -442,15 +468,6 @@ module Lita
         end
       end
 
-      def create_order(user, type)
-        {
-          id: SecureRandom.uuid,
-          user_id: user.id,
-          type: type,
-          created_at: Time.now
-        }.to_json
-      end
-
       def cancel_order(response, order_type)
         user = response.user
         order = @market.find_order(order_type, user.id)
@@ -471,29 +488,18 @@ module Lita
         @winning_list ||= @assigner.winning_lunchers_list
       end
 
-      def execute_transaction
-        executed_orders = @market.execute_transaction
-        return unless executed_orders
-        ask_order = executed_orders['ask']
-        bid_order = executed_orders['bid']
-        seller_user = Lita::User.find_by_id(ask_order['user_id'])
-        buyer_user = Lita::User.find_by_id(bid_order['user_id'])
-        {
-          'buyer' => buyer_user,
-          'seller' => seller_user,
-          'timestamp' => Time.now,
-          'bid_order' => bid_order,
-          'ask_order' => ask_order
-        }
-      end
-
-      def notify_transaction(buyer_user, seller_user)
+      def notify_transaction(buyer_user, seller_user, price)
         seller_message = "@#{seller_user.mention_name}, #{t(:sold_lunch)}"
         buyer_message = "@#{buyer_user.mention_name}, #{t(:bought_lunch)}"
         robot.send_message(Source.new(user: seller_user), seller_message) if seller_user
         robot.send_message(Source.new(user: buyer_user), buyer_message) if buyer_user
         broadcast_to_channel(
-          t(:transaction, subject1: buyer_user.mention_name, subject2: seller_user.mention_name),
+          t(
+            :transaction,
+            subject1: buyer_user.mention_name,
+            subject2: seller_user.mention_name,
+            price: price
+          ),
           COOKING_CHANNEL
         )
       end
