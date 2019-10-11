@@ -40,6 +40,8 @@ en:
         announce_count: '%{subject1} la cuenta de almuerzos en %{month} fue: Platanus: %{count1}, Fintual: %{count2}, Buda: %{count3}'
         food_delivery: 'Pizza? Subway? Mechada? Vean que quieren pedir!'
         food_delivery_link: 'Te incluí aquí https://platanus.slack.com/archives/%{channel_code}/p%{timestamp} para que veas que pedir con los demás hambrientos'
+        order_book_entry: "%{user} %{action} %{price}"
+        order_book: ":chart_with_upwards_trend: Libro de ordenes\nVendiendo :arrow_down:\n%{ask_entries}\n-----------------\n%{bid_entries}\nComprando :arrow_up:"
         help:
           thanks:
             usage: gracias
@@ -89,3 +91,6 @@ en:
           want_delivery:
             usage: quiero pedir
             description: Incluirme en un thread para quienes quieren pedir delivery
+          order_book:
+            usage: cómo está el mercado
+            description: Muestra el libro de ordenes actual

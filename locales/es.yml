@@ -46,6 +46,8 @@ en:
         food_delivery_link: 'Te incluí aquí https://platanus.slack.com/archives/%{channel_code}/p%{timestamp} para que veas que pedir con los demás hambrientos'
         karma_list_entry: '@%{mention_name} tiene %{karma}'
         karma_list: ":frog: aquí va la lista de :karma::\n%{entries}"
+        order_book_entry: "%{user} %{action} %{price}"
+        order_book: ":chart_with_upwards_trend: Libro de ordenes\nVendiendo :arrow_down:\n%{ask_entries}\n-----------------\n%{bid_entries}\nComprando :arrow_up:"
         help:
           thanks:
             usage: gracias
@@ -104,3 +106,6 @@ en:
           karma_list:
             usage: show me the money
             description: Pedir listado de karma de todos los almorzadores
+          order_book:
+            usage: cómo está el mercado
+            description: Muestra el libro de ordenes actual

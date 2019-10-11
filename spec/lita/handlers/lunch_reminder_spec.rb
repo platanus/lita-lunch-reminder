@@ -362,4 +362,51 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
     end
   end
+
+  describe 'order book message' do
+    let(:seller) { Lita::User.create(125, mention_name: 'seller') }
+    let(:buyer) { Lita::User.create(126, mention_name: 'buyer') }
+
+    context 'with no orders' do
+      it 'responds with tumbleweeds' do
+        send_message('@lita cómo está el mercado', as: seller)
+        expect(replies.last).to(
+          match(
+            ":chart_with_upwards_trend: Libro de ordenes\n" +
+            "Vendiendo :arrow_down:\n" +
+            ":tumbleweed:\n" +
+            "-----------------\n" +
+            ":tumbleweed:\n" +
+            "Comprando :arrow_up:"
+          )
+        )
+      end
+    end
+
+    context 'with orders' do
+      let(:ask_orders) { [{ 'id' => 1111, 'user_id' => seller.id, 'type' => 'ask', 'price' => 2 }] }
+      let(:bid_orders) { [{ 'id' => 2222, 'user_id' => buyer.id, 'type' => 'bid', 'price' => 1 }] }
+      let(:market) { double }
+
+      before do
+        allow(Lita::Services::MarketManager).to receive(:new).and_return(market)
+        allow(market).to receive(:ask_orders).and_return(ask_orders)
+        allow(market).to receive(:bid_orders).and_return(bid_orders)
+      end
+
+      it 'responds with the order book' do
+        send_message('@lita cómo está el mercado', as: seller)
+        expect(replies.last).to(
+          match(
+            ":chart_with_upwards_trend: Libro de ordenes\n" +
+            "Vendiendo :arrow_down:\n" +
+            "seller vendiendo a 2\n" +
+            "-----------------\n" +
+            "buyer comprando a 1\n" +
+            "Comprando :arrow_up:"
+          )
+        )
+      end
+    end
+  end
 end

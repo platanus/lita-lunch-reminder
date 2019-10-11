@@ -294,12 +294,36 @@ module Lita
         response.reply_privately(karma_list_message)
       end
 
+      route(/c(o|ó)mo est(a|á) el mercado/i, command: true, help: help_msg(:order_book)) do |response|
+        response.reply(order_book_message)
+      end
+
       def karma_list_message
         karma_list = @karmanager.karma_list(@assigner.lunchers_list).sort_by { |_, karma| -karma }
         entries = karma_list.map do |mention_name, karma|
           t(:karma_list_entry, mention_name: mention_name, karma: karma)
         end.join("\n")
         t(:karma_list, entries: entries)
+      end
+
+      def order_book_message
+        ask_orders = @market.ask_orders.reverse
+        bid_orders = @market.bid_orders
+        ask_entries = ask_orders.map { |order| order_book_entry_message(order) }.join("\n")
+        bid_entries = bid_orders.map { |order| order_book_entry_message(order) }.join("\n")
+        ask_entries = ask_orders.any? ? ask_entries : ':tumbleweed:'
+        bid_entries = bid_orders.any? ? bid_entries : ':tumbleweed:'
+        t(:order_book, ask_entries: ask_entries, bid_entries: bid_entries)
+      end
+
+      def order_book_entry_message(order)
+        user = Lita::User.find_by_id(order['user_id'])
+        t(
+          :order_book_entry,
+          user: user.mention_name,
+          action: order['type'] == 'ask' ? 'vendiendo a': 'comprando a',
+          price: order['price']
+        )
       end
 
       def add_user_to_lunchers(mention_name)
