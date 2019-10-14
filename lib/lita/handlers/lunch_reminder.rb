@@ -205,7 +205,7 @@ module Lita
         end
       end
 
-      route(/^vend[oe] (mi|\s)? ?almuerzo( a )?([^\D]+)?( karma)?/i,
+      route(/^vend[oe] (mi|\s)? ?almuerzo( a | en )?([^\D]+)?( karma)?/i,
         command: true, help: help_msg(:sell_lunch)) do |response|
         user = response.user
         price = (response.matches[0].detect { |match| match.to_i > 0 } || 1).to_i
@@ -237,7 +237,7 @@ module Lita
         cancel_order(response, 'bid')
       end
 
-      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo( a )?([^\D]+)?( karma)?/i,
+      route(/^c(o|ó)mpr(o|ame|a)? (un )?almuerzo( a | en )?([^\D]+)?( karma)?/i,
         command: true, help: help_msg(:buy_lunch)) do |response|
         user = response.user
         price = (response.matches[0].detect { |match| match.to_i > 0 } || 1).to_i
