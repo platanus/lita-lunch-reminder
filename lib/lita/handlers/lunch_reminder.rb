@@ -452,10 +452,10 @@ module Lita
         scheduler = Rufus::Scheduler.new
         scheduler.cron(ENV['ASK_CRON']) do
           refresh
-          scheduler.in(ENV['WAIT_RESPONSES_SECONDS'].to_i) do
-            @assigner.do_the_assignment
-            announce_winners if @assigner.winning_lunchers_list.count >= MIN_LUNCHERS
-          end
+        end
+        scheduler.cron(ENV['ANNOUNCE_WINNERS_CRON']) do
+          @assigner.do_the_assignment
+          announce_winners if @assigner.winning_lunchers_list.count >= MIN_LUNCHERS
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers

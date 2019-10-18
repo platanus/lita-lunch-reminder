@@ -25,7 +25,7 @@ The following environment variables should be defined in your Lita instance:
 - QUIET_START_HOUR
 - QUIET_END_HOUR
 - ASK_CRON
-- WAIT_RESPONSES_SECONDS
+- ANNOUNCE_WINNERS_CRON
 - PERSIST_CRON
 - COUNTS_CRON
 - KARMA_LIST_CRON
