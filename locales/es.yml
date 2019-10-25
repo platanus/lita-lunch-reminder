@@ -47,7 +47,7 @@ en:
         karma_list_entry: '@%{mention_name} tiene %{karma}'
         karma_list: ":frog: aquí va la lista de :karma::\n%{entries}"
         order_book_entry: "%{user} %{action} %{price}"
-        order_book: ":chart_with_upwards_trend: Libro de ordenes\nVendiendo :arrow_down:\n%{ask_entries}\n-----------------\n%{bid_entries}\nComprando :arrow_up:"
+        order_book: ":chart_with_upwards_trend: Libro de ordenes\n:arrow_down: *Vendiendo*\n%{ask_entries}\n-----------------\n%{bid_entries}\n:arrow_up: *Comprando*"
         help:
           thanks:
             usage: gracias
