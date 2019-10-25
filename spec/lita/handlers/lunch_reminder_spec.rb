@@ -368,18 +368,17 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
     let(:buyer) { Lita::User.create(126, mention_name: 'buyer') }
 
     context 'with no orders' do
+      let(:expected_message) do
+        I18n.t(
+          'lita.handlers.lunch_reminder.order_book',
+          ask_entries: ":tumbleweed:",
+          bid_entries: ":tumbleweed:"
+        )
+      end
+
       it 'responds with tumbleweeds' do
         send_message('@lita cómo está el mercado', as: seller)
-        expect(replies.last).to(
-          match(
-            ":chart_with_upwards_trend: Libro de ordenes\n" +
-            "Vendiendo :arrow_down:\n" +
-            ":tumbleweed:\n" +
-            "-----------------\n" +
-            ":tumbleweed:\n" +
-            "Comprando :arrow_up:"
-          )
-        )
+        expect(replies.last).to match(expected_message)
       end
     end
 
@@ -387,6 +386,13 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       let(:ask_orders) { [{ 'id' => 1111, 'user_id' => seller.id, 'type' => 'ask', 'price' => 2 }] }
       let(:bid_orders) { [{ 'id' => 2222, 'user_id' => buyer.id, 'type' => 'bid', 'price' => 1 }] }
       let(:market) { double }
+      let(:expected_message) do
+        I18n.t(
+          'lita.handlers.lunch_reminder.order_book',
+          ask_entries: "#{seller.mention_name} vendiendo a 2",
+          bid_entries: "#{buyer.mention_name} comprando a 1"
+        )
+      end
 
       before do
         allow(Lita::Services::MarketManager).to receive(:new).and_return(market)
@@ -396,16 +402,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
 
       it 'responds with the order book' do
         send_message('@lita cómo está el mercado', as: seller)
-        expect(replies.last).to(
-          match(
-            ":chart_with_upwards_trend: Libro de ordenes\n" +
-            "Vendiendo :arrow_down:\n" +
-            "seller vendiendo a 2\n" +
-            "-----------------\n" +
-            "buyer comprando a 1\n" +
-            "Comprando :arrow_up:"
-          )
-        )
+        expect(replies.last).to match(expected_message)
       end
     end
   end
