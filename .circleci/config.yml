@@ -1,0 +1,15 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/lib
+
+    docker:
+    - image: ruby:2.5
+    - image: redis
+
+    steps:
+    - checkout
+    - setup_remote_docker
+
+    - run: bundle install
+    - run: bundle exec rake
