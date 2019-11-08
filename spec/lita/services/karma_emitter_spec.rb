@@ -147,14 +147,17 @@ describe Lita::Services::KarmaEmitter, lita: true do
     end
 
     context 'with one user such that if the karma is emitted to him, he will have more than the max' do
+      let(:max_karma) { 50 }
       let(:ham_karma) { 30 }
       let(:andres_karma) { 10 }
       let(:cristobal_karma) { 10 }
       let(:jaime_karma) { 48 }
 
+      before { stub_const('Lita::Services::KarmaEmitter::KARMA_LIMIT', max_karma) }
+
       it 'emits only the remaining karma to reach the limit' do
         subject.emit(users)
-        expect(karmanager.get_karma(jaime.id)).to eq(50)
+        expect(karmanager.get_karma(jaime.id)).to eq(max_karma)
       end
 
       it 'transfers the reminder to the other participants' do
