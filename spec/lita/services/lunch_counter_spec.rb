@@ -8,6 +8,7 @@ describe Lita::Services::LunchCounter, lita: true do
     allow(ENV).to receive(:fetch)
       .with('MAIN_SHEET')
       .and_return('SHEET')
+    allow(Date).to receive(:today).and_return(Date.new(2018, 12, 30))
     allow(Lita::Services::SpreadsheetManager).to receive(:new).and_return(sh_manager)
     allow(sh_manager).to receive(:load_worksheet).with('Platanus').and_return(platanus_ws)
     allow(sh_manager).to receive(:load_worksheet).with('Fintual').and_return(fintual_ws)
