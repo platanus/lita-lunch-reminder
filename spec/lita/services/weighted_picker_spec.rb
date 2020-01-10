@@ -252,7 +252,7 @@ describe Lita::Services::WeightedPicker do
                                                             'juan' => 1)
         end
 
-        it 'returns and array with the users with highest karma and a sample of who where tied' do
+        it 'returns an array with the users with highest wager and a sample of who where tied' do
           expect(subject.choose(4)).to contain_exactly('giovanni', 'andres', 'juan', 'agustin')
         end
       end

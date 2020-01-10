@@ -97,21 +97,22 @@ describe Lita::Services::LunchAssigner, lita: true do
     expect(lkh['pedro']).to eq(1) # 0 karma is 1
   end
 
-  it "considerates karma for shuffle and decreases to winners" do
+  it "decreases to winners" do
+    original_karma = 100
     subject.add_to_lunchers(alfredo.mention_name)
-    subject.set_karma(alfredo.mention_name, 100)
+    subject.set_karma(alfredo.mention_name, original_karma)
     subject.add_to_lunchers(pedro.mention_name)
-    subject.set_karma(pedro.mention_name, 200)
+    subject.set_karma(pedro.mention_name, original_karma)
     subject.add_to_current_lunchers(alfredo.mention_name)
     subject.add_to_current_lunchers(pedro.mention_name)
     subject.pick_winners(1)
-    expect(subject.winning_lunchers_list).to eq([pedro.mention_name])
-    expect(subject.get_karma(pedro.mention_name)).to eq(199)
-    expect(subject.get_karma(alfredo.mention_name)).to eq(100)
+    winner = subject.winning_lunchers_list.first
+    looser = winner == pedro.mention_name ? alfredo.mention_name : pedro.mention_name
+    expect(subject.get_karma(winner)).to eq(original_karma - 1)
+    expect(subject.get_karma(looser)).to eq(original_karma)
   end
 
-  # rubocop:disable RSpec/ExampleLength, RSpec/NamedSubject
-  it "interates until every spot has been asigned" do
+  it "assigns all the spots" do
     subject.add_to_current_lunchers(alfredo.mention_name)
     subject.set_karma(alfredo.mention_name, 1)
     subject.add_to_current_lunchers(pedro.mention_name)
@@ -154,20 +155,6 @@ describe Lita::Services::LunchAssigner, lita: true do
       subject.pick_winners(1)
       expect(subject.winning_lunchers_list).to eq(['pedro'])
       expect(karmanager.get_karma(pedro.id)).to eq(70)
-    end
-
-    it 'interates until every spot has been asigned' do
-      subject.add_to_current_lunchers('armando')
-      karmanager.set_karma(armando.id, 0.1)
-      subject.add_to_current_lunchers('pedro')
-      karmanager.set_karma(pedro.id, 100)
-      subject.add_to_current_lunchers('alfredo')
-      karmanager.set_karma(alfredo.id, 1)
-      subject.add_to_current_lunchers('juan')
-      karmanager.set_karma(juan.id, 2)
-      subject.pick_winners(3)
-      expect(subject.winning_lunchers_list).to include('pedro')
-      expect(subject.winning_lunchers_list.count).to eq(3)
     end
 
     it 'transfers spent karma to ham' do

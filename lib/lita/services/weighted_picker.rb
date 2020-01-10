@@ -16,7 +16,7 @@ module Lita
         loosers = choose_loosers(n, sorted_hash)
         winners = choose_winners(hash.size - tied_users.size - loosers.size, sorted_hash)
         tied_users = @karma_hash.slice(*tied_users.keys)
-        winners.concat sample(n - winners.size, tied_users.to_h)
+        winners.concat sample(n - winners.size, tied_users)
       end
 
       private
@@ -28,17 +28,8 @@ module Lita
         winner
       end
 
-      def sample(n, hash = @karma_hash)
-        winners = []
-        sample_size = [n, hash.count].min
-        return winners if sample_size.zero?
-        sample_size.times do
-          winner = sample_one(hash.except(*winners))
-          unless winner.nil? || winners.include?(winner)
-            winners.push winner
-          end
-        end
-        winners
+      def sample(number, users = @karma_hash)
+        users.keys.sample(number)
       end
 
       def choose_winners(n, hash = @wager_hash)
