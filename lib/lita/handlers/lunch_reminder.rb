@@ -460,6 +460,7 @@ module Lita
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
+          @assigner.persist_wagers
         end
         scheduler.cron(ENV.fetch('COUNTS_CRON')) do
           count_lunches
