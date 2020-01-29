@@ -3,7 +3,7 @@ require "base64"
 module Lita
   module Services
     class SpreadsheetManager
-      def initialize(ws_title)
+      def initialize(spreadsheet_key,ws_title)
         @session = GoogleDrive::Session.from_service_account_key(credentials_io)
         @spreadsheet = @session.spreadsheet_by_key(ENV.fetch('GOOGLE_SP_KEY'))
         @ws = load_worksheet(ws_title)
