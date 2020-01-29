@@ -3,6 +3,14 @@ require 'pry'
 require 'dotenv/load'
 
 describe Lita::Services::MarketManager, lita: true do
+  before do
+    allow(Lita::Services::SpreadsheetManager).to receive(:new).and_return(sh_manager)
+    allow(ENV).to receive(:fetch)
+        .with('GOOGLE_SP_DB_KEY')
+        .and_return('KEY')
+    allow(sh_manager).to receive(:insert_new_row)
+  end
+
   let(:robot) { Lita::Robot.new(registry) }
   let(:karmanager) do
     Lita::Services::Karmanager.new(Lita::Handlers::LunchReminder.new(robot).redis)
@@ -22,6 +30,7 @@ describe Lita::Services::MarketManager, lita: true do
   let(:oscar) { Lita::User.create(147, mention_name: 'oscar') }
   let(:fernanda) { Lita::User.create(157, mention_name: 'fernanda') }
   let(:order_time) { Time.now }
+  let(:sh_manager) { double }
 
   def add_limit_order(user, type, created_at, price = 1)
     subject.add_limit_order(
@@ -282,6 +291,18 @@ describe Lita::Services::MarketManager, lita: true do
         subject.execute_transaction
         expect(lunch_assigner.winning_lunchers_list).to include(fdom.mention_name)
         expect(lunch_assigner.winning_lunchers_list).not_to include(andres.mention_name)
+      end
+
+      it 'uploads transaction' do
+        subject.execute_transaction
+        expect(sh_manager).to have_received(:insert_new_row).with([
+          Time.now.strftime('%Y-%m-%d'),
+          fdom.name,
+          fdom.id,
+          andres.name,
+          andres.id,
+          1
+        ])
       end
     end
 
