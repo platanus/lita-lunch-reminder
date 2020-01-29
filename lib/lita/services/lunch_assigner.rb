@@ -91,7 +91,7 @@ module Lita
       end
 
       def persist_winning_lunchers
-        sw = Lita::Services::SpreadsheetManager.new(ENV.fetch('GOOGLE_SP_KEY'),ENV.fetch('MAIN_SHEET'))
+        sw = Lita::Services::SpreadsheetManager.new(ENV.fetch('GOOGLE_SP_KEY'), ENV.fetch('MAIN_SHEET'))
         time = Time.now.strftime('%Y-%m-%d')
         winning_lunchers_list.each do |winner|
           user = User.find_by_mention_name(winner) || User.find_by_name(winner)
@@ -101,7 +101,7 @@ module Lita
       end
 
       def persist_wagers
-        sw = Lita::Services::SpreadsheetManager.new(ENV.fetch('GOOGLE_SP_DB_KEY'),'wagers')
+        sw = Lita::Services::SpreadsheetManager.new(ENV.fetch('GOOGLE_SP_DB_KEY'), 'wagers')
         time = Time.now.strftime('%Y-%m-%d')
         current_lunchers_list.each do |luncher|
           user = User.find_by_mention_name(luncher) || User.find_by_name(luncher)

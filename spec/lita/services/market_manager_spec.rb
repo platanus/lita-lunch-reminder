@@ -3,14 +3,6 @@ require 'pry'
 require 'dotenv/load'
 
 describe Lita::Services::MarketManager, lita: true do
-  before do
-    allow(Lita::Services::SpreadsheetManager).to receive(:new).and_return(sh_manager)
-    allow(ENV).to receive(:fetch)
-        .with('GOOGLE_SP_DB_KEY')
-        .and_return('KEY')
-    allow(sh_manager).to receive(:insert_new_row)
-  end
-
   let(:robot) { Lita::Robot.new(registry) }
   let(:karmanager) do
     Lita::Services::Karmanager.new(Lita::Handlers::LunchReminder.new(robot).redis)
@@ -49,6 +41,11 @@ describe Lita::Services::MarketManager, lita: true do
 
   before do
     ENV['MAX_LUNCHERS'] = '20'
+    allow(Lita::Services::SpreadsheetManager).to receive(:new).and_return(sh_manager)
+    allow(ENV).to receive(:fetch)
+      .with('GOOGLE_SP_DB_KEY')
+      .and_return('KEY')
+    allow(sh_manager).to receive(:insert_new_row)
   end
 
   describe '#add_limit_order' do
@@ -295,14 +292,16 @@ describe Lita::Services::MarketManager, lita: true do
 
       it 'uploads transaction' do
         subject.execute_transaction
-        expect(sh_manager).to have_received(:insert_new_row).with([
-          Time.now.strftime('%Y-%m-%d'),
-          fdom.name,
-          fdom.id,
-          andres.name,
-          andres.id,
-          1
-        ])
+        expect(sh_manager).to have_received(:insert_new_row).with(
+          [
+            Time.now.strftime('%Y-%m-%d'),
+            fdom.name,
+            fdom.id,
+            andres.name,
+            andres.id,
+            1
+          ]
+        )
       end
     end
 
