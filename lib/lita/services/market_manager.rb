@@ -107,8 +107,13 @@ module Lita
           check_limit: false
         )
         return unless karma_transfered
-
-        @lunch_assigner.transfer_lunch(lunch_seller.mention_name, lunch_buyer.mention_name)
+        lunch_transfered = @lunch_assigner.transfer_lunch(
+          lunch_seller.mention_name,
+          lunch_buyer.mention_name
+        )
+        if lunch_transfered
+          persist_transaction(lunch_buyer, lunch_seller, executed_orders['ask']['price'])
+        end
         {
           'buyer' => lunch_buyer,
           'seller' => lunch_seller,
@@ -133,6 +138,23 @@ module Lita
           created_at: created_at,
           price: price
         }
+      end
+
+      def persist_transaction(buyer,seller,price)
+        sw = Lita::Services::SpreadsheetManager.new(
+          ENV.fetch('GOOGLE_SP_DB_KEY'),
+          'transactions'
+        )
+        sw.insert_new_row(
+          [
+            Time.now.strftime('%Y-%m-%d'),
+            buyer.name,
+            buyer.id,
+            seller.name,
+            seller.id,
+            price
+          ]
+        )
       end
     end
   end

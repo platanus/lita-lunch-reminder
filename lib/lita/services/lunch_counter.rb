@@ -6,7 +6,10 @@ module Lita
       attr_accessor :orgs, :lunchers
 
       def initialize
-        @sm = Lita::Services::SpreadsheetManager.new(ENV.fetch('MAIN_SHEET'))
+        @sm = Lita::Services::SpreadsheetManager.new(
+          ENV.fetch('GOOGLE_SP_KEY'),
+          ENV.fetch('MAIN_SHEET')
+        )
         @orgs = {}
         @lunchers = {}
         @orgs_names = ['Platanus', 'Fintual', 'Buda']
