@@ -164,17 +164,19 @@ module Lita
         response.reply("@#{user.mention_name} tiene #{user_karma} puntos de karma.")
       end
 
-      route(/transfi[ée]rele karma a ([^\s]+)/i, command: true) do |response|
+      route(/(transfi[ée]r|d|su[ée]lt|p[áa]s)[ae]le (\d*)( ?karmas?)? a ([^\s]+)/i,
+        command: true) do |response|
         giver = response.user
-        mention_name = clean_mention_name(response.matches[0][0])
+        amount = [response.matches[0][1].to_i, 1].max
+        mention_name = clean_mention_name(response.matches[0][-1])
         destinatary = Lita::User.find_by_mention_name(mention_name)
-        transfered = @karmanager.transfer_karma(giver.id, destinatary.id, 1)
+        transfered = @karmanager.transfer_karma(giver.id, destinatary.id, amount)
         if transfered
           response.reply(
-            "@#{giver.mention_name}, le has dado uno de tus puntos de " +
+            "@#{giver.mention_name}, le has dado #{amount} de tus puntos de " +
             "karma a @#{destinatary.mention_name}."
           )
-          broadcast_to_channel("@#{giver.mention_name}, le ha dado un punto de " +
+          broadcast_to_channel("@#{giver.mention_name}, le ha dado #{amount} punto/s de " +
             "karma a @#{destinatary.mention_name}.", KARMA_AUDIT_CHANNEL)
         else
           response.reply(

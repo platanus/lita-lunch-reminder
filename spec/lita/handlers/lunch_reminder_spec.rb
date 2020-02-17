@@ -63,7 +63,7 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
         armando = Lita::User.create(124, mention_name: 'armando')
         jilberto = Lita::User.create(125, mention_name: 'jilberto')
         send_message('@lita transfierele karma a armando', as: jilberto)
-        expect(replies.last).to match('@jilberto, le ha dado un punto de karma a @armando.')
+        expect(replies.last).to match('@jilberto, le ha dado 1 punto/s de karma a @armando.')
       end
     end
 
