@@ -302,11 +302,11 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
       end
 
       context 'with transaction executed' do
-        let(:executed_tx) { { 'buyer' => buyer, 'seller' => seller } }
+        let(:executed_tx) { { 'buyer' => buyer, 'seller' => seller, 'price' => 1 } }
 
         it 'responds that tx was executed' do
           send_message('@lita compro almuerzo a 12 karmas', as: buyer)
-          expect(replies.last).to match('@armando le compró almuerzo a @jorge a 12 karma/s')
+          expect(replies.last).to match('@armando le compró almuerzo a @jorge a 1 karma/s')
         end
 
         it 'calls add_limit_order' do
