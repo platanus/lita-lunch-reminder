@@ -144,6 +144,26 @@ describe Lita::Handlers::LunchReminder, lita_handler: true do
           )
         end
       end
+
+      context 'when seller has max karma' do
+        let(:market) { double }
+        let(:seller) { Lita::User.create(124, mention_name: 'armando') }
+
+        before do
+          allow(Lita::Services::MarketManager).to receive(:new).and_return(market)
+          allow(market).to receive(:add_limit_order).and_return(true)
+          allow(market).to receive(:execute_transaction).and_return(false)
+          allow_any_instance_of(Lita::Services::Karmanager).to\
+            receive(:get_karma).with(seller.id).and_return(1000)
+        end
+
+        it 'sets order to 1' do
+          send_message('@lita vendo almuerzo a 2', as: seller)
+          expect(market).to(
+            have_received(:add_limit_order).with(user: seller, type: 'ask', price: 1)
+          )
+        end
+      end
     end
 
     context 'user without lunch' do

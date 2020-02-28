@@ -215,6 +215,10 @@ module Lita
           response.reply("@#{user.mention_name} #{t(:cant_sell)}")
           next
         end
+        unless price == 1 || (@karmanager.get_karma(user.id) + price) < ENV.fetch('KARMA_LIMIT', 50).to_i
+          price = 1
+          response.reply("@#{user.mention_name} #{t(:cant_sell_high_price)}")
+        end
         next unless @market.add_limit_order(user: user, type: 'ask', price: price)
         if transaction = @market.execute_transaction
           notify_transaction(transaction['buyer'], transaction['seller'], transaction['price'])
