@@ -45,6 +45,9 @@ module Lita
       route(/qu[ée] hay de postre/i, help: help_msg(:dessert)) do |response|
         response.reply(t(:"todays_dessert#{1 + rand(4)}"))
       end
+      route(/tengo hambre/i) do |response|
+        response.reply(t(:"hungry#{1 + rand(4)}"))
+      end
       route(/qu[ée] hay de almuerzo/i, help: help_msg(:menu)) do |response|
         response.reply(t(:todays_lunch))
       end
