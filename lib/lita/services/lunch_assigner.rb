@@ -111,7 +111,11 @@ module Lita
       end
 
       def winning_lunchers_list
-        @redis.smembers('winning_lunchers') || []
+        if current_lunchers_list.size > Lita::Handlers::LunchReminder::MAX_LUNCHERS
+          @redis.smembers('winning_lunchers') || []
+        else
+          current_lunchers_list
+        end
       end
 
       def loosing_lunchers_list

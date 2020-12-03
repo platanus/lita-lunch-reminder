@@ -460,9 +460,11 @@ module Lita
           refresh
         end
         scheduler.cron(ENV['ANNOUNCE_WINNERS_CRON']) do
-          @assigner.do_the_assignment
+          if @assigner.winning_lunchers_list.count >= MAX_LUNCHERS
+            @assigner.do_the_assignment
+          end
           @market.reset_limit_orders
-          announce_winners if @assigner.winning_lunchers_list.count >= MIN_LUNCHERS
+          announce_winners
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
