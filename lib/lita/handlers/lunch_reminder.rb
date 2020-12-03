@@ -147,7 +147,10 @@ module Lita
       end
 
       route(/assignnow/i, command: true) do |response|
-        @assigner.do_the_assignment
+        if @assigner.winning_lunchers_list.count >= MAX_LUNCHERS
+          @assigner.do_the_assignment
+        end
+        @market.reset_limit_orders
         announce_winners
         response.reply('did it boss')
       end
