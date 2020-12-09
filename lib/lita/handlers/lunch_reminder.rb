@@ -150,11 +150,7 @@ module Lita
       end
 
       route(/assignnow/i, command: true) do |response|
-        if @assigner.winning_lunchers_list.count >= MAX_LUNCHERS
-          @assigner.do_the_assignment
-        end
-        @market.reset_limit_orders
-        announce_winners
+        assign_winners
         response.reply('did it boss')
       end
 
@@ -308,6 +304,16 @@ module Lita
 
       route(/c(o|ó)mo est(a|á) el mercado/i, command: true, help: help_msg(:order_book)) do |response|
         response.reply(order_book_message)
+      end
+
+      def assign_winners
+        if @assigner.winning_lunchers_list.count >= MAX_LUNCHERS
+          @assigner.do_the_assignment
+        end
+        @market.reset_limit_orders
+        if @assigner.winning_lunchers_list.count > 0
+          announce_winners
+        end
       end
 
       def karma_list_message
@@ -466,13 +472,7 @@ module Lita
           refresh
         end
         scheduler.cron(ENV['ANNOUNCE_WINNERS_CRON']) do
-          if @assigner.winning_lunchers_list.count >= MAX_LUNCHERS
-            @assigner.do_the_assignment
-          end
-          @market.reset_limit_orders
-          if @assigner.winning_lunchers_list.count > 0
-            announce_winners
-          end
+          assign_winners
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
