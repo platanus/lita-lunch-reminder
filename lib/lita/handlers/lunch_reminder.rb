@@ -470,7 +470,9 @@ module Lita
             @assigner.do_the_assignment
           end
           @market.reset_limit_orders
-          announce_winners
+          if @assigner.winning_lunchers_list.count > 0
+            announce_winners
+          end
         end
         scheduler.cron(ENV['PERSIST_CRON']) do
           @assigner.persist_winning_lunchers
